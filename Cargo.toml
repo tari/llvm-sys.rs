@@ -1,0 +1,8 @@
+[package]
+
+name = "llvm-sys"
+version = "0.0.1"
+authors = ["Peter Marheine <peter@taricorp.net>"]
+
+[dependencies]
+bitflags = "*"
