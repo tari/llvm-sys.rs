@@ -3,6 +3,11 @@
 name = "llvm-sys"
 version = "0.0.1"
 authors = ["Peter Marheine <peter@taricorp.net>"]
+build = "build.rs"
+
+[features]
+# Turn this on to link against LLVM as a shared rather than static library
+llvm-dylib = []
 
 [dependencies]
 bitflags = "*"

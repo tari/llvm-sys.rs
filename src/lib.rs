@@ -1,4 +1,6 @@
 //! Bindings to LLVM's C API
+//!
+//! http://llvm.org/docs/doxygen/html/group__LLVMC.html
 
 #![feature(libc)]
 
