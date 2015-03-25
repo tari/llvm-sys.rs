@@ -1,8 +1,9 @@
+//! http://llvm.org/docs/doxygen/html/Core_8h.html
+
 use super::*;
 use super::prelude::*;
 
 // Core
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMInitializeCore(R: LLVMPassRegistryRef) -> ();
     pub fn LLVMShutdown() -> ();
@@ -14,7 +15,6 @@ extern "C" {
 }
 
 // Core->Contexts
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMContextCreate() -> LLVMContextRef;
     pub fn LLVMGetGlobalContext() -> LLVMContextRef;
@@ -37,7 +37,6 @@ extern "C" {
 }
 
 // Core->Modules
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMModuleCreateWithName(ModuleID: *const ::libc::c_char) -> LLVMModuleRef;
     pub fn LLVMModuleCreateWithNameInContext(ModuleID: *const ::libc::c_char,
@@ -75,7 +74,6 @@ extern "C" {
 }
 
 // Core->Types
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMGetTypeKind(Ty: LLVMTypeRef) -> LLVMTypeKind;
     pub fn LLVMTypeIsSized(Ty: LLVMTypeRef) -> LLVMBool;
@@ -162,7 +160,6 @@ extern "C" {
 }
 
 // Core->Values
-#[link(name="LLVMCore")]
 extern "C" {
     // Core->Values->General
     pub fn LLVMTypeOf(Val: LLVMValueRef) -> LLVMTypeRef;
@@ -426,7 +423,6 @@ extern "C" {
 }
 
 // Core->Metadata
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMMDStringInContext(C: LLVMContextRef,
                                  Str: *const ::libc::c_char,
@@ -441,7 +437,6 @@ extern "C" {
 }
 
 // Core->Basic Block
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMBasicBlockAsValue(BB: LLVMBasicBlockRef) -> LLVMValueRef;
     pub fn LLVMValueIsBasicBlock(Val: LLVMValueRef) -> LLVMBool;
@@ -475,7 +470,6 @@ extern "C" {
 }
 
 // Core->Instructions
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMHasMetadata(Val: LLVMValueRef) -> ::libc::c_int;
     pub fn LLVMGetMetadata(Val: LLVMValueRef, KindID: ::libc::c_uint) -> LLVMValueRef;
@@ -526,7 +520,6 @@ extern "C" {
 }
 
 // Core->Values again; these don't appear in Doxygen because they're macro-generated.
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMIsAArgument(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsABasicBlock(Val: LLVMValueRef) -> LLVMValueRef;
@@ -603,7 +596,6 @@ extern "C" {
 }
 
 // Core->Instruction Builders
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMCreateBuilderInContext(C: LLVMContextRef) -> LLVMBuilderRef;
     pub fn LLVMCreateBuilder() -> LLVMBuilderRef;
@@ -874,7 +866,6 @@ extern "C" {
 }
 
 // Core->Module Providers
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMCreateModuleProviderForExistingModule(M: LLVMModuleRef)
      -> LLVMModuleProviderRef;
@@ -882,7 +873,6 @@ extern "C" {
 }
 
 // Core->Memory Buffers
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMCreateMemoryBufferWithContentsOfFile(Path:
                                                         *const ::libc::c_char,
@@ -917,13 +907,11 @@ extern "C" {
 }
 
 // Core->pass registry
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMGetGlobalPassRegistry() -> LLVMPassRegistryRef;
 }
 
 // Core->Pass managers
-#[link(name="LLVMCore")]
 extern "C" {
     pub fn LLVMCreatePassManager() -> LLVMPassManagerRef;
     pub fn LLVMCreateFunctionPassManagerForModule(M: LLVMModuleRef)
@@ -942,7 +930,6 @@ extern "C" {
 }
 
 // Core->Threading
-#[link(name="LLVMCore")]
 extern "C" {
     #[deprecated(reason="LLVM threading is configured at compile-time with `LLVM_ENABLE_THREADS`")]
     pub fn LLVMStartMultithreaded() -> LLVMBool;
