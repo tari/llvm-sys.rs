@@ -128,7 +128,7 @@ extern "C" {
     /// ```c++
     /// LLVMMCJITCompilerOptions options;
     /// LLVMInitializeMCJITCompilerOptions(&options, sizeof(options));
-    /// ... fill in those options you care about
+    /// // ... fill in those options you care about
     /// LLVMCreateMCJITCompilerForModule(&jit, mod, &options, sizeof(options),
     ///                                  &error);
     /// ```
@@ -138,6 +138,8 @@ extern "C" {
     /// ```c++
     /// LLVMCreateMCJITCompilerForModule(&jit, mod, 0, 0, &error);
     /// ```
+    /// 
+    /// 0 is returned on success, or 1 on failure.
     pub fn LLVMCreateMCJITCompilerForModule(OutJIT: *mut LLVMExecutionEngineRef,
                                             M: LLVMModuleRef,
                                             Options: *mut LLVMMCJITCompilerOptions,
