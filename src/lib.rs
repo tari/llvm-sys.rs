@@ -26,6 +26,7 @@ pub mod prelude {
 }
 
 pub mod core;
+pub mod execution_engine;
 
 bitflags! {
     #[repr(C)]
