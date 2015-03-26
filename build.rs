@@ -1,7 +1,11 @@
+use std::str::from_utf8_unchecked;
 use std::process::Command;
 
+fn is_whitespace(x: &u8) -> bool {
+    ['\n', '\t', ' '].contains(&(*x as char))
+}
+
 fn main() {
-    let whitespace = ['\n', '\t', ' '];
     // Are we using LLVM as a shared object or static library?
     let llvm_libtype = match std::env::var("CARGO_FEATURE_LLVM_DYLIB") {
         Ok(_) => "dylib",
@@ -15,33 +19,37 @@ fn main() {
         Ok(x) => x
     };
 
-    let version = String::from_utf8(output.stdout).unwrap();
-    println!("Found LLVM version {}", version);
+    let version = output.stdout;
+    println!("Found LLVM version {}", unsafe {
+        // We really just want to write bytes to stdout (no guarantees the system
+        // is UTF-8), so it's easiest to just do this unchecked conversion rather
+        // than use std::io to write raw bytes.
+        from_utf8_unchecked(&version)
+    });
 
     // llvm-config --ldflags: extract -L<dir> options
-    let output = String::from_utf8(
-        Command::new("llvm-config").arg("--ldflags").output().unwrap().stdout
-    ).unwrap();
-    for arg in output.split(&whitespace[..]) {
-        let arg = arg.trim();
-        if arg.starts_with("-L") {
-            println!("cargo:rustc-link-search=native={}", &arg[2..]);
+    let output = Command::new("llvm-config").arg("--ldflags").output().unwrap().stdout;
+    for arg in output.split(is_whitespace) {
+        if arg.starts_with(b"-L") {
+            println!("cargo:rustc-link-search=native={}", unsafe {
+                from_utf8_unchecked(&arg[2..])
+            });
         }
     }
 
     // llvm-config --libs --system-libs: extract -l<lib> options
-    let output = String::from_utf8(
-        Command::new("llvm-config").args(&["--libs", "--system-libs"]).output().unwrap().stdout
-    ).unwrap();
-    for arg in output.split(&whitespace[..]) {
-        if arg.starts_with("-l") {
+    let output = Command::new("llvm-config").args(&["--libs", "--system-libs"]).output().unwrap().stdout;
+    for arg in output.split(is_whitespace) {
+        if arg.starts_with(b"-l") {
             let arg = &arg[2..];
-            let libtype = if arg.contains("LLVM") {
+            let libtype = if arg.starts_with(b"LLVM") {
                 llvm_libtype
             } else {
                 "dylib"
             };
-            println!("cargo:rustc-link-lib={}={}", libtype, arg);
+            println!("cargo:rustc-link-lib={}={}", libtype, unsafe {
+                from_utf8_unchecked(arg)
+            });
         }
     }
 
