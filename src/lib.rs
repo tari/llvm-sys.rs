@@ -1,6 +1,7 @@
-//! Bindings to LLVM's C API
+//! Bindings to LLVM's C API.
 //!
-//! http://llvm.org/docs/doxygen/html/group__LLVMC.html
+//! Refer to the [LLVM documentation](http://llvm.org/docs/) for more
+//! information.
 
 #![feature(libc)]
 
@@ -34,6 +35,9 @@ pub struct LLVMUse;
 #[repr(C)]
 pub struct LLVMDiagnosticInfo;
 
+/// Core types used throughout LLVM.
+///
+/// In most cases you will want to `use llvm::prelude::*`.
 pub mod prelude {
     pub type LLVMBool = ::libc::c_int;
     pub type LLVMMemoryBufferRef = *mut super::LLVMMemoryBuffer;

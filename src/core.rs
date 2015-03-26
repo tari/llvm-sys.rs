@@ -1,4 +1,4 @@
-//! http://llvm.org/docs/doxygen/html/Core_8h.html
+//! The LLVM intermediate representation.
 
 use super::*;
 use super::prelude::*;
