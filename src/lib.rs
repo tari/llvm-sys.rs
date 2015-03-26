@@ -50,7 +50,11 @@ pub mod prelude {
     pub type LLVMDiagnosticInfoRef = *mut super::LLVMDiagnosticInfo;
 }
 
+pub mod analysis;
+pub mod bit_reader;
+pub mod bit_writer;
 pub mod core;
+pub mod disassembler;
 pub mod execution_engine;
 pub mod target;
 pub mod support;
