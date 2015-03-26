@@ -59,6 +59,8 @@ pub mod execution_engine;
 pub mod initialization;
 pub mod ir_reader;
 pub mod link_time_optimizer;
+pub mod linker;
+pub mod object;
 pub mod target;
 pub mod support;
 pub mod target_machine;
