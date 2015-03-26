@@ -52,6 +52,9 @@ pub mod prelude {
 
 pub mod core;
 pub mod execution_engine;
+pub mod target;
+pub mod support;
+pub mod target_machine;
 
 bitflags! {
     #[repr(C)]
