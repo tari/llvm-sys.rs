@@ -65,6 +65,13 @@ pub mod target;
 pub mod support;
 pub mod target_machine;
 
+pub mod transforms {
+    pub mod ipo;
+    pub mod pass_manager_builder;
+    pub mod scalar;
+    pub mod vectorize;
+}
+
 bitflags! {
     #[repr(C)]
     flags LLVMAttribute: ::libc::c_int {
