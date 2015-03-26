@@ -5,6 +5,9 @@ version = "0.0.2"
 authors = ["Peter Marheine <peter@taricorp.net>"]
 build = "build.rs"
 
+# TODO static inline functions via some C++ in this crate.
+# eg, Target.h, LLVMInitializeAllTargets
+
 [features]
 # Turn this on to link against LLVM as a shared rather than static library
 llvm-dylib = []

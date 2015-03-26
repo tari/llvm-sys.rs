@@ -1,68 +1,17 @@
 use super::prelude::*;
+use super::target::LLVMTargetDataRef;
+use super::target_machine::{LLVMTargetMachineRef, LLVMCodeModel};
 
 #[repr(C)]
-pub enum LLVMByteOrdering {
-    LLVMBigEndian = 0,
-    LLVMLittleEndian = 1
-}
+pub struct LLVMOpaqueGenericValue;
+#[repr(C)]
+pub struct LLVMOpaqueExecutionEngine;
+#[repr(C)]
+pub struct LLVMOpaqueMCJITMemoryManager;
 
-#[repr(C)]
-pub struct LLVMTargetData;
-#[repr(C)]
-pub struct LLVMTargetLibraryInfo;
-#[repr(C)]
-pub struct LLVMTargetMachine;
-#[repr(C)]
-pub struct LLVMTarget;
-
-pub type LLVMTargetDataRef = *mut LLVMTargetData;
-pub type LLVMTargetLibraryInfoRef = *mut LLVMTargetLibraryInfo;
-pub type LLVMTargetMachineRef = *mut LLVMTargetMachine;
-pub type LLVMTargetRef = *mut LLVMTarget;
-
-#[repr(C)]
-pub enum LLVMCodeGenOptLevel {
-    LLVMCodeGenLevelNone = 0,
-    LLVMCodeGenLevelLess = 1,
-    LLVMCodeGenLevelDefault = 2,
-    LLVMCodeGenLevelAggressive = 3
-}
-
-#[repr(C)]
-pub enum LLVMRelocMode {
-    LLVMRelocDefault = 0,
-    LLVMRelocStatic = 1,
-    LLVMRelocPIC = 2,
-    LLVMRelocDynamicNoPic = 3,
-}
-
-#[repr(C)]
-#[derive(Copy)]
-pub enum LLVMCodeModel {
-    LLVMCodeModelDefault = 0,
-    LLVMCodeModelJITDefault = 1,
-    LLVMCodeModelSmall = 2,
-    LLVMCodeModelKernel = 3,
-    LLVMCodeModelMedium = 4,
-    LLVMCodeModelLarge = 5,
-}
-
-#[repr(C)]
-pub enum LLVMCodeGenFileType {
-    LLVMAssemblyFile = 0,
-    LLVMObjectFile = 1,
-}
-
-#[repr(C)]
-pub struct LLVMGenericValue;
-#[repr(C)]
-pub struct LLVMExecutionEngine;
-#[repr(C)]
-pub struct LLVMMCJITMemoryManager;
-
-pub type LLVMGenericValueRef = *mut LLVMGenericValue;
-pub type LLVMExecutionEngineRef = *mut LLVMExecutionEngine;
-pub type LLVMMCJITMemoryManagerRef = *mut LLVMMCJITMemoryManager;
+pub type LLVMGenericValueRef = *mut LLVMOpaqueGenericValue;
+pub type LLVMExecutionEngineRef = *mut LLVMOpaqueExecutionEngine;
+pub type LLVMMCJITMemoryManagerRef = *mut LLVMOpaqueMCJITMemoryManager;
 
 #[repr(C)]
 #[derive(Copy)]
