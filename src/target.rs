@@ -1,3 +1,5 @@
+//! Target information
+
 use super::prelude::*;
 
 #[repr(C)]
