@@ -60,6 +60,7 @@ pub mod initialization;
 pub mod ir_reader;
 pub mod link_time_optimizer;
 pub mod linker;
+pub mod lto;
 pub mod object;
 pub mod target;
 pub mod support;

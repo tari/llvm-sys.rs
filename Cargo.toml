@@ -1,7 +1,7 @@
 [package]
 
-name = "llvm-sys"
-version = "0.0.2"
+name = "llvm_sys"
+version = "0.1.0"
 authors = ["Peter Marheine <peter@taricorp.net>"]
 build = "build.rs"
 
