@@ -6,10 +6,19 @@ pub enum LLVMByteOrdering {
     LLVMLittleEndian = 1
 }
 
-pub type LLVMTargetDataRef = *mut ();
-pub type LLVMTargetLibraryInfoRef = *mut ();
-pub type LLVMTargetMachineRef = *mut ();
-pub type LLVMTargetRef = *mut ();
+#[repr(C)]
+pub struct LLVMTargetData;
+#[repr(C)]
+pub struct LLVMTargetLibraryInfo;
+#[repr(C)]
+pub struct LLVMTargetMachine;
+#[repr(C)]
+pub struct LLVMTarget;
+
+pub type LLVMTargetDataRef = *mut LLVMTargetData;
+pub type LLVMTargetLibraryInfoRef = *mut LLVMTargetLibraryInfo;
+pub type LLVMTargetMachineRef = *mut LLVMTargetMachine;
+pub type LLVMTargetRef = *mut LLVMTarget;
 
 #[repr(C)]
 pub enum LLVMCodeGenOptLevel {
@@ -44,9 +53,16 @@ pub enum LLVMCodeGenFileType {
     LLVMObjectFile = 1,
 }
 
-pub type LLVMGenericValueRef = *mut ();
-pub type LLVMExecutionEngineRef = *mut ();
-pub type LLVMMCJITMemoryManagerRef = *mut ();
+#[repr(C)]
+pub struct LLVMGenericValue;
+#[repr(C)]
+pub struct LLVMExecutionEngine;
+#[repr(C)]
+pub struct LLVMMCJITMemoryManager;
+
+pub type LLVMGenericValueRef = *mut LLVMGenericValue;
+pub type LLVMExecutionEngineRef = *mut LLVMExecutionEngine;
+pub type LLVMMCJITMemoryManagerRef = *mut LLVMMCJITMemoryManager;
 
 #[repr(C)]
 #[derive(Copy)]
