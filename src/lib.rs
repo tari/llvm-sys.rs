@@ -9,20 +9,45 @@ extern crate libc;
 
 use self::prelude::*;
 
+#[repr(C)]
+pub struct LLVMMemoryBuffer;
+#[repr(C)]
+pub struct LLVMContext;
+#[repr(C)]
+pub struct LLVMModule;
+#[repr(C)]
+pub struct LLVMType;
+#[repr(C)]
+pub struct LLVMValue;
+#[repr(C)]
+pub struct LLVMBasicBlock;
+#[repr(C)]
+pub struct LLVMBuilder;
+#[repr(C)]
+pub struct LLVMModuleProvider;
+#[repr(C)]
+pub struct LLVMPassManager;
+#[repr(C)]
+pub struct LLVMPassRegistry;
+#[repr(C)]
+pub struct LLVMUse;
+#[repr(C)]
+pub struct LLVMDiagnosticInfo;
+
 pub mod prelude {
     pub type LLVMBool = ::libc::c_int;
-    pub type LLVMMemoryBufferRef = *mut ();
-    pub type LLVMContextRef = *mut ();
-    pub type LLVMModuleRef = *mut ();
-    pub type LLVMTypeRef = *mut ();
-    pub type LLVMValueRef = *mut ();
-    pub type LLVMBasicBlockRef = *mut ();
-    pub type LLVMBuilderRef = *mut ();
-    pub type LLVMModuleProviderRef = *mut ();
-    pub type LLVMPassManagerRef = *mut ();
-    pub type LLVMPassRegistryRef = *mut ();
-    pub type LLVMUseRef = *mut ();
-    pub type LLVMDiagnosticInfoRef = *mut ();
+    pub type LLVMMemoryBufferRef = *mut super::LLVMMemoryBuffer;
+    pub type LLVMContextRef = *mut super::LLVMContext;
+    pub type LLVMModuleRef = *mut super::LLVMModule;
+    pub type LLVMTypeRef = *mut super::LLVMType;
+    pub type LLVMValueRef = *mut super::LLVMValue;
+    pub type LLVMBasicBlockRef = *mut super::LLVMBasicBlock;
+    pub type LLVMBuilderRef = *mut super::LLVMBuilder;
+    pub type LLVMModuleProviderRef = *mut super::LLVMModuleProvider;
+    pub type LLVMPassManagerRef = *mut super::LLVMPassManager;
+    pub type LLVMPassRegistryRef = *mut super::LLVMPassRegistry;
+    pub type LLVMUseRef = *mut super::LLVMUse;
+    pub type LLVMDiagnosticInfoRef = *mut super::LLVMDiagnosticInfo;
 }
 
 pub mod core;
