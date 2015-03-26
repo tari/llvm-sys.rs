@@ -1,4 +1,10 @@
 [package]
+description = "Bindings to LLVM's C API"
+documentation = "http://rustdoc.taricorp.net/llvm_sys/llvm_sys/"
+repository = "https://bitbucket.org/tari/llvm-sys.rs"
+readme = "README.md"
+license = "MIT"
+keywords = ["bindings", "llvm"]
 
 name = "llvm_sys"
 version = "0.1.0"

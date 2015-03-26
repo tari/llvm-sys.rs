@@ -1,3 +1,5 @@
+//! Target machine information, to generate assembly or object files.
+
 use super::prelude::*;
 use super::target::LLVMTargetDataRef;
 

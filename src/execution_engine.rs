@@ -1,3 +1,5 @@
+//! Runtime code generation and execution.
+
 use super::prelude::*;
 use super::target::LLVMTargetDataRef;
 use super::target_machine::{LLVMTargetMachineRef, LLVMCodeModel};
