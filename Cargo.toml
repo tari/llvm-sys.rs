@@ -1,18 +1,15 @@
 [package]
 description = "Bindings to LLVM's C API"
-documentation = "http://rustdoc.taricorp.net/llvm_sys/llvm_sys/"
+documentation = "http://rustdoc.taricorp.net/llvm-sys/llvm_sys/"
 repository = "https://bitbucket.org/tari/llvm-sys.rs"
 readme = "README.md"
 license = "MIT"
 keywords = ["bindings", "llvm"]
 
 name = "llvm-sys"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Peter Marheine <peter@taricorp.net>"]
 build = "build.rs"
-
-# TODO static inline functions via some C++ in this crate.
-# eg, Target.h, LLVMInitializeAllTargets
 
 [features]
 # Turn this on to link against LLVM as a shared rather than static library
@@ -20,3 +17,6 @@ llvm-dylib = []
 
 [dependencies]
 bitflags = "*"
+
+[build-dependencies]
+semver = "*"
