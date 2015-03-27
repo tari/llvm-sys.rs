@@ -13,6 +13,13 @@ Most of the interfaces are not documented in these bindings. Refer to the
 [LLVM documentation](http://llvm.org/docs/) for more information, particularly
 the [generated API documentation](http://llvm.org/doxygen/).
 
+# Dependencies
+
+You will need LLVM (>= 3.6) and cmake (>= 2.6) installed on your system to
+compile these bindings. The `llvm-config` tool must be on PATH so the build
+scripts can find it, and the LLVM cmake scripts must be somewhere cmake can find
+them.
+
 ## Why not use `librustc_llvm`?
 
 In many cases, the interfaces exposed by `librustc_llvm` are sufficient for
