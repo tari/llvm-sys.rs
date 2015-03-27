@@ -130,3 +130,23 @@ extern "C" {
      -> ::libc::c_ulonglong;
     pub fn LLVMDisposeTargetData(TD: LLVMTargetDataRef) -> ();
 }
+
+// Functions from our target wrappers, since the C interface defines them with
+// macros (wrappers/target.c).
+extern "C" {
+    pub fn LLVM_InitializeAllTargetInfos();
+    pub fn LLVM_InitializeAllTargets();
+    pub fn LLVM_InitializeAllTargetMCs();
+    pub fn LLVM_InitializeAllAsmPrinters();
+    pub fn LLVM_InitializeAllAsmParsers();
+    pub fn LLVM_InitializeAllDisassemblers();
+
+    /// Returns 1 on failure.
+    pub fn LLVM_InitializeNativeTarget() -> LLVMBool;
+    /// Returns 1 on failure.
+    pub fn LLVM_InitializeNativeAsmParser() -> LLVMBool;
+    /// Returns 1 on failure.
+    pub fn LLVM_InitializeNativeAsmPrinter() -> LLVMBool;
+    /// Returns 1 on failure.
+    pub fn LLVM_InitializeNativeDisassembler() -> LLVMBool;
+}
