@@ -6,8 +6,8 @@ readme = "README.md"
 license = "MIT"
 keywords = ["bindings", "llvm"]
 
-name = "llvm_sys"
-version = "0.1.0"
+name = "llvm-sys"
+version = "0.1.1"
 authors = ["Peter Marheine <peter@taricorp.net>"]
 build = "build.rs"
 
