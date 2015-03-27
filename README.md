@@ -5,7 +5,7 @@ Rust bindings to LLVM's C API.
 Add to your `Cargo.toml`:
 
     [dependencies]
-    llvm_sys = "*"
+    llvm-sys = "*"
 
 See the `examples` directory in this repository for API examples.
 
