@@ -28,7 +28,7 @@ pub enum LLVMRelocMode {
 }
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 pub enum LLVMCodeModel {
     LLVMCodeModelDefault = 0,
     LLVMCodeModelJITDefault = 1,

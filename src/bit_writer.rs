@@ -15,7 +15,7 @@ extern "C" {
     pub fn LLVMWriteBitcodeToFD(M: LLVMModuleRef, FD: ::libc::c_int,
                                 ShouldClose: ::libc::c_int,
                                 Unbuffered: ::libc::c_int) -> ::libc::c_int;
-    #[deprecated(reason="Use LLVMWriteBitcodeToFD")]
+    /// Deprecated: use LLVMWriteBitcodeToFD
     pub fn LLVMWriteBitcodeToFileHandle(M: LLVMModuleRef,
                                         Handle: ::libc::c_int)
      -> ::libc::c_int;

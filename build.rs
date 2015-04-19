@@ -1,5 +1,3 @@
-#![feature(convert)]
-
 extern crate semver;
 
 use semver::{Version, VersionReq};

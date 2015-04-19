@@ -16,7 +16,7 @@ pub type LLVMExecutionEngineRef = *mut LLVMOpaqueExecutionEngine;
 pub type LLVMMCJITMemoryManagerRef = *mut LLVMOpaqueMCJITMemoryManager;
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Clone, Copy)]
 #[allow(non_snake_case)]
 pub struct LLVMMCJITCompilerOptions {
     pub OptLevel: ::libc::c_uint,
@@ -113,17 +113,17 @@ extern "C" {
                                             SizeOfOptions: ::libc::size_t,
                                             OutError: *mut *mut ::libc::c_char) -> LLVMBool;
 
-    #[deprecated(reason="Use LLVMCreateExecutionEngineForModule instead")]
+    /// Deprecated: Use LLVMCreateExecutionEngineForModule instead
     pub fn LLVMCreateExecutionEngine(OutEE: *mut LLVMExecutionEngineRef,
                                      MP: LLVMModuleProviderRef,
                                      OutError: *mut *mut ::libc::c_char) -> LLVMBool;
 
-    #[deprecated(reason="Use LLVMCreateInterpreterForModule instead")]
+    /// Deprecated: Use LLVMCreateInterpreterForModule instead
     pub fn LLVMCreateInterpreter(OutInterp: *mut LLVMExecutionEngineRef,
                                  MP: LLVMModuleProviderRef,
                                  OutError: *mut *mut ::libc::c_char) -> LLVMBool;
 
-    #[deprecated(reason="Use LLVMCreateJITCompilerForModule instead")]
+    /// Deprecated: Use LLVMCreateJITCompilerForModule instead
     pub fn LLVMCreateJITCompiler(OutJIT: *mut LLVMExecutionEngineRef,
                                  MP: LLVMModuleProviderRef,
                                  OptLevel: ::libc::c_uint,
@@ -147,7 +147,7 @@ extern "C" {
     pub fn LLVMRemoveModule(EE: LLVMExecutionEngineRef, M: LLVMModuleRef,
                             OutMod: *mut LLVMModuleRef,
                             OutError: *mut *mut ::libc::c_char) -> LLVMBool;
-    #[deprecated(reason="Use LLVMRemoveModule instead")]
+    /// Deprecated: Use LLVMRemoveModule instead
     pub fn LLVMRemoveModuleProvider(EE: LLVMExecutionEngineRef,
                                     MP: LLVMModuleProviderRef,
                                     OutMod: *mut LLVMModuleRef,
