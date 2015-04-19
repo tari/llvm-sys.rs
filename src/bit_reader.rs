@@ -29,7 +29,7 @@ extern "C" {
                                 OutM: *mut LLVMModuleRef,
                                 OutMessage: *mut *mut ::libc::c_char)
      -> LLVMBool;
-    #[deprecated(reason="Use LLVMGetBitcodeModuleInContext instead")]
+    /// Deprecated: use LLVMGetBitcodeModuleInContext instead
     pub fn LLVMGetBitcodeModuleProviderInContext(ContextRef: LLVMContextRef,
                                                  MemBuf: LLVMMemoryBufferRef,
                                                  OutMP:
@@ -37,7 +37,7 @@ extern "C" {
                                                  OutMessage:
                                                      *mut *mut ::libc::c_char)
      -> LLVMBool;
-    #[deprecated(reason="Use LLVMGetBitcodeModule instead")]
+    /// Deprecated: Use LLVMGetBitcodeModule instead
     pub fn LLVMGetBitcodeModuleProvider(MemBuf: LLVMMemoryBufferRef,
                                         OutMP: *mut LLVMModuleProviderRef,
                                         OutMessage: *mut *mut ::libc::c_char)

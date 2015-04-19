@@ -931,9 +931,9 @@ extern "C" {
 
 // Core->Threading
 extern "C" {
-    #[deprecated(reason="LLVM threading is configured at compile-time with `LLVM_ENABLE_THREADS`")]
+    /// Deprecated: LLVM threading is configured at compile-time with `LLVM_ENABLE_THREADS`
     pub fn LLVMStartMultithreaded() -> LLVMBool;
-    #[deprecated(reason="LLVM threading is configured at compile-time with `LLVM_ENABLE_THREADS`")]
+    /// Deprecated: LLVM threading is configured at compile-time with `LLVM_ENABLE_THREADS`
     pub fn LLVMStopMultithreaded() -> ();
     pub fn LLVMIsMultithreaded() -> LLVMBool;
 }

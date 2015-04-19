@@ -15,7 +15,6 @@ pub type LLVMOpInfoCallback =
         -> ::libc::c_int;
 
 #[repr(C)]
-#[derive(Copy)]
 pub struct LLVMOpInfoSymbol1 {
     /// 1 if this symbol is present.
     pub Present: u64,
@@ -26,7 +25,6 @@ pub struct LLVMOpInfoSymbol1 {
 }
 
 #[repr(C)]
-#[derive(Copy)]
 pub struct Struct_LLVMOpInfo1 {
     pub AddSymbol: LLVMOpInfoSymbol1,
     pub SubtractSymbol: LLVMOpInfoSymbol1,
