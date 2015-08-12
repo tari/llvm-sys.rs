@@ -62,7 +62,8 @@ fn main() {
 
 
     // llvm-config --ldflags: extract -L<dir> options
-    let output = Command::new(&*llvm_config).arg("--ldflags").output().unwrap().stdout;
+    let output = Command::new(&*llvm_config).arg("--ldflags")
+        .output().ok().expect("Failed to get LDFLAGS from llvm-config").stdout;
     for arg in output.split(is_whitespace) {
         if arg.starts_with(b"-L") {
             println!("cargo:rustc-link-search=native={}", unsafe {
@@ -72,7 +73,8 @@ fn main() {
     }
 
     // llvm-config --libs --system-libs: extract -l<lib> options
-    let output = Command::new(&*llvm_config).args(&["--libs", "--system-libs"]).output().unwrap().stdout;
+    let output = Command::new(&*llvm_config).args(&["--libs", "--system-libs"])
+        .output().ok().expect("Failed to get libs from llvm-config").stdout;
     for arg in output.split(is_whitespace) {
         if arg.starts_with(b"-l") {
             let arg = &arg[2..];
@@ -89,8 +91,9 @@ fn main() {
 
     // llvm-config --cxxflags: determine which libc++ to use: LLVM's or GCC's
     let output = String::from_utf8(
-        Command::new(&*llvm_config).arg("--cxxflags").output().unwrap().stdout
-    ).unwrap();
+        Command::new(&*llvm_config).arg("--cxxflags")
+            .output().ok().expect("Failed to get CXXFLAGS from llvm-config").stdout
+    ).ok().expect("llvm-config --cxxflags gave invalid UTF-8");
     let libcpp = if output.contains("stdlib=libc++") {
         "c++"
     } else {
