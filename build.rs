@@ -1,6 +1,7 @@
 extern crate semver;
 
 use semver::{Version, VersionReq};
+use semver::ParseError::IncorrectParse;
 use std::borrow::Cow;
 use std::path::PathBuf;
 use std::str::from_utf8_unchecked;
@@ -102,8 +103,13 @@ fn get_llvm_config() -> (Cow<'static, str>, Version) {
     match Command::new("llvm-config").arg("--version").output() {
         Ok(x) => {
             // llvm-config was on our PATH. Easy.
-            (Cow::Borrowed("llvm-config"),
-             Version::parse(std::str::from_utf8(&x.stdout[..]).unwrap()).unwrap())
+            let ver = match Version::parse(&String::from_utf8_lossy(&*x.stdout)) {
+                // Ignore partial error; particularly constructs like '3.8.0svn'
+                // should be accepted, despite being invalid semver.
+                Err(IncorrectParse(v, _)) | Ok(v) => v,
+                _ => panic!("Could not determine LLVM version")
+            };
+            (Cow::Borrowed("llvm-config"), ver)
         }
         Err(_) => {
             panic!("llvm-config not found. Install LLVM before attempting to build.");
