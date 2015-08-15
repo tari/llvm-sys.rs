@@ -25,13 +25,13 @@ pub struct LLVMMCJITCompilerOptions {
 
 pub type LLVMMemoryManagerAllocateCodeSectionCallback =
     extern "C" fn(Opaque: *mut ::libc::c_void,
-                  Size: usize,
+                  Size: ::libc::uintptr_t,
                   Alignment: ::libc::c_uint,
                   SectionID: ::libc::c_uint,
                   SectionName: *const ::libc::c_char) -> *mut u8;
 pub type LLVMMemoryManagerAllocateDataSectionCallback =
     extern "C" fn(Opaque: *mut ::libc::c_void,
-                  Size: usize,
+                  Size: ::libc::uintptr_t,
                   Alignment: ::libc::c_uint,
                   SectionID: ::libc::c_uint,
                   SectionName: *const ::libc::c_char,
