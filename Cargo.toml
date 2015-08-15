@@ -6,18 +6,18 @@ readme = "README.md"
 license = "MIT"
 keywords = ["bindings", "llvm"]
 
-name = "llvm_sys"
-version = "0.1.4"
-authors = ["Peter Marheine <peter@taricorp.net>"]
+name = "llvm-sys"
+version = "0.2.0"
+authors = [
+  "Peter Marheine <peter@taricorp.net>",
+  "Scott Olson <scott@solson.me>",
+]
 build = "build.rs"
 
-[features]
-# Turn this on to link against LLVM as a shared rather than static library
-llvm-dylib = []
-
 [dependencies]
-bitflags = "*"
-libc = "*"
+bitflags = "0.3.2"
+libc = "0.1.8"
 
 [build-dependencies]
-semver = "*"
+gcc = "0.3.13"
+semver = "0.1.20"
