@@ -4,12 +4,9 @@ use super::prelude::*;
 use super::target::LLVMTargetDataRef;
 use super::target_machine::{LLVMTargetMachineRef, LLVMCodeModel};
 
-#[repr(C)]
-pub struct LLVMOpaqueGenericValue;
-#[repr(C)]
-pub struct LLVMOpaqueExecutionEngine;
-#[repr(C)]
-pub struct LLVMOpaqueMCJITMemoryManager;
+pub enum LLVMOpaqueGenericValue {}
+pub enum LLVMOpaqueExecutionEngine {}
+pub enum LLVMOpaqueMCJITMemoryManager {}
 
 pub type LLVMGenericValueRef = *mut LLVMOpaqueGenericValue;
 pub type LLVMExecutionEngineRef = *mut LLVMOpaqueExecutionEngine;
@@ -28,13 +25,13 @@ pub struct LLVMMCJITCompilerOptions {
 
 pub type LLVMMemoryManagerAllocateCodeSectionCallback =
     extern "C" fn(Opaque: *mut ::libc::c_void,
-                  Size: usize,
+                  Size: ::libc::uintptr_t,
                   Alignment: ::libc::c_uint,
                   SectionID: ::libc::c_uint,
                   SectionName: *const ::libc::c_char) -> *mut u8;
 pub type LLVMMemoryManagerAllocateDataSectionCallback =
     extern "C" fn(Opaque: *mut ::libc::c_void,
-                  Size: usize,
+                  Size: ::libc::uintptr_t,
                   Alignment: ::libc::c_uint,
                   SectionID: ::libc::c_uint,
                   SectionName: *const ::libc::c_char,

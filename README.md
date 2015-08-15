@@ -4,8 +4,16 @@ Rust bindings to LLVM's C API.
 
 Add to your `Cargo.toml`:
 
-    [dependencies]
-    llvm-sys = "*"
+```toml
+[dependencies]
+llvm-sys = "0.2.0"
+```
+
+and this to your crate root:
+
+```rust
+extern crate llvm_sys;
+```
 
 See the `examples` directory in this repository for API examples.
 
@@ -15,10 +23,8 @@ the [generated API documentation](http://llvm.org/doxygen/).
 
 # Dependencies
 
-You will need LLVM (>= 3.6) and cmake (>= 2.6) installed on your system to
-compile these bindings. The `llvm-config` tool must be on PATH so the build
-scripts can find it, and the LLVM cmake scripts must be somewhere cmake can find
-them.
+You will need LLVM (>= 3.6) installed on your system to compile these bindings.
+The `llvm-config` tool must be on PATH so the build scripts can find it.
 
 ## Why not use `librustc_llvm`?
 

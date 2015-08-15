@@ -8,12 +8,10 @@ pub enum LLVMByteOrdering {
     LLVMLittleEndian = 1
 }
 
-#[repr(C)]
-pub struct LLVMOpaqueTargetData;
+pub enum LLVMOpaqueTargetData {}
 pub type LLVMTargetDataRef = *mut LLVMOpaqueTargetData;
 
-#[repr(C)]
-pub struct LLVMOpaqueTargetLibraryInfotData;
+pub enum LLVMOpaqueTargetLibraryInfotData {}
 pub type LLVMTargetLibraryInfoRef = *mut LLVMOpaqueTargetLibraryInfotData;
 
 extern "C" {
