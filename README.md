@@ -15,10 +15,8 @@ the [generated API documentation](http://llvm.org/doxygen/).
 
 # Dependencies
 
-You will need LLVM (>= 3.6) and cmake (>= 2.6) installed on your system to
-compile these bindings. The `llvm-config` tool must be on PATH so the build
-scripts can find it, and the LLVM cmake scripts must be somewhere cmake can find
-them.
+You will need LLVM (>= 3.6) installed on your system to compile these bindings.
+The `llvm-config` tool must be on PATH so the build scripts can find it.
 
 ## Why not use `librustc_llvm`?
 
