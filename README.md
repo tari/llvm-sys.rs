@@ -4,8 +4,16 @@ Rust bindings to LLVM's C API.
 
 Add to your `Cargo.toml`:
 
-    [dependencies]
-    llvm-sys = "*"
+```toml
+[dependencies]
+llvm-sys = "0.2.0"
+```
+
+and this to your crate root:
+
+```rust
+extern crate llvm_sys;
+```
 
 See the `examples` directory in this repository for API examples.
 
