@@ -2,20 +2,16 @@
 
 use super::prelude::*;
 
-#[repr(C)]
-pub struct LLVMOpaqueObjectFile;
+pub enum LLVMOpaqueObjectFile {}
 pub type LLVMObjectFileRef = *mut LLVMOpaqueObjectFile;
 
-#[repr(C)]
-pub struct LLVMOpaqueSectionIterator;
+pub enum LLVMOpaqueSectionIterator {}
 pub type LLVMSectionIteratorRef = *mut LLVMOpaqueSectionIterator;
 
-#[repr(C)]
-pub struct LLVMOpaqueSymbolIterator;
+pub enum LLVMOpaqueSymbolIterator {}
 pub type LLVMSymbolIteratorRef = *mut LLVMOpaqueSymbolIterator;
 
-#[repr(C)]
-pub struct LLVMOpaqueRelocationIterator;
+pub enum LLVMOpaqueRelocationIterator {}
 pub type LLVMRelocationIteratorRef = *mut LLVMOpaqueRelocationIterator;
 
 extern "C" {

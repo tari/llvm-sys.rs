@@ -2,8 +2,7 @@
 
 #![allow(non_upper_case_globals, non_snake_case)]
 
-#[repr(C)]
-pub struct LLVMOpaqueDisasmContext;
+pub enum LLVMOpaqueDisasmContext {}
 pub type LLVMDisasmContextRef = *mut LLVMOpaqueDisasmContext;
 
 pub type LLVMOpInfoCallback =
