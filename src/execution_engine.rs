@@ -4,12 +4,9 @@ use super::prelude::*;
 use super::target::LLVMTargetDataRef;
 use super::target_machine::{LLVMTargetMachineRef, LLVMCodeModel};
 
-#[repr(C)]
-pub struct LLVMOpaqueGenericValue;
-#[repr(C)]
-pub struct LLVMOpaqueExecutionEngine;
-#[repr(C)]
-pub struct LLVMOpaqueMCJITMemoryManager;
+pub enum LLVMOpaqueGenericValue {}
+pub enum LLVMOpaqueExecutionEngine {}
+pub enum LLVMOpaqueMCJITMemoryManager {}
 
 pub type LLVMGenericValueRef = *mut LLVMOpaqueGenericValue;
 pub type LLVMExecutionEngineRef = *mut LLVMOpaqueExecutionEngine;

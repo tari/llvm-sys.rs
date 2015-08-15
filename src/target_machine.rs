@@ -3,12 +3,10 @@
 use super::prelude::*;
 use super::target::LLVMTargetDataRef;
 
-#[repr(C)]
-pub struct LLVMOpaqueTargetMachine;
+pub enum LLVMOpaqueTargetMachine {}
 pub type LLVMTargetMachineRef = *mut LLVMOpaqueTargetMachine;
 
-#[repr(C)]
-pub struct LLVMTarget;
+pub enum LLVMTarget {}
 pub type LLVMTargetRef = *mut LLVMTarget;
 
 #[repr(C)]

@@ -10,30 +10,18 @@ extern crate libc;
 
 use self::prelude::*;
 
-#[repr(C)]
-pub struct LLVMMemoryBuffer;
-#[repr(C)]
-pub struct LLVMContext;
-#[repr(C)]
-pub struct LLVMModule;
-#[repr(C)]
-pub struct LLVMType;
-#[repr(C)]
-pub struct LLVMValue;
-#[repr(C)]
-pub struct LLVMBasicBlock;
-#[repr(C)]
-pub struct LLVMBuilder;
-#[repr(C)]
-pub struct LLVMModuleProvider;
-#[repr(C)]
-pub struct LLVMPassManager;
-#[repr(C)]
-pub struct LLVMPassRegistry;
-#[repr(C)]
-pub struct LLVMUse;
-#[repr(C)]
-pub struct LLVMDiagnosticInfo;
+pub enum LLVMMemoryBuffer {}
+pub enum LLVMContext {}
+pub enum LLVMModule {}
+pub enum LLVMType {}
+pub enum LLVMValue {}
+pub enum LLVMBasicBlock {}
+pub enum LLVMBuilder {}
+pub enum LLVMModuleProvider {}
+pub enum LLVMPassManager {}
+pub enum LLVMPassRegistry {}
+pub enum LLVMUse {}
+pub enum LLVMDiagnosticInfo {}
 
 /// Core types used throughout LLVM.
 ///

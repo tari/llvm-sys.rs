@@ -42,12 +42,10 @@ pub enum lto_codegen_model {
     LTO_CODEGEN_PIC_MODEL_DEFAULT = 3,
 }
 
-#[repr(C)]
-pub struct LLVMOpaqueLTOModule;
+pub enum LLVMOpaqueLTOModule {}
 pub type lto_module_t = *mut LLVMOpaqueLTOModule;
 
-#[repr(C)]
-pub struct LLVMOpaqueLTOCodeGenerator;
+pub enum LLVMOpaqueLTOCodeGenerator {}
 pub type lto_code_gen_t = *mut LLVMOpaqueLTOCodeGenerator;
 
 #[repr(C)]
