@@ -6,7 +6,7 @@ readme = "README.md"
 license = "MIT"
 keywords = ["bindings", "llvm"]
 
-name = "llvm-sys"
+name = "llvm_sys"
 version = "0.2.0"
 authors = [
   "Peter Marheine <peter@taricorp.net>",
