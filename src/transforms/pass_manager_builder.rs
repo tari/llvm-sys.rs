@@ -1,7 +1,6 @@
 use super::super::prelude::*;
 
-#[repr(C)]
-pub struct LLVMOpaquePassManagerBuilder;
+pub enum LLVMOpaquePassManagerBuilder {}
 pub type LLVMPassManagerBuilderRef = *mut LLVMOpaquePassManagerBuilder;
 
 extern "C" {
