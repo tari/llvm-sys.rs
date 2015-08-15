@@ -3,6 +3,8 @@
 //! Refer to the [LLVM documentation](http://llvm.org/docs/) for more
 //! information.
 
+#![allow(non_upper_case_globals)]
+
 extern crate libc;
 #[macro_use] extern crate bitflags;
 
