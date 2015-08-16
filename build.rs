@@ -10,7 +10,7 @@ fn llvm_config(arg: &str) -> String {
     let stdout = Command::new("llvm-config")
         .arg(arg)
         .output()
-        .ok().expect("llvm-config not found. Install LLVM before attempting to build.")
+        .unwrap_or_else(|e| panic!("Couldn't execute llvm-config. Error: {}", e))
         .stdout;
 
     String::from_utf8(stdout).ok().expect("llvm-config output was not UTF-8.")
