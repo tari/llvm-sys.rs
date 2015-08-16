@@ -55,10 +55,13 @@ fn main() {
         }
     }
 
-    // Determine which C++ standard library to use: LLVM's or GCC's.
-    let cxxflags = llvm_config("--cxxflags");
-    let libcpp = if cxxflags.contains("stdlib=libc++") { "c++" } else { "stdc++" };
-    println!("cargo:rustc-link-lib={}", libcpp);
+    // This breaks the link step on Windows with MSVC.
+    if !cfg!(windows) {
+        // Determine which C++ standard library to use: LLVM's or GCC's.
+        let cxxflags = llvm_config("--cxxflags");
+        let libcpp = if cxxflags.contains("stdlib=libc++") { "c++" } else { "stdc++" };
+        println!("cargo:rustc-link-lib={}", libcpp);
+    }
 
     // Build the extra wrapper functions.
     std::env::set_var("CFLAGS", llvm_config("--cflags").trim());
