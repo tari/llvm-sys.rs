@@ -6,7 +6,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-llvm_sys = "0.2.0"
+llvm-sys = "0.2.0"
 ```
 
 and this to your crate root:
