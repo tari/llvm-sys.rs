@@ -45,7 +45,7 @@ fn main() {
 
     for arg in llvm_config("--libs").split_whitespace() {
         if arg.starts_with("-l") {
-            println!("cargo:rustc-link-lib=static={}", &arg[2..]);
+            println!("cargo:rustc-link-lib={}", &arg[2..]);
         }
     }
 
