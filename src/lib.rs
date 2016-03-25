@@ -67,7 +67,7 @@ pub mod transforms {
 
 bitflags! {
     #[repr(C)]
-    flags LLVMAttribute: ::libc::c_int {
+    pub flags LLVMAttribute: ::libc::c_int {
         #[allow(non_upper_case_globals)] 
         const LLVMZExtAttribute = 1 << 0,
         #[allow(non_upper_case_globals)] 
