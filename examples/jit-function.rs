@@ -70,7 +70,7 @@ fn main() {
         let z: u64 = 1;
         let res = f(x, y, z);
 
-        println!("{} + {} + {} = {}", x, y, res);
+        println!("{} + {} + {} = {}", x, y, z, res);
 
         // Clean up. Values created in the context mostly get cleaned up there.
         LLVMDisposeExecutionEngine(ee);
