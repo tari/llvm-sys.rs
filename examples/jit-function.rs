@@ -37,7 +37,7 @@ fn main() {
 
         LLVMPositionBuilderAtEnd(builder, bb);
 
-        // get the functions arguments
+        // get the function's arguments
         let x = LLVMGetParam(function, 0);
         let y = LLVMGetParam(function, 1);
         let z = LLVMGetParam(function, 2);
@@ -48,6 +48,9 @@ fn main() {
         // Emit a `ret void` into the function
         LLVMBuildRet(builder, sum);
 
+        // done building
+        LLVMDisposeBuilder(builder);
+
         // Dump the module as IR to stdout.
         LLVMDumpModule(module);
 
@@ -55,10 +58,14 @@ fn main() {
         let mut ee = mem::uninitialized();
         let mut out = mem::zeroed();
 
-        // who cares about error handing??
+        // robust code should check that these calls complete successfully
+        // each of these calls is necessary to setup an execution engine which compiles to native
+        // code
         LLVMLinkInMCJIT();
         LLVM_InitializeNativeTarget();
         LLVM_InitializeNativeAsmPrinter();
+
+        // takes ownership of the module
         LLVMCreateExecutionEngineForModule(&mut ee, module, &mut out);
 
         let addr = LLVMGetFunctionAddress(ee, b"sum\0".as_ptr() as *const _);
@@ -72,10 +79,8 @@ fn main() {
 
         println!("{} + {} + {} = {}", x, y, z, res);
 
-        // Clean up. Values created in the context mostly get cleaned up there.
+        // Clean up the rest.
         LLVMDisposeExecutionEngine(ee);
-        LLVMDisposeBuilder(builder);
-        LLVMDisposeModule(module);
         LLVMContextDispose(context);
     }
 }
