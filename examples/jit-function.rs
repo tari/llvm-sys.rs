@@ -15,11 +15,11 @@ fn main() {
 
         // get a type for sum function
         let i64t = LLVMInt64TypeInContext(context);
-        let argts = [i64t, i64t, i64t];
+        let mut argts = [i64t, i64t, i64t];
         let function_type = LLVMFunctionType(
             i64t,
-            mem::transmute(&argts[0]), // can't figure out how to make it *mut
-            3,
+            argts.as_mut_ptr(),
+            argts.len() as u32,
             0);
 
         // add it to our module
@@ -70,7 +70,7 @@ fn main() {
 
         let addr = LLVMGetFunctionAddress(ee, b"sum\0".as_ptr() as *const _);
 
-        let f: fn(u64, u64, u64) -> u64 = mem::transmute(addr);
+        let f: extern "C" fn(u64, u64, u64) -> u64 = mem::transmute(addr);
 
         let x: u64 = 1;
         let y: u64 = 1;
