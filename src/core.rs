@@ -5,7 +5,6 @@ use super::prelude::*;
 
 // Core
 extern "C" {
-    pub fn LLVMInitializeCore(R: LLVMPassRegistryRef) -> ();
     pub fn LLVMShutdown() -> ();
     pub fn LLVMCreateMessage(Message: *const ::libc::c_char) -> *mut ::libc::c_char;
     pub fn LLVMDisposeMessage(Message: *mut ::libc::c_char) -> ();
