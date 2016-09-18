@@ -5,7 +5,7 @@ use super::prelude::*;
 #[repr(C)]
 pub enum LLVMByteOrdering {
     LLVMBigEndian = 0,
-    LLVMLittleEndian = 1
+    LLVMLittleEndian = 1,
 }
 
 pub enum LLVMOpaqueTargetData {}
@@ -86,46 +86,37 @@ extern "C" {
 }
 
 extern "C" {
-    pub fn LLVMCreateTargetData(StringRep: *const ::libc::c_char)
-     -> LLVMTargetDataRef;
-    pub fn LLVMAddTargetData(TD: LLVMTargetDataRef, PM: LLVMPassManagerRef)
-     -> ();
-    pub fn LLVMAddTargetLibraryInfo(TLI: LLVMTargetLibraryInfoRef,
-                                    PM: LLVMPassManagerRef) -> ();
-    pub fn LLVMCopyStringRepOfTargetData(TD: LLVMTargetDataRef)
-     -> *mut ::libc::c_char;
+    pub fn LLVMCreateTargetData(StringRep: *const ::libc::c_char) -> LLVMTargetDataRef;
+    pub fn LLVMAddTargetData(TD: LLVMTargetDataRef, PM: LLVMPassManagerRef) -> ();
+    pub fn LLVMAddTargetLibraryInfo(TLI: LLVMTargetLibraryInfoRef, PM: LLVMPassManagerRef) -> ();
+    pub fn LLVMCopyStringRepOfTargetData(TD: LLVMTargetDataRef) -> *mut ::libc::c_char;
     pub fn LLVMByteOrder(TD: LLVMTargetDataRef) -> LLVMByteOrdering;
     pub fn LLVMPointerSize(TD: LLVMTargetDataRef) -> ::libc::c_uint;
-    pub fn LLVMPointerSizeForAS(TD: LLVMTargetDataRef, AS: ::libc::c_uint)
-     -> ::libc::c_uint;
+    pub fn LLVMPointerSizeForAS(TD: LLVMTargetDataRef, AS: ::libc::c_uint) -> ::libc::c_uint;
     pub fn LLVMIntPtrType(TD: LLVMTargetDataRef) -> LLVMTypeRef;
-    pub fn LLVMIntPtrTypeForAS(TD: LLVMTargetDataRef, AS: ::libc::c_uint)
-     -> LLVMTypeRef;
-    pub fn LLVMIntPtrTypeInContext(C: LLVMContextRef, TD: LLVMTargetDataRef)
-     -> LLVMTypeRef;
+    pub fn LLVMIntPtrTypeForAS(TD: LLVMTargetDataRef, AS: ::libc::c_uint) -> LLVMTypeRef;
+    pub fn LLVMIntPtrTypeInContext(C: LLVMContextRef, TD: LLVMTargetDataRef) -> LLVMTypeRef;
     pub fn LLVMIntPtrTypeForASInContext(C: LLVMContextRef,
                                         TD: LLVMTargetDataRef,
-                                        AS: ::libc::c_uint) -> LLVMTypeRef;
-    pub fn LLVMSizeOfTypeInBits(TD: LLVMTargetDataRef, Ty: LLVMTypeRef)
-     -> ::libc::c_ulonglong;
-    pub fn LLVMStoreSizeOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef)
-     -> ::libc::c_ulonglong;
-    pub fn LLVMABISizeOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef)
-     -> ::libc::c_ulonglong;
-    pub fn LLVMABIAlignmentOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef)
-     -> ::libc::c_uint;
-    pub fn LLVMCallFrameAlignmentOfType(TD: LLVMTargetDataRef,
-                                        Ty: LLVMTypeRef) -> ::libc::c_uint;
-    pub fn LLVMPreferredAlignmentOfType(TD: LLVMTargetDataRef,
-                                        Ty: LLVMTypeRef) -> ::libc::c_uint;
+                                        AS: ::libc::c_uint)
+                                        -> LLVMTypeRef;
+    pub fn LLVMSizeOfTypeInBits(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_ulonglong;
+    pub fn LLVMStoreSizeOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_ulonglong;
+    pub fn LLVMABISizeOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_ulonglong;
+    pub fn LLVMABIAlignmentOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_uint;
+    pub fn LLVMCallFrameAlignmentOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_uint;
+    pub fn LLVMPreferredAlignmentOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMPreferredAlignmentOfGlobal(TD: LLVMTargetDataRef,
                                           GlobalVar: LLVMValueRef)
-     -> ::libc::c_uint;
-    pub fn LLVMElementAtOffset(TD: LLVMTargetDataRef, StructTy: LLVMTypeRef,
-                               Offset: ::libc::c_ulonglong) -> ::libc::c_uint;
-    pub fn LLVMOffsetOfElement(TD: LLVMTargetDataRef, StructTy: LLVMTypeRef,
+                                          -> ::libc::c_uint;
+    pub fn LLVMElementAtOffset(TD: LLVMTargetDataRef,
+                               StructTy: LLVMTypeRef,
+                               Offset: ::libc::c_ulonglong)
+                               -> ::libc::c_uint;
+    pub fn LLVMOffsetOfElement(TD: LLVMTargetDataRef,
+                               StructTy: LLVMTypeRef,
                                Element: ::libc::c_uint)
-     -> ::libc::c_ulonglong;
+                               -> ::libc::c_ulonglong;
     pub fn LLVMDisposeTargetData(TD: LLVMTargetDataRef) -> ();
 }
 

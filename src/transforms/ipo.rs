@@ -14,8 +14,7 @@ extern "C" {
     pub fn LLVMAddIPConstantPropagationPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddPruneEHPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddIPSCCPPass(PM: LLVMPassManagerRef) -> ();
-    pub fn LLVMAddInternalizePass(arg1: LLVMPassManagerRef,
-                                  AllButMain: ::libc::c_uint) -> ();
+    pub fn LLVMAddInternalizePass(arg1: LLVMPassManagerRef, AllButMain: ::libc::c_uint) -> ();
     pub fn LLVMAddStripDeadPrototypesPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddStripSymbolsPass(PM: LLVMPassManagerRef) -> ();
 }
