@@ -5,7 +5,8 @@ use super::prelude::*;
 #[repr(C)]
 pub enum LLVMLinkerMode {
     LLVMLinkerDestroySource = 0,
-    LLVMLinkerPreserveSource = 1
+    #[deprecated(since="3.7.0", note="LLVMLinkerPreserveSource has no effect")]
+    LLVMLinkerPreserveSource_Removed = 1
 }
 
 extern "C" {
@@ -14,6 +15,6 @@ extern "C" {
     /// Takes ownership of the source module, returning false on success.
     /// Optionally returns a human-readable error message in `OutMessage`.
     pub fn LLVMLinkModules(Dest: LLVMModuleRef, Src: LLVMModuleRef,
-                           Mode: LLVMLinkerMode,
+                           _Unused: LLVMLinkerMode,
                            OutMessage: *mut *mut ::libc::c_char) -> LLVMBool;
 }

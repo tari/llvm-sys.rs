@@ -134,6 +134,11 @@ extern "C" {
     pub fn LLVMCountStructElementTypes(StructTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMGetStructElementTypes(StructTy: LLVMTypeRef,
                                      Dest: *mut LLVMTypeRef) -> ();
+    /// Get the type of the element at the given index in a structure.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn LLVMStructGetTypeAtIndex(StructTy: LLVMTypeRef, i: ::libc::c_uint) -> LLVMTypeRef;
+    /// Determine whether a structure is packed.
     pub fn LLVMIsPackedStruct(StructTy: LLVMTypeRef) -> LLVMBool;
     pub fn LLVMIsOpaqueStruct(StructTy: LLVMTypeRef) -> LLVMBool;
 
@@ -394,6 +399,15 @@ extern "C" {
 
     // ..->Function Values
     pub fn LLVMDeleteFunction(Fn: LLVMValueRef) -> ();
+    /// Obtain the personality function attached to the function.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn LLVMGetPersonalityFn(Fn: LLVMValueRef) -> LLVMValueRef;
+    /// Set the personality function attached to the function.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn LLVMSetPersonalityFn(Fn: LLVMValueRef, PersonalityFn: LLVMValueRef);
+    /// Obtain the ID number from a function instance.
     pub fn LLVMGetIntrinsicID(Fn: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetFunctionCallConv(Fn: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetFunctionCallConv(Fn: LLVMValueRef, CC: ::libc::c_uint) -> ();
@@ -640,7 +654,6 @@ extern "C" {
                            Then: LLVMBasicBlockRef, Catch: LLVMBasicBlockRef,
                            Name: *const ::libc::c_char) -> LLVMValueRef;
     pub fn LLVMBuildLandingPad(B: LLVMBuilderRef, Ty: LLVMTypeRef,
-                               PersFn: LLVMValueRef,
                                NumClauses: ::libc::c_uint,
                                Name: *const ::libc::c_char) -> LLVMValueRef;
     pub fn LLVMBuildResume(B: LLVMBuilderRef, Exn: LLVMValueRef)
