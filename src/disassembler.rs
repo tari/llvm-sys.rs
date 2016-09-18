@@ -5,13 +5,13 @@
 pub enum LLVMOpaqueDisasmContext {}
 pub type LLVMDisasmContextRef = *mut LLVMOpaqueDisasmContext;
 
-pub type LLVMOpInfoCallback =
-    extern "C" fn(DisInfo: *mut ::libc::c_void,
-                  PC: u64, Offset: u64,
-                  Size: u64,
-                  TagType: ::libc::c_int,
-                  TagBuf: *mut ::libc::c_void)
-        -> ::libc::c_int;
+pub type LLVMOpInfoCallback = extern "C" fn(DisInfo: *mut ::libc::c_void,
+                                            PC: u64,
+                                            Offset: u64,
+                                            Size: u64,
+                                            TagType: ::libc::c_int,
+                                            TagBuf: *mut ::libc::c_void)
+                                            -> ::libc::c_int;
 
 #[repr(C)]
 pub struct LLVMOpInfoSymbol1 {
@@ -91,14 +91,12 @@ pub const LLVMDisassembler_Option_SetInstrComments: u64 = 8;
 /// The option to print latency information alongside instructions
 pub const LLVMDisassembler_Option_PrintLatency: u64 = 16;
 
-pub type LLVMSymbolLookupCallback =
-    extern "C" fn(DisInfo: *mut ::libc::c_void,
-                  ReferenceValue: u64,
-                  ReferenceType: *mut u64,
-                  ReferencePC: u64,
-                  ReferenceName:
-                      *mut *const ::libc::c_char)
-        -> *const ::libc::c_char;
+pub type LLVMSymbolLookupCallback = extern "C" fn(DisInfo: *mut ::libc::c_void,
+                                                  ReferenceValue: u64,
+                                                  ReferenceType: *mut u64,
+                                                  ReferencePC: u64,
+                                                  ReferenceName: *mut *const ::libc::c_char)
+                                                  -> *const ::libc::c_char;
 
 extern "C" {
     pub fn LLVMCreateDisasm(TripleName: *const ::libc::c_char,
@@ -106,14 +104,14 @@ extern "C" {
                             TagType: ::libc::c_int,
                             GetOpInfo: LLVMOpInfoCallback,
                             SymbolLookUp: LLVMSymbolLookupCallback)
-     -> LLVMDisasmContextRef;
+                            -> LLVMDisasmContextRef;
     pub fn LLVMCreateDisasmCPU(Triple: *const ::libc::c_char,
                                CPU: *const ::libc::c_char,
                                DisInfo: *mut ::libc::c_void,
                                TagType: ::libc::c_int,
                                GetOpInfo: LLVMOpInfoCallback,
                                SymbolLookUp: LLVMSymbolLookupCallback)
-     -> LLVMDisasmContextRef;
+                               -> LLVMDisasmContextRef;
     pub fn LLVMCreateDisasmCPUFeatures(Triple: *const ::libc::c_char,
                                        CPU: *const ::libc::c_char,
                                        Features: *const ::libc::c_char,
@@ -121,12 +119,14 @@ extern "C" {
                                        TagType: ::libc::c_int,
                                        GetOpInfo: LLVMOpInfoCallback,
                                        SymbolLookUp: LLVMSymbolLookupCallback)
-     -> LLVMDisasmContextRef;
-    pub fn LLVMSetDisasmOptions(DC: LLVMDisasmContextRef, Options: u64)
-     -> ::libc::c_int;
+                                       -> LLVMDisasmContextRef;
+    pub fn LLVMSetDisasmOptions(DC: LLVMDisasmContextRef, Options: u64) -> ::libc::c_int;
     pub fn LLVMDisasmDispose(DC: LLVMDisasmContextRef) -> ();
     pub fn LLVMDisasmInstruction(DC: LLVMDisasmContextRef,
-                                 Bytes: *mut u8, BytesSize: u64,
-                                 PC: u64, OutString: *mut ::libc::c_char,
-                                 OutStringSize: ::libc::size_t) -> ::libc::size_t;
+                                 Bytes: *mut u8,
+                                 BytesSize: u64,
+                                 PC: u64,
+                                 OutString: *mut ::libc::c_char,
+                                 OutStringSize: ::libc::size_t)
+                                 -> ::libc::size_t;
 }

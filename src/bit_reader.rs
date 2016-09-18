@@ -9,12 +9,13 @@ extern "C" {
     /// Optionally returns a human-readable error message in `OutMessage`.
     pub fn LLVMParseBitcode(MemBuf: LLVMMemoryBufferRef,
                             OutModule: *mut LLVMModuleRef,
-                            OutMessage: *mut *mut ::libc::c_char) -> LLVMBool;
+                            OutMessage: *mut *mut ::libc::c_char)
+                            -> LLVMBool;
     pub fn LLVMParseBitcodeInContext(ContextRef: LLVMContextRef,
                                      MemBuf: LLVMMemoryBufferRef,
                                      OutModule: *mut LLVMModuleRef,
                                      OutMessage: *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                     -> LLVMBool;
 
     /// Read a module from the specified path, returning a module provider
     /// performing lazy deserialization.
@@ -24,22 +25,20 @@ extern "C" {
                                          MemBuf: LLVMMemoryBufferRef,
                                          OutM: *mut LLVMModuleRef,
                                          OutMessage: *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                         -> LLVMBool;
     pub fn LLVMGetBitcodeModule(MemBuf: LLVMMemoryBufferRef,
                                 OutM: *mut LLVMModuleRef,
                                 OutMessage: *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                -> LLVMBool;
     /// Deprecated: use LLVMGetBitcodeModuleInContext instead
     pub fn LLVMGetBitcodeModuleProviderInContext(ContextRef: LLVMContextRef,
                                                  MemBuf: LLVMMemoryBufferRef,
-                                                 OutMP:
-                                                     *mut LLVMModuleProviderRef,
-                                                 OutMessage:
-                                                     *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                                 OutMP: *mut LLVMModuleProviderRef,
+                                                 OutMessage: *mut *mut ::libc::c_char)
+                                                 -> LLVMBool;
     /// Deprecated: Use LLVMGetBitcodeModule instead
     pub fn LLVMGetBitcodeModuleProvider(MemBuf: LLVMMemoryBufferRef,
                                         OutMP: *mut LLVMModuleProviderRef,
                                         OutMessage: *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                        -> LLVMBool;
 }

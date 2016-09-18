@@ -14,7 +14,7 @@ pub enum LLVMCodeGenOptLevel {
     LLVMCodeGenLevelNone = 0,
     LLVMCodeGenLevelLess = 1,
     LLVMCodeGenLevelDefault = 2,
-    LLVMCodeGenLevelAggressive = 3
+    LLVMCodeGenLevelAggressive = 3,
 }
 
 #[repr(C)]
@@ -45,15 +45,13 @@ pub enum LLVMCodeGenFileType {
 extern "C" {
     pub fn LLVMGetFirstTarget() -> LLVMTargetRef;
     pub fn LLVMGetNextTarget(T: LLVMTargetRef) -> LLVMTargetRef;
-    pub fn LLVMGetTargetFromName(Name: *const ::libc::c_char)
-     -> LLVMTargetRef;
+    pub fn LLVMGetTargetFromName(Name: *const ::libc::c_char) -> LLVMTargetRef;
     pub fn LLVMGetTargetFromTriple(Triple: *const ::libc::c_char,
                                    T: *mut LLVMTargetRef,
                                    ErrorMessage: *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                   -> LLVMBool;
     pub fn LLVMGetTargetName(T: LLVMTargetRef) -> *const ::libc::c_char;
-    pub fn LLVMGetTargetDescription(T: LLVMTargetRef)
-     -> *const ::libc::c_char;
+    pub fn LLVMGetTargetDescription(T: LLVMTargetRef) -> *const ::libc::c_char;
     pub fn LLVMTargetHasJIT(T: LLVMTargetRef) -> LLVMBool;
     pub fn LLVMTargetHasTargetMachine(T: LLVMTargetRef) -> LLVMBool;
     pub fn LLVMTargetHasAsmBackend(T: LLVMTargetRef) -> LLVMBool;
@@ -64,36 +62,27 @@ extern "C" {
                                    Level: LLVMCodeGenOptLevel,
                                    Reloc: LLVMRelocMode,
                                    CodeModel: LLVMCodeModel)
-     -> LLVMTargetMachineRef;
+                                   -> LLVMTargetMachineRef;
     pub fn LLVMDisposeTargetMachine(T: LLVMTargetMachineRef) -> ();
-    pub fn LLVMGetTargetMachineTarget(T: LLVMTargetMachineRef)
-     -> LLVMTargetRef;
-    pub fn LLVMGetTargetMachineTriple(T: LLVMTargetMachineRef)
-     -> *mut ::libc::c_char;
-    pub fn LLVMGetTargetMachineCPU(T: LLVMTargetMachineRef)
-     -> *mut ::libc::c_char;
-    pub fn LLVMGetTargetMachineFeatureString(T: LLVMTargetMachineRef)
-     -> *mut ::libc::c_char;
+    pub fn LLVMGetTargetMachineTarget(T: LLVMTargetMachineRef) -> LLVMTargetRef;
+    pub fn LLVMGetTargetMachineTriple(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
+    pub fn LLVMGetTargetMachineCPU(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
+    pub fn LLVMGetTargetMachineFeatureString(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
     #[deprecated(since="3.7.0", note="use LLVMGetDataLayout(LLVMModuleRef) instead")]
-    pub fn LLVMGetTargetMachineData(T: LLVMTargetMachineRef)
-     -> LLVMTargetDataRef;
-    pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef,
-                                            VerboseAsm: LLVMBool) -> ();
+    pub fn LLVMGetTargetMachineData(T: LLVMTargetMachineRef) -> LLVMTargetDataRef;
+    pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef, VerboseAsm: LLVMBool) -> ();
     pub fn LLVMTargetMachineEmitToFile(T: LLVMTargetMachineRef,
                                        M: LLVMModuleRef,
                                        Filename: *mut ::libc::c_char,
                                        codegen: LLVMCodeGenFileType,
                                        ErrorMessage: *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                       -> LLVMBool;
     pub fn LLVMTargetMachineEmitToMemoryBuffer(T: LLVMTargetMachineRef,
                                                M: LLVMModuleRef,
                                                codegen: LLVMCodeGenFileType,
-                                               ErrorMessage:
-                                                   *mut *mut ::libc::c_char,
-                                               OutMemBuf:
-                                                   *mut LLVMMemoryBufferRef)
-     -> LLVMBool;
+                                               ErrorMessage: *mut *mut ::libc::c_char,
+                                               OutMemBuf: *mut LLVMMemoryBufferRef)
+                                               -> LLVMBool;
     pub fn LLVMGetDefaultTargetTriple() -> *mut ::libc::c_char;
-    pub fn LLVMAddAnalysisPasses(T: LLVMTargetMachineRef,
-                                 PM: LLVMPassManagerRef) -> ();
+    pub fn LLVMAddAnalysisPasses(T: LLVMTargetMachineRef, PM: LLVMPassManagerRef) -> ();
 }
