@@ -74,6 +74,7 @@ extern "C" {
      -> *mut ::libc::c_char;
     pub fn LLVMGetTargetMachineFeatureString(T: LLVMTargetMachineRef)
      -> *mut ::libc::c_char;
+    #[deprecated(since="3.7.0", note="use LLVMGetDataLayout(LLVMModuleRef) instead")]
     pub fn LLVMGetTargetMachineData(T: LLVMTargetMachineRef)
      -> LLVMTargetDataRef;
     pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef,

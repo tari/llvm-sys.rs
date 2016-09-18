@@ -4,10 +4,10 @@ Rust bindings to LLVM's C API.
 
 ```toml
 [dependencies]
-llvm-sys = "0.4.0"
+llvm-sys = "37"
 ```
 
-You will need LLVM (>= 3.6) installed on your system to compile these bindings.
+You will need LLVM (>= 3.7) installed on your system to compile these bindings.
 The `llvm-config` tool must be on PATH so the build scripts can find it.
 
 See the `examples` directory in this repository for API examples. There also

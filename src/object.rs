@@ -52,8 +52,6 @@ extern "C" {
      -> *const ::libc::c_char;
     pub fn LLVMGetSymbolAddress(SI: LLVMSymbolIteratorRef) -> u64;
     pub fn LLVMGetSymbolSize(SI: LLVMSymbolIteratorRef) -> u64;
-    pub fn LLVMGetRelocationAddress(RI: LLVMRelocationIteratorRef)
-     -> u64;
     pub fn LLVMGetRelocationOffset(RI: LLVMRelocationIteratorRef) -> u64;
     pub fn LLVMGetRelocationSymbol(RI: LLVMRelocationIteratorRef)
      -> LLVMSymbolIteratorRef;
