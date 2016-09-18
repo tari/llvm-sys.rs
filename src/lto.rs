@@ -22,10 +22,14 @@ pub enum lto_symbol_attributes {
     LTO_SYMBOL_DEFINITION_WEAKUNDEF = 1280,
     LTO_SYMBOL_SCOPE_MASK = 14336,
     LTO_SYMBOL_SCOPE_INTERNAL = 2048,
-    LTO_SYMBOL_SCOPE_HIDDEN = 4096,
-    LTO_SYMBOL_SCOPE_PROTECTED = 8192,
-    LTO_SYMBOL_SCOPE_DEFAULT = 6144,
-    LTO_SYMBOL_SCOPE_DEFAULT_CAN_BE_HIDDEN = 10240,
+    LTO_SYMBOL_SCOPE_HIDDEN = 0x1000,
+    LTO_SYMBOL_SCOPE_PROTECTED = 0x2000,
+    LTO_SYMBOL_SCOPE_DEFAULT = 0x1800,
+    LTO_SYMBOL_SCOPE_DEFAULT_CAN_BE_HIDDEN = 0x2800,
+    /// Added in LLVM 3.7.
+    LTO_SYMBOL_COMDAT = 0x4000,
+    /// Added in LLVM 3.7.
+    LTO_SYMBOL_ALIAS = 0x8000,
 }
 
 #[repr(C)]
@@ -116,13 +120,13 @@ extern "C" {
     pub fn lto_module_get_symbol_attribute(_mod: lto_module_t,
                                            index: ::libc::c_uint)
      -> lto_symbol_attributes;
-    pub fn lto_module_get_num_deplibs(_mod: lto_module_t) -> ::libc::c_uint;
-    pub fn lto_module_get_deplib(_mod: lto_module_t, index: ::libc::c_uint)
-     -> *const ::libc::c_char;
-    pub fn lto_module_get_num_linkeropts(_mod: lto_module_t)
-     -> ::libc::c_uint;
-    pub fn lto_module_get_linkeropt(_mod: lto_module_t, index: ::libc::c_uint)
-     -> *const ::libc::c_char;
+    /// Returns the module's linker options.
+    ///
+    /// The linker options may consist of multiple flags. It is the linker's
+    /// responsibility to split the flags using a platform-specific mechanism.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn lto_module_get_linkeropts(_mod: lto_module_t) -> *const ::libc::c_char;
     pub fn lto_codegen_set_diagnostic_handler(arg1: lto_code_gen_t,
                                               arg2: lto_diagnostic_handler_t,
                                               arg3: *mut ::libc::c_void)
@@ -132,6 +136,11 @@ extern "C" {
     pub fn lto_codegen_dispose(arg1: lto_code_gen_t) -> ();
     pub fn lto_codegen_add_module(cg: lto_code_gen_t, _mod: lto_module_t)
      -> lto_bool_t;
+    /// Sets the object module for code gneeration. This will transfer ownership
+    /// of the module to the code generator.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn lto_codegen_set_module(cg: lto_code_gen_t, _mod: lto_module_t);
     pub fn lto_codegen_set_debug_model(cg: lto_code_gen_t,
                                        arg1: lto_debug_model) -> lto_bool_t;
     pub fn lto_codegen_set_pic_model(cg: lto_code_gen_t,
@@ -154,7 +163,39 @@ extern "C" {
     pub fn lto_codegen_compile_to_file(cg: lto_code_gen_t,
                                        name: *mut *const ::libc::c_char)
      -> lto_bool_t;
+    /// Runs optimization for the merged module.
+    ///
+    /// Returns true on error.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn lto_codegen_optimize(cg: lto_code_gen_t) -> lto_bool_t;
+    /// Generates code for the optimized merged module into one native object file.
+    ///
+    /// Does not run IR optimizations on the merged module.
+    ///
+    /// Returns a pointer to the generated mach-o/ELF buffer with length
+    /// set to the buffer size. This buffer is owned by `cg` and will be
+    /// freed when `lto_codegen_dispose` is called or `lto_codegen_compile_optimized`
+    /// is called again. Returns null on failure.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn lto_codegen_compile_optimized(cg: lto_code_gen_t, length: *mut ::libc::size_t) -> *mut ::libc::c_void;
+    /// Returns the runtime API version.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn lto_api_version() -> ::libc::c_uint;
     pub fn lto_codegen_debug_options(cg: lto_code_gen_t,
                                      arg1: *const ::libc::c_char) -> ();
     pub fn lto_initialize_disassembler() -> ();
+    /// Sets if we should run the itnernalize pass during optimization and code generation.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn lto_codegen_set_should_internalize(cg: lto_code_gen_t, ShouldInternalize: lto_bool_t);
+    /// Set whether to embed uselists in bitcode.
+    ///
+    /// Sets whether `lto_codegen_write_merged_modules` should embed uselists in
+    /// output bitcode. This should be turned on for all -save-temps output.
+    ///
+    /// Added in LLVM 3.7.
+    pub fn lto_codegen_set_should_embed_uselists(cg: lto_code_gen_t, ShouldEmbedUselists: lto_bool_t);
 }

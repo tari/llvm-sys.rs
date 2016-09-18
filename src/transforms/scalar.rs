@@ -4,6 +4,8 @@ use super::super::prelude::*;
 
 extern "C" {
     pub fn LLVMAddAggressiveDCEPass(PM: LLVMPassManagerRef) -> ();
+    /// Added in LLVM 3.7.
+    pub fn LLVMAddBitTrackingDCEPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddAlignmentFromAssumptionsPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddCFGSimplificationPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddDeadStoreEliminationPass(PM: LLVMPassManagerRef) -> ();
@@ -28,10 +30,8 @@ extern "C" {
     pub fn LLVMAddSCCPPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddScalarReplAggregatesPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddScalarReplAggregatesPassSSA(PM: LLVMPassManagerRef) -> ();
-    pub fn LLVMAddScalarReplAggregatesPassWithThreshold(PM:
-                                                            LLVMPassManagerRef,
-                                                        Threshold:
-                                                            ::libc::c_int)
+    pub fn LLVMAddScalarReplAggregatesPassWithThreshold(PM: LLVMPassManagerRef,
+                                                        Threshold: ::libc::c_int)
      -> ();
     pub fn LLVMAddSimplifyLibCallsPass(PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddTailCallEliminationPass(PM: LLVMPassManagerRef) -> ();
