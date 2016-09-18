@@ -1,8 +1,9 @@
 extern crate gcc;
+extern crate regex;
 extern crate semver;
 
+use regex::Regex;
 use semver::{Version, VersionReq};
-use semver::ParseError::IncorrectParse;
 use std::process::Command;
 
 /// Get the output from running `llvm-config` with the given argument.
@@ -10,20 +11,22 @@ fn llvm_config(arg: &str) -> String {
     let stdout = Command::new("llvm-config")
         .arg(arg)
         .output()
-        .unwrap_or_else(|e| panic!("Couldn't execute llvm-config. Error: {}", e))
+        .expect("Couldn't execute llvm-config")
         .stdout;
 
-    String::from_utf8(stdout).ok().expect("llvm-config output was not UTF-8.")
+    String::from_utf8(stdout).expect("llvm-config output was not UTF-8.")
 }
 
 /// Get the LLVM version using llvm-config.
 fn llvm_version() -> Version {
-    match Version::parse(&llvm_config("--version")) {
-        // Ignore partial error; particularly constructs like '3.8.0svn' should be accepted,
-        // despite being invalid semver.
-        Err(IncorrectParse(v, _)) | Ok(v) => v,
-        _ => panic!("Could not determine LLVM version from llvm-config."),
-    }
+    let version_str = llvm_config("--version");
+
+    let re = Regex::new(r"^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)")
+        .unwrap();
+    let (start, end) = re.find(&version_str)
+        .expect("Could not determine LLVM version from llvm-config.");
+
+    Version::parse(&version_str[start..end]).unwrap()
 }
 
 fn main() {

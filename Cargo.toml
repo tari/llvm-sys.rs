@@ -15,9 +15,10 @@ authors = [
 build = "build.rs"
 
 [dependencies]
-bitflags = "0.5"
+bitflags = "0.7"
 libc = "0.2"
 
 [build-dependencies]
 gcc = "0.3"
-semver = "0.1"
+regex = "0.1.77"
+semver = "0.4"
