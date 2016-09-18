@@ -6,7 +6,8 @@
 #![allow(non_upper_case_globals)]
 
 extern crate libc;
-#[macro_use] extern crate bitflags;
+#[macro_use]
+extern crate bitflags;
 
 use self::prelude::*;
 
@@ -183,7 +184,7 @@ pub enum LLVMOpcode {
     LLVMAtomicCmpXchg = 56,
     LLVMAtomicRMW = 57,
     LLVMResume = 58,
-    LLVMLandingPad = 59
+    LLVMLandingPad = 59,
 }
 
 #[repr(C)]
@@ -203,7 +204,7 @@ pub enum LLVMTypeKind {
     LLVMPointerTypeKind = 12,
     LLVMVectorTypeKind = 13,
     LLVMMetadataTypeKind = 14,
-    LLVMX86_MMXTypeKind = 15
+    LLVMX86_MMXTypeKind = 15,
 }
 
 #[repr(C)]
@@ -224,21 +225,21 @@ pub enum LLVMLinkage {
     LLVMGhostLinkage = 13,
     LLVMCommonLinkage = 14,
     LLVMLinkerPrivateLinkage = 15,
-    LLVMLinkerPrivateWeakLinkage = 16
+    LLVMLinkerPrivateWeakLinkage = 16,
 }
 
 #[repr(C)]
 pub enum LLVMVisibility {
     LLVMDefaultVisibility = 0,
     LLVMHiddenVisibility = 1,
-    LLVMProtectedVisibility = 2
+    LLVMProtectedVisibility = 2,
 }
 
 #[repr(C)]
 pub enum LLVMDLLStorageClass {
     LLVMDefaultStorageClass = 0,
     LLVMDLLImportStorageClass = 1,
-    LLVMDLLExportStorageClass = 2
+    LLVMDLLExportStorageClass = 2,
 }
 
 #[repr(C)]
@@ -285,7 +286,7 @@ pub enum LLVMRealPredicate {
     LLVMRealUNE = 14,
     LLVMRealPredicateTrue = 15,
 }
-    
+
 #[repr(C)]
 pub enum LLVMLandingPadClauseTy {
     LLVMLandingPadCatch = 0,
@@ -334,10 +335,9 @@ pub enum LLVMDiagnosticSeverity {
     LLVMDSRemark = 2,
     LLVMDSNote = 3,
 }
-    
+
 pub type LLVMFatalErrorHandler = extern "C" fn(Reason: *const ::libc::c_char) -> ();
 pub type LLVMDiagnosticHandler = extern "C" fn(arg1: LLVMDiagnosticInfoRef,
-                                               arg2: *mut ::libc::c_void) -> ();
-pub type LLVMYieldCallback = extern "C" fn(arg1: LLVMContextRef,
-                                           arg2: *mut ::libc::c_void) -> ();
-
+                                               arg2: *mut ::libc::c_void)
+                                               -> ();
+pub type LLVMYieldCallback = extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void) -> ();

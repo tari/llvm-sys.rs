@@ -11,5 +11,5 @@ extern "C" {
                                 MemBuf: LLVMMemoryBufferRef,
                                 OutM: *mut LLVMModuleRef,
                                 OutMessage: *mut *mut ::libc::c_char)
-     -> LLVMBool;
+                                -> LLVMBool;
 }

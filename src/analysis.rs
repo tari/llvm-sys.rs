@@ -9,7 +9,7 @@ pub enum LLVMVerifierFailureAction {
     /// Print to stderr and return 1.
     LLVMPrintMessageAction = 1,
     /// Return 1 and print nothing.
-    LLVMReturnStatusAction = 2
+    LLVMReturnStatusAction = 2,
 }
 
 extern "C" {
@@ -19,12 +19,12 @@ extern "C" {
     /// which must be disposed with `LLVMDisposeMessage`.
     pub fn LLVMVerifyModule(M: LLVMModuleRef,
                             Action: LLVMVerifierFailureAction,
-                            OutMessage: *mut *mut ::libc::c_char) -> LLVMBool;
+                            OutMessage: *mut *mut ::libc::c_char)
+                            -> LLVMBool;
     /// Verify that a single function is valid, taking the specified action.
     ///
     /// Useful for debugging.
-    pub fn LLVMVerifyFunction(Fn: LLVMValueRef,
-                              Action: LLVMVerifierFailureAction) -> LLVMBool;
+    pub fn LLVMVerifyFunction(Fn: LLVMValueRef, Action: LLVMVerifierFailureAction) -> LLVMBool;
     /// Open a ghostview window displaying the CFG of the given function.
     ///
     /// Useful for debugging.
