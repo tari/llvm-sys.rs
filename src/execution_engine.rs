@@ -115,25 +115,6 @@ extern "C" {
                                             OutError: *mut *mut ::libc::c_char)
                                             -> LLVMBool;
 
-    /// Deprecated: Use LLVMCreateExecutionEngineForModule instead
-    pub fn LLVMCreateExecutionEngine(OutEE: *mut LLVMExecutionEngineRef,
-                                     MP: LLVMModuleProviderRef,
-                                     OutError: *mut *mut ::libc::c_char)
-                                     -> LLVMBool;
-
-    /// Deprecated: Use LLVMCreateInterpreterForModule instead
-    pub fn LLVMCreateInterpreter(OutInterp: *mut LLVMExecutionEngineRef,
-                                 MP: LLVMModuleProviderRef,
-                                 OutError: *mut *mut ::libc::c_char)
-                                 -> LLVMBool;
-
-    /// Deprecated: Use LLVMCreateJITCompilerForModule instead
-    pub fn LLVMCreateJITCompiler(OutJIT: *mut LLVMExecutionEngineRef,
-                                 MP: LLVMModuleProviderRef,
-                                 OptLevel: ::libc::c_uint,
-                                 OutError: *mut *mut ::libc::c_char)
-                                 -> LLVMBool;
-
     pub fn LLVMDisposeExecutionEngine(EE: LLVMExecutionEngineRef) -> ();
     pub fn LLVMRunStaticConstructors(EE: LLVMExecutionEngineRef) -> ();
     pub fn LLVMRunStaticDestructors(EE: LLVMExecutionEngineRef) -> ();
@@ -150,18 +131,11 @@ extern "C" {
                            -> LLVMGenericValueRef;
     pub fn LLVMFreeMachineCodeForFunction(EE: LLVMExecutionEngineRef, F: LLVMValueRef) -> ();
     pub fn LLVMAddModule(EE: LLVMExecutionEngineRef, M: LLVMModuleRef) -> ();
-    pub fn LLVMAddModuleProvider(EE: LLVMExecutionEngineRef, MP: LLVMModuleProviderRef) -> ();
     pub fn LLVMRemoveModule(EE: LLVMExecutionEngineRef,
                             M: LLVMModuleRef,
                             OutMod: *mut LLVMModuleRef,
                             OutError: *mut *mut ::libc::c_char)
                             -> LLVMBool;
-    /// Deprecated: Use LLVMRemoveModule instead
-    pub fn LLVMRemoveModuleProvider(EE: LLVMExecutionEngineRef,
-                                    MP: LLVMModuleProviderRef,
-                                    OutMod: *mut LLVMModuleRef,
-                                    OutError: *mut *mut ::libc::c_char)
-                                    -> LLVMBool;
     pub fn LLVMFindFunction(EE: LLVMExecutionEngineRef,
                             Name: *const ::libc::c_char,
                             OutFn: *mut LLVMValueRef)
