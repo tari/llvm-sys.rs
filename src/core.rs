@@ -701,6 +701,7 @@ extern "C" {
                            -> LLVMValueRef;
     pub fn LLVMBuildLandingPad(B: LLVMBuilderRef,
                                Ty: LLVMTypeRef,
+                               PersFn: LLVMValueRef,
                                NumClauses: ::libc::c_uint,
                                Name: *const ::libc::c_char)
                                -> LLVMValueRef;
