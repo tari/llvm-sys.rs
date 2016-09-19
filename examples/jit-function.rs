@@ -10,7 +10,8 @@ fn main() {
     unsafe {
         // Set up a context, module and builder in that context.
         let context = LLVMContextCreate();
-        let module = LLVMModuleCreateWithName(b"sum\0".as_ptr() as *const _);
+        let module = LLVMModuleCreateWithNameInContext(b"sum\0".as_ptr() as *const _,
+                                                       context);
         let builder = LLVMCreateBuilderInContext(context);
 
         // get a type for sum function
