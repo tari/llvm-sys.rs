@@ -48,6 +48,7 @@ pub mod bit_reader;
 pub mod bit_writer;
 pub mod core;
 pub mod disassembler;
+pub mod error_handling;
 pub mod execution_engine;
 pub mod initialization;
 pub mod ir_reader;
@@ -55,6 +56,7 @@ pub mod link_time_optimizer;
 pub mod linker;
 pub mod lto;
 pub mod object;
+pub mod orc;
 pub mod target;
 pub mod support;
 pub mod target_machine;
@@ -185,6 +187,11 @@ pub enum LLVMOpcode {
     LLVMAtomicRMW = 57,
     LLVMResume = 58,
     LLVMLandingPad = 59,
+    LLVMCleanupRet = 61,
+    LLVMCatchRet = 62,
+    LLVMCatchPad = 63,
+    LLVMCleanupPad = 64,
+    LLVMCatchSwitch = 65,
 }
 
 #[repr(C)]
@@ -205,6 +212,7 @@ pub enum LLVMTypeKind {
     LLVMVectorTypeKind = 13,
     LLVMMetadataTypeKind = 14,
     LLVMX86_MMXTypeKind = 15,
+    LLVMTokenTypeKind = 16,
 }
 
 #[repr(C)]
@@ -336,7 +344,6 @@ pub enum LLVMDiagnosticSeverity {
     LLVMDSNote = 3,
 }
 
-pub type LLVMFatalErrorHandler = extern "C" fn(Reason: *const ::libc::c_char) -> ();
 pub type LLVMDiagnosticHandler = extern "C" fn(arg1: LLVMDiagnosticInfoRef,
                                                arg2: *mut ::libc::c_void)
                                                -> ();
