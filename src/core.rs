@@ -8,9 +8,6 @@ extern "C" {
     pub fn LLVMShutdown() -> ();
     pub fn LLVMCreateMessage(Message: *const ::libc::c_char) -> *mut ::libc::c_char;
     pub fn LLVMDisposeMessage(Message: *mut ::libc::c_char) -> ();
-    pub fn LLVMInstallFatalErrorHandler(Handler: LLVMFatalErrorHandler) -> ();
-    pub fn LLVMResetFatalErrorHandler() -> ();
-    pub fn LLVMEnablePrettyStackTrace() -> ();
 }
 
 // Core->Contexts
@@ -92,12 +89,14 @@ extern "C" {
     pub fn LLVMInt16TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMInt32TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMInt64TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    pub fn LLVMInt128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMIntTypeInContext(C: LLVMContextRef, NumBits: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMInt1Type() -> LLVMTypeRef;
     pub fn LLVMInt8Type() -> LLVMTypeRef;
     pub fn LLVMInt16Type() -> LLVMTypeRef;
     pub fn LLVMInt32Type() -> LLVMTypeRef;
     pub fn LLVMInt64Type() -> LLVMTypeRef;
+    pub fn LLVMInt128Type() -> LLVMTypeRef;
     pub fn LLVMIntType(NumBits: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMGetIntTypeWidth(IntegerTy: LLVMTypeRef) -> ::libc::c_uint;
 
@@ -587,6 +586,7 @@ extern "C" {
     pub fn LLVMIsAConstantInt(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAConstantPointerNull(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAConstantStruct(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAConstantTokenNone(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAConstantVector(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalValue(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalAlias(Val: LLVMValueRef) -> LLVMValueRef;
@@ -624,6 +624,11 @@ extern "C" {
     pub fn LLVMIsASwitchInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAUnreachableInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAResumeInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsACleanupReturnInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsACatchReturnInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAFuncletPadInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsACatchPadInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsACleanupPadInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAUnaryInstruction(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAAllocaInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsACastInst(Val: LLVMValueRef) -> LLVMValueRef;
@@ -928,6 +933,8 @@ extern "C" {
                                     -> LLVMValueRef;
     pub fn LLVMGetVolatile(MemoryAccessInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetVolatile(MemoryAccessInst: LLVMValueRef, IsVolatile: LLVMBool) -> ();
+    pub fn LLVMGetOrdering(MemoryAccessInst: LLVMValueRef) -> LLVMAtomicOrdering;
+    pub fn LLVMSetOrdering(MemoryAccessInst: LLVMValueRef, Ordering: LLVMAtomicOrdering);
 
     // Casts
     pub fn LLVMBuildTrunc(arg1: LLVMBuilderRef,
