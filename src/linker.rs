@@ -14,7 +14,7 @@ extern "C" {
     ///
     /// Takes ownership of the source module, returning false on success.
     /// Optionally returns a human-readable error message in `OutMessage`.
-    #[deprecated(since="3.8", reason="Use LLVMLinkModules2 instead")]
+    #[deprecated(since="3.8", note="Use LLVMLinkModules2 instead")]
     pub fn LLVMLinkModules(Dest: LLVMModuleRef,
                            Src: LLVMModuleRef,
                            _Unused: LLVMLinkerMode,

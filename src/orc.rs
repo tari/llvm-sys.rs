@@ -1,5 +1,9 @@
 //! The ORC JIT.
 
+use super::prelude::*;
+use super::object::LLVMObjectFileRef;
+use super::target_machine::LLVMTargetMachineRef;
+
 pub enum LLVMOrcOpaqueJITStack {}
 pub type LLVMOrcJITStackRef = *mut LLVMOrcOpaqueJITStack;
 pub type LLVMOrcModuleHandle = u32;
@@ -39,9 +43,9 @@ extern "C" {
                                      InitAddr: LLVMOrcTargetAddress);
 
     /// Set the pointer for the given indirect stub.
-    pub fn LLVMOrcCreateIndirectStub(JITStack: LLVMOrcJITStackRef,
-                                     StubName: *const ::libc::c_char,
-                                     NewAddr: LLVMOrcTargetAddress);
+    pub fn LLVMOrcSetIndirectStubPointer(JITStack: LLVMOrcJITStackRef,
+                                         StubName: *const ::libc::c_char,
+                                         NewAddr: LLVMOrcTargetAddress);
 
     /// Add a module to be eagerly compiled.
     pub fn LLVMOrcAddEagerlyCompiledIR(JITStack: LLVMOrcJITStackRef,
