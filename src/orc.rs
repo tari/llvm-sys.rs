@@ -11,6 +11,11 @@ pub type LLVMOrcTargetAddress = u64;
 
 pub type LLVMOrcSymbolResolverFn = extern "C" fn(*const ::libc::c_char, *mut ::libc::c_void) -> u64;
 pub type LLVMOrcLazyCompileCallbackFn = extern "C" fn(LLVMOrcJITStackRef, *mut ::libc::c_void);
+#[repr(C)]
+pub enum LLVMOrcErrorCode {
+    LLVMOrcErrSuccess = 0,
+    LLVMOrcErrGeneric
+}
 
 extern "C" {
     /// Create an ORC JIT stack.
@@ -19,6 +24,11 @@ extern "C" {
     /// when done with it. The JIT stack takes ownership of the provided
     /// TargetMachine.
     pub fn LLVMOrcCreateInstance(TM: LLVMTargetMachineRef) -> LLVMOrcJITStackRef;
+
+    /// Get the error message for the most recent error (if any).
+    ///
+    /// The returned message is owned by the ORC JIT stack.
+    pub fn LLVMOrcGetErrorMsg(JITStack: LLVMOrcJITStackRef) -> *const ::libc::c_char;
 
     /// Mangle the given symbol.
     ///
@@ -40,12 +50,14 @@ extern "C" {
     /// Create a named indirect call stub.
     pub fn LLVMOrcCreateIndirectStub(JITStack: LLVMOrcJITStackRef,
                                      StubName: *const ::libc::c_char,
-                                     InitAddr: LLVMOrcTargetAddress);
+                                     InitAddr: LLVMOrcTargetAddress)
+                                     -> LLVMOrcErrorCode;
 
     /// Set the pointer for the given indirect stub.
     pub fn LLVMOrcSetIndirectStubPointer(JITStack: LLVMOrcJITStackRef,
                                          StubName: *const ::libc::c_char,
-                                         NewAddr: LLVMOrcTargetAddress);
+                                         NewAddr: LLVMOrcTargetAddress)
+                                         -> LLVMOrcErrorCode;
 
     /// Add a module to be eagerly compiled.
     pub fn LLVMOrcAddEagerlyCompiledIR(JITStack: LLVMOrcJITStackRef,

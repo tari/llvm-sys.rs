@@ -18,6 +18,10 @@ extern "C" {
                                            Handler: LLVMDiagnosticHandler,
                                            DiagnosticContext: *mut ::libc::c_void)
                                            -> ();
+    /// Get the diagnostic handler of this context.
+    pub fn LLVMContextGetDiagnosticHandler(C: LLVMContextRef) -> LLVMDiagnosticHandler;
+    /// Get the diagnostic context of this context.
+    pub fn LLVMContextGetdiagnosticContext(C: LLVMContextRef) -> *mut ::libc::c_void;
     pub fn LLVMContextSetYieldCallback(C: LLVMContextRef,
                                        Callback: LLVMYieldCallback,
                                        OpaqueHandle: *mut ::libc::c_void)
@@ -30,6 +34,46 @@ extern "C" {
                                     SLen: ::libc::c_uint)
                                     -> ::libc::c_uint;
     pub fn LLVMGetMDKindID(Name: *const ::libc::c_char, SLen: ::libc::c_uint) -> ::libc::c_uint;
+
+    /// Return a unique id given the name of an enum attribute, or 0 if no attribute
+    /// by that name exists.
+    ///
+    /// See http://llvm.org/docs/LangRef.html#parameter-attributes
+    /// and http://llvm.org/docs/LangRef.html#function-attributes
+    /// for the list of available attributes.
+    ///
+    /// Note that attribute names and IDs are not subject to the same stability
+    /// guarantees as this API.
+    pub fn LLVMGetEnumAttributeKindForName(Name: *const ::libc::c_char,
+                                           SLen: ::libc::size_t) -> ::libc::c_uint;
+    pub fn LLVMGetLastEnumAttributeKind() -> ::libc::c_uint;
+
+    /// Create an enum attribute.
+    pub fn LLVMCreateEnumAttribute(C: LLVMContextRef,
+                                   KindID: ::libc::c_uint,
+                                   Val: u64) -> LLVMAttributeRef;
+    /// Get the unique id corresponding to the provided enum attribute.
+    pub fn LLVMGetEnumAttributeKind(A: LLVMAttributeRef) -> ::libc::c_uint;
+    /// Get the value of an enum attribute.
+    ///
+    /// Returns 0 if none exists.
+    pub fn LLVMGetEnumAttributeValue(A: LLVMAttributeRef) -> u64;
+    /// Create a string attribute.
+    pub fn LLVMCreateStringAttribute(C: LLVMContextRef,
+                                     K: *const ::libc::c_char,
+                                     KLength: ::libc::c_uint,
+                                     V: *const ::libc::c_char,
+                                     VLength: ::libc::c_uint) -> LLVMAttributeRef;
+    /// Get a string attribute's kind.
+    pub fn LLVMGetStringAttributeKind(A: LLVMAttributeRef,
+                                      Length: *mut ::libc::c_uint)
+                                      -> *const ::libc::c_char;
+    /// Get a string attribute's value.
+    pub fn LLVMGetStringAttributeValue(A: LLVMAttributeRef,
+                                       Length: *mut ::libc::c_uint)
+                                       -> *const ::libc::c_char;
+    pub fn LLVMIsEnumAttribute(A: LLVMAttributeRef) -> LLVMBool;
+    pub fn LLVMIsStringAttribute(A: LLVMAttributeRef) -> LLVMBool;
 }
 
 // Core->Modules
@@ -40,8 +84,22 @@ extern "C" {
                                              -> LLVMModuleRef;
     pub fn LLVMCloneModule(M: LLVMModuleRef) -> LLVMModuleRef;
     pub fn LLVMDisposeModule(M: LLVMModuleRef) -> ();
+    /// Get the identifier of a module.
+    ///
+    /// `Len` is written to contains the length of the returned string.
+    pub fn LLVMGetModuleIdentifier(M: LLVMModuleRef, Len: *mut ::libc::size_t)
+                                   -> *const ::libc::c_char;
+    /// Set the identifier of a module.
+    ///
+    /// `Len` is the length of the string pointed to by `Ident`.
+    pub fn LLVMSetModuleIdentifier(M: LLVMModuleRef,
+                                   Ident: *const ::libc::c_char,
+                                   Len: ::libc::size_t);
+    #[deprecated(since="3.9", note="Confusingly named. Use LLVMGetDataLayoutStr.")]
     pub fn LLVMGetDataLayout(M: LLVMModuleRef) -> *const ::libc::c_char;
-    pub fn LLVMSetDataLayout(M: LLVMModuleRef, Triple: *const ::libc::c_char) -> ();
+    /// Obtain the data layout for a module.
+    pub fn LLVMGetDataLayoutStr(M: LLVMModuleRef) -> *const ::libc::c_char;
+    pub fn LLVMSetDataLayout(M: LLVMModuleRef, DataLayoutStr: *const ::libc::c_char) -> ();
     pub fn LLVMGetTarget(M: LLVMModuleRef) -> *const ::libc::c_char;
     pub fn LLVMSetTarget(M: LLVMModuleRef, Triple: *const ::libc::c_char) -> ();
     pub fn LLVMDumpModule(M: LLVMModuleRef) -> ();
@@ -173,12 +231,15 @@ extern "C" {
 // Core->Values
 extern "C" {
     // Core->Values->General
+    /// Get the enumerated kind of a Value instance.
+    pub fn LLVMGetValueKind(Val: LLVMValueRef) -> LLVMValueKind;
     pub fn LLVMTypeOf(Val: LLVMValueRef) -> LLVMTypeRef;
     pub fn LLVMGetValueName(Val: LLVMValueRef) -> *const ::libc::c_char;
     pub fn LLVMSetValueName(Val: LLVMValueRef, Name: *const ::libc::c_char) -> ();
     pub fn LLVMDumpValue(Val: LLVMValueRef) -> ();
     pub fn LLVMPrintValueToString(Val: LLVMValueRef) -> *mut ::libc::c_char;
     pub fn LLVMReplaceAllUsesWith(OldVal: LLVMValueRef, NewVal: LLVMValueRef) -> ();
+    /// Determine whether the specified value instance is constant.
     pub fn LLVMIsConstant(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMIsUndef(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMIsAMDNode(Val: LLVMValueRef) -> LLVMValueRef;
@@ -244,7 +305,8 @@ extern "C" {
                            DontNullTerminate: LLVMBool)
                            -> LLVMValueRef;
     pub fn LLVMIsConstantString(c: LLVMValueRef) -> LLVMBool;
-    pub fn LLVMGetAsString(c: LLVMValueRef, out: *mut ::libc::size_t) -> *const ::libc::c_char;
+    pub fn LLVMGetAsString(C: LLVMValueRef, Length: *mut ::libc::size_t)
+                           -> *const ::libc::c_char;
     pub fn LLVMConstStructInContext(C: LLVMContextRef,
                                     ConstantVals: *mut LLVMValueRef,
                                     Count: ::libc::c_uint,
@@ -262,7 +324,7 @@ extern "C" {
                                 ConstantVals: *mut LLVMValueRef,
                                 Count: ::libc::c_uint)
                                 -> LLVMValueRef;
-    pub fn LLVMGetElementAsConstant(c: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
+    pub fn LLVMGetElementAsConstant(C: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
     pub fn LLVMConstVector(ScalarConstantVals: *mut LLVMValueRef,
                            Size: ::libc::c_uint)
                            -> LLVMValueRef;
@@ -425,6 +487,8 @@ extern "C" {
 
     // ..->Function Values
     pub fn LLVMDeleteFunction(Fn: LLVMValueRef) -> ();
+    /// Check whether the given function has a personality function.
+    pub fn LLVMHasPersonalityFunction(Fn: LLVMValueRef) -> LLVMBool;
     /// Obtain the personality function attached to the function.
     ///
     /// Added in LLVM 3.7.
@@ -440,6 +504,30 @@ extern "C" {
     pub fn LLVMGetGC(Fn: LLVMValueRef) -> *const ::libc::c_char;
     pub fn LLVMSetGC(Fn: LLVMValueRef, Name: *const ::libc::c_char) -> ();
     pub fn LLVMAddFunctionAttr(Fn: LLVMValueRef, PA: LLVMAttribute) -> ();
+    pub fn LLVMAddAttributeAtIndex(F: LLVMValueRef,
+                                   Idx: LLVMAttributeIndex,
+                                   A: LLVMAttributeRef);
+    pub fn LLVMGetAttributeCountAtIndex(F: LLVMValueRef,
+                                        Idx: LLVMAttributeIndex) -> ::libc::c_uint;
+    pub fn LLVMGetAttributeAtIndex(F: LLVMValueRef,
+                                   Idx: LLVMAttributeIndex,
+                                   Attrs: *mut LLVMAttributeRef);
+    pub fn LLVMGetEnumAttributeAtIndex(F: LLVMValueRef,
+                                       Idx: LLVMAttributeIndex,
+                                       KindID: ::libc::c_uint)
+                                       -> LLVMAttributeRef;
+    pub fn LLVMGetStringAttributeAtIndex(F: LLVMValueRef,
+                                         Idx: LLVMAttributeIndex,
+                                         K: *const ::libc::c_char,
+                                         KLen: ::libc::c_uint)
+                                         -> LLVMAttributeRef;
+    pub fn LLVMRemoveEnumAttributeAtIndex(F: LLVMValueRef,
+                                          Idx: LLVMAttributeIndex,
+                                          KindID: ::libc::c_uint);
+    pub fn LLVMRemoveStringAttributeAtIndex(F: LLVMValueRef,
+                                            Idx: LLVMAttributeIndex,
+                                            K: *const ::libc::c_char,
+                                            KLen: ::libc::c_uint);
     pub fn LLVMAddTargetDependentFunctionAttr(Fn: LLVMValueRef,
                                               A: *const ::libc::c_char,
                                               V: *const ::libc::c_char)
@@ -459,7 +547,7 @@ extern "C" {
     pub fn LLVMAddAttribute(Arg: LLVMValueRef, PA: LLVMAttribute) -> ();
     pub fn LLVMRemoveAttribute(Arg: LLVMValueRef, PA: LLVMAttribute) -> ();
     pub fn LLVMGetAttribute(Arg: LLVMValueRef) -> LLVMAttribute;
-    pub fn LLVMSetParamAlignment(Arg: LLVMValueRef, align: ::libc::c_uint) -> ();
+    pub fn LLVMSetParamAlignment(Arg: LLVMValueRef, Align: ::libc::c_uint);
 }
 
 // Core->Metadata
@@ -474,6 +562,9 @@ extern "C" {
                                Count: ::libc::c_uint)
                                -> LLVMValueRef;
     pub fn LLVMMDNode(Vals: *mut LLVMValueRef, Count: ::libc::c_uint) -> LLVMValueRef;
+    /// Obtain the underlying string from a MDString value.
+    ///
+    /// `Len` is written to contain the length of the returned string.
     pub fn LLVMGetMDString(V: LLVMValueRef, Len: *mut ::libc::c_uint) -> *const ::libc::c_char;
     pub fn LLVMGetMDNodeNumOperands(V: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetMDNodeOperands(V: LLVMValueRef, Dest: *mut LLVMValueRef) -> ();
@@ -484,6 +575,8 @@ extern "C" {
     pub fn LLVMBasicBlockAsValue(BB: LLVMBasicBlockRef) -> LLVMValueRef;
     pub fn LLVMValueIsBasicBlock(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMValueAsBasicBlock(Val: LLVMValueRef) -> LLVMBasicBlockRef;
+    /// Get the string name of a basic block.
+    pub fn LLVMGetBasicBlockName(BB: LLVMBasicBlockRef) -> *const ::libc::c_char;
     pub fn LLVMGetBasicBlockParent(BB: LLVMBasicBlockRef) -> LLVMValueRef;
     pub fn LLVMGetBasicBlockTerminator(BB: LLVMBasicBlockRef) -> LLVMValueRef;
     pub fn LLVMCountBasicBlocks(Fn: LLVMValueRef) -> ::libc::c_uint;
@@ -523,6 +616,11 @@ extern "C" {
     pub fn LLVMGetInstructionParent(Inst: LLVMValueRef) -> LLVMBasicBlockRef;
     pub fn LLVMGetNextInstruction(Inst: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMGetPreviousInstruction(Inst: LLVMValueRef) -> LLVMValueRef;
+    /// Remove the given instruction from its containing building block but
+    /// kept alive.
+    pub fn LLVMInstructionRemoveFromParent(Inst: LLVMValueRef);
+    /// Remove the given instruction from its containing building block and
+    /// delete it.
     pub fn LLVMInstructionEraseFromParent(Inst: LLVMValueRef) -> ();
     pub fn LLVMGetInstructionOpcode(Inst: LLVMValueRef) -> LLVMOpcode;
     pub fn LLVMGetICmpPredicate(Inst: LLVMValueRef) -> LLVMIntPredicate;
@@ -530,6 +628,10 @@ extern "C" {
     pub fn LLVMInstructionClone(Inst: LLVMValueRef) -> LLVMValueRef;
 
     // Instructions->Call Sites and Invocations
+    /// Obtain the argument count for a call instruction.
+    ///
+    /// The provided value should be either a CallInst or InvokeInst.
+    pub fn LLVMGetNumArgOperands(Instr: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetInstructionCallConv(Instr: LLVMValueRef, CC: ::libc::c_uint) -> ();
     pub fn LLVMGetInstructionCallConv(Instr: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMAddInstrAttribute(Instr: LLVMValueRef,
@@ -542,10 +644,44 @@ extern "C" {
                                     -> ();
     pub fn LLVMSetInstrParamAlignment(Instr: LLVMValueRef,
                                       index: ::libc::c_uint,
-                                      align: ::libc::c_uint)
-                                      -> ();
+                                      Align: ::libc::c_uint);
+    pub fn LLVMAddCallSiteAttribute(C: LLVMValueRef,
+                                    Idx: LLVMAttributeIndex,
+                                    A: LLVMAttributeRef);
+    pub fn LLVMGetCallSiteAttributeCount(C: LLVMValueRef,
+                                         Idx: LLVMAttributeIndex) -> ::libc::c_uint;
+    pub fn LLVMGetCallSiteAttributes(C: LLVMValueRef,
+                                     Idx: LLVMAttributeIndex,
+                                     Attrs: *mut LLVMAttributeRef);
+    pub fn LLVMGetCallSiteEnumAttribute(C: LLVMValueRef,
+                                        Idx: LLVMAttributeIndex,
+                                        KindID: ::libc::c_uint) -> LLVMAttributeRef;
+    pub fn LLVMGetCallSiteStringAttribute(C: LLVMValueRef,
+                                          Idx: LLVMAttributeIndex,
+                                          K: *const ::libc::c_char,
+                                          KLen: ::libc::c_uint) -> LLVMAttributeRef;
+    pub fn LLVMRemoveCallSiteEnumAttribute(C: LLVMValueRef,
+                                           Idx: LLVMAttributeIndex,
+                                           KindID: ::libc::c_uint);
+    pub fn LLVMRemoveCallSiteStringAttribute(C: LLVMValueRef,
+                                             Idx: LLVMAttributeIndex,
+                                             K: *const ::libc::c_char,
+                                             KLen: ::libc::c_uint);
+    /// Get a pointer to the function invoked by this instruction.
+    ///
+    /// The provided value should be a CallInst or InvokeInst.
+    pub fn LLVMGetCalledValue(Instr: LLVMValueRef) -> LLVMValueRef;
+    /// Get whether a call instruction is a tail call.
     pub fn LLVMIsTailCall(CallInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetTailCall(CallInst: LLVMValueRef, IsTailCall: LLVMBool) -> ();
+    /// Return the normal destination basic block of an invoke instruction.
+    pub fn LLVMGetNormalDest(InvokeInst: LLVMValueRef) -> LLVMBasicBlockRef;
+    /// Return the unwind destination basic block of an invoke instruction.
+    pub fn LLVMGetUnwindDest(InvokeInst: LLVMValueRef) -> LLVMBasicBlockRef;
+    /// Set the normal destination basic block of an invoke instruction.
+    pub fn LLVMSetNormalDest(InvokeInst: LLVMValueRef, B: LLVMBasicBlockRef);
+    /// Set the unwind destination basic block of an invoke instruction.
+    pub fn LLVMSetUnwindDest(InvokeInst: LLVMValueRef, B: LLVMBasicBlockRef);
 
     // Instructions->Terminators
     pub fn LLVMGetNumSuccessors(Term: LLVMValueRef) -> ::libc::c_uint;
@@ -555,6 +691,16 @@ extern "C" {
     pub fn LLVMGetCondition(Branch: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMSetCondition(Branch: LLVMValueRef, Cond: LLVMValueRef) -> ();
     pub fn LLVMGetSwitchDefaultDest(SwitchInstr: LLVMValueRef) -> LLVMBasicBlockRef;
+
+    // Instructions->Allocas
+    /// Obtain the type being allocated by an alloca instruction.
+    pub fn LLVMGetAllocatedType(Alloca: LLVMValueRef) -> LLVMTypeRef;
+
+    // Instructions->GEPs
+    /// Check whether the given GEP instruction is inbounds.
+    pub fn LLVMIsInBounds(GEP: LLVMValueRef) -> LLVMBool;
+    /// Set the given GEP instruction to be inbounds or not.
+    pub fn LLVMSetIsInBounds(GEP: LLVMValueRef, InBounds: LLVMBool);
 
     // Instruction->PHI Nodes
     pub fn LLVMAddIncoming(PhiNode: LLVMValueRef,
@@ -650,6 +796,13 @@ extern "C" {
     pub fn LLVMIsAVAArgInst(Val: LLVMValueRef) -> LLVMValueRef;
 }
 
+// Core->Extract/Insert Value
+extern "C" {
+    /// Get the number of indices on an ExtractValue, InsertValue or GEP instruction.
+    pub fn LLVMGetNumIndices(Inst: LLVMValueRef) -> ::libc::c_uint;
+    pub fn LLVMGetIndices(Inst: LLVMValueRef) -> *const ::libc::c_uint;
+}
+
 // Core->Instruction Builders
 extern "C" {
     pub fn LLVMCreateBuilderInContext(C: LLVMContextRef) -> LLVMBuilderRef;
@@ -719,8 +872,17 @@ extern "C" {
     /// Add a destination to an `indirectbr` instruction
     pub fn LLVMAddDestination(IndirectBr: LLVMValueRef, Dest: LLVMBasicBlockRef) -> ();
 
+    /// Get the number of clauses on a landingpad instruction.
+    pub fn LLVMGetNumClauses(LandingPad: LLVMValueRef) -> ::libc::c_uint;
+
+    /// Get the value of the clause with the given index on a landingpad instruction.
+    pub fn LLVMGetClause(LandingPad: LLVMValueRef, Idx: ::libc::c_uint) -> LLVMValueRef;
+
     /// Add a catch or filter clause to a `landingpad` instruction
     pub fn LLVMAddClause(LandingPad: LLVMValueRef, ClauseVal: LLVMValueRef) -> ();
+
+    /// Get the cleanup flag in a landingpad instruction.
+    pub fn LLVMIsCleanup(LandingPad: LLVMValueRef) -> LLVMBool;
 
     /// Set the cleanup flag in a `landingpad` instruction.
     pub fn LLVMSetCleanup(LandingPad: LLVMValueRef, Val: LLVMBool) -> ();
@@ -1128,6 +1290,23 @@ extern "C" {
                               ordering: LLVMAtomicOrdering,
                               singleThread: LLVMBool)
                               -> LLVMValueRef;
+    pub fn LLVMBuildAtomicCmpXchg(B: LLVMBuilderRef,
+                                  Ptr: LLVMValueRef,
+                                  Cmp: LLVMValueRef,
+                                  New: LLVMValueRef,
+                                  SuccessOrdering: LLVMAtomicOrdering,
+                                  FailureOrdering: LLVMAtomicOrdering,
+                                  SingleThread: LLVMBool)
+                                  -> LLVMValueRef;
+    pub fn LLVMIsAtomicSinglethread(AtomicInst: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMSetAtomicSingleThread(AtomicInst: LLVMValueRef,
+                                     SingleThread: LLVMBool);
+    pub fn LLVMGetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef) -> LLVMAtomicOrdering;
+    pub fn LLVMSetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef,
+                                         Ordering: LLVMAtomicOrdering);
+    pub fn LLVMGetCmpXchgFailureOrdering(CmpXchgInst: LLVMValueRef) -> LLVMAtomicOrdering;
+    pub fn LLVMSetCmpXchgFailureOrdering(CmpXchgInst: LLVMValueRef,
+                                         Ordering: LLVMAtomicOrdering);
 }
 
 // Core->Module Providers

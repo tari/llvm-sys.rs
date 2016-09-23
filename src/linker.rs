@@ -10,17 +10,6 @@ pub enum LLVMLinkerMode {
 }
 
 extern "C" {
-    /// Link the source module into the destination.
-    ///
-    /// Takes ownership of the source module, returning false on success.
-    /// Optionally returns a human-readable error message in `OutMessage`.
-    #[deprecated(since="3.8", note="Use LLVMLinkModules2 instead")]
-    pub fn LLVMLinkModules(Dest: LLVMModuleRef,
-                           Src: LLVMModuleRef,
-                           _Unused: LLVMLinkerMode,
-                           OutMessage: *mut *mut ::libc::c_char)
-                           -> LLVMBool;
-
     /// Link the source module into the destination module.
     ///
     /// Destroys the source module, returns true on error. Use the diagnostic

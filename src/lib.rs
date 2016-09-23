@@ -23,6 +23,7 @@ pub enum LLVMPassManager {}
 pub enum LLVMPassRegistry {}
 pub enum LLVMUse {}
 pub enum LLVMDiagnosticInfo {}
+pub enum LLVMOpaqueAttributeRef {}
 
 /// Core types used throughout LLVM.
 ///
@@ -41,6 +42,7 @@ pub mod prelude {
     pub type LLVMPassRegistryRef = *mut super::LLVMPassRegistry;
     pub type LLVMUseRef = *mut super::LLVMUse;
     pub type LLVMDiagnosticInfoRef = *mut super::LLVMDiagnosticInfo;
+    pub type LLVMAttributeRef = *mut super::LLVMOpaqueAttributeRef;
 }
 
 pub mod analysis;
@@ -262,6 +264,38 @@ pub enum LLVMCallConv {
 }
 
 #[repr(C)]
+pub enum LLVMValueKind {
+    LLVMArgumentValueKind,
+    LLVMBasicBlockValueKind,
+    LLVMMemoryUseValueKind,
+    LLVMMemoryDefValueKind,
+    LLVMMemoryPhiValueKind,
+
+    LLVMFunctionValueKind,
+    LLVMGlobalAliasValueKind,
+    LLVMGlobalIFuncValueKind,
+    LLVMGlobalVariableValueKind,
+    LLVMBlockAddressValueKind,
+    LLVMConstantExprValueKind,
+    LLVMConstantArrayValueKind,
+    LLVMConstantStructValueKind,
+    LLVMConstantVectorValueKind,
+    LLVMUndefValueValueKind,
+    LLVMConstantAggregateZeroValueKind,
+    LLVMConstantDataArrayValueKind,
+    LLVMConstantDataVectorValueKind,
+    LLVMConstantIntValueKind,
+    LLVMConstantFPValueKind,
+    LLVMConstantPointerNullValueKind,
+    LLVMConstantTokenNoneValueKind,
+  
+    LLVMMetadataAsValueValueKind,
+    LLVMInlineAsmValueKind,
+    
+    LLVMInstructionValueKind,
+}
+
+#[repr(C)]
 pub enum LLVMIntPredicate {
     LLVMIntEQ = 32,
     LLVMIntNE = 33,
@@ -343,6 +377,12 @@ pub enum LLVMDiagnosticSeverity {
     LLVMDSRemark = 2,
     LLVMDSNote = 3,
 }
+
+pub const LLVMAttributeReturnIndex: ::libc::c_uint = 0;
+pub const LLVMAttributeFunctionIndex: ::libc::c_uint = !0; // -1
+/// Either LLVMAttributeReturnIndex, LLVMAttributeFunctionIndex, or a parameter
+/// number from 1 to N.
+pub type LLVMAttributeIndex = ::libc::c_uint;
 
 pub type LLVMDiagnosticHandler = extern "C" fn(arg1: LLVMDiagnosticInfoRef,
                                                arg2: *mut ::libc::c_void)
