@@ -108,9 +108,7 @@ fn locate_system_llvm_config() -> Option<&'static str> {
 /// Check whether the given version of LLVM is blacklisted,
 /// returning `Some(reason)` if it is.
 fn is_blacklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
-    static BLACKLIST: &'static [(u64, u64, u64, &'static str)] = &[
-        (3, 7, 0, "Breaks ABI for LLVMBuildLandingPad"),
-    ];
+    static BLACKLIST: &'static [(u64, u64, u64, &'static str)] = &[];
 
     let blacklist_var = format!("LLVM_SYS_{}_IGNORE_BLACKLIST",
                                 env!("CARGO_PKG_VERSION_MAJOR"));
