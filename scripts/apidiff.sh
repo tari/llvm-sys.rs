@@ -26,4 +26,11 @@ else
     typeset -r R2=$2
 fi
 
-svn diff $(branch_url $R1)/include/llvm-c $(branch_url $R2)/include/llvm-c
+if which colordiff >/dev/null
+then
+    colordiff="colordiff"
+else
+    colordiff="cat"
+fi
+
+svn diff $(branch_url $R1)/include/llvm-c $(branch_url $R2)/include/llvm-c | $colordiff
