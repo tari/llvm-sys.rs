@@ -68,8 +68,8 @@ extern "C" {
     pub fn LLVMGetTargetMachineTriple(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
     pub fn LLVMGetTargetMachineCPU(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
     pub fn LLVMGetTargetMachineFeatureString(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
-    /// Returns the DataLayout used for this Targetmachine.
-    pub fn LLVMGetTargetMachineData(T: LLVMTargetMachineRef) -> LLVMTargetDataRef;
+    /// Create a DataLayout based on the target machine.
+    pub fn LLVMCreateTargetDataLayout(T: LLVMTargetMachineRef) -> LLVMTargetDataRef;
     pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef, VerboseAsm: LLVMBool) -> ();
     pub fn LLVMTargetMachineEmitToFile(T: LLVMTargetMachineRef,
                                        M: LLVMModuleRef,
