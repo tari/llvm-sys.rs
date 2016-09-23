@@ -86,8 +86,12 @@ extern "C" {
 }
 
 extern "C" {
+    /// Get the data layout for a module.
+    pub fn LLVMGetModuleDataLayout(M: LLVMModuleRef) -> LLVMTargetDataRef;
+    /// Set the data layout for a module.
+    pub fn LLVMSetModuleDataLayout(M: LLVMModuleRef, R: LLVMTargetDataRef);
+    /// Create target data from a target layout string.
     pub fn LLVMCreateTargetData(StringRep: *const ::libc::c_char) -> LLVMTargetDataRef;
-    pub fn LLVMAddTargetData(TD: LLVMTargetDataRef, PM: LLVMPassManagerRef) -> ();
     pub fn LLVMAddTargetLibraryInfo(TLI: LLVMTargetLibraryInfoRef, PM: LLVMPassManagerRef) -> ();
     pub fn LLVMCopyStringRepOfTargetData(TD: LLVMTargetDataRef) -> *mut ::libc::c_char;
     pub fn LLVMByteOrder(TD: LLVMTargetDataRef) -> LLVMByteOrdering;
