@@ -105,11 +105,55 @@ fn locate_system_llvm_config() -> Option<&'static str> {
     None
 }
 
+/// Check whether the given version of LLVM is blacklisted,
+/// returning `Some(reason)` if it is.
+fn is_blacklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
+    static BLACKLIST: &'static [(u64, u64, u64, &'static str)] = &[
+        (3, 7, 0, "Breaks ABI for LLVMBuildLandingPad"),
+    ];
+
+    let blacklist_var = format!("LLVM_SYS_{}_IGNORE_BLACKLIST",
+                                env!("CARGO_PKG_VERSION_MAJOR"));
+    if let Some(x) = env::var_os(&blacklist_var) {
+        if &x == "YES" {
+            println!("cargo:warning=Ignoring blacklist entry for LLVM {}", llvm_version);
+            return None;
+        } else {
+            println!("cargo:warning={} is set but not exactly \"YES\"; blacklist is still honored.",
+                     &blacklist_var);
+        }
+    }
+
+    for &(major, minor, patch, reason) in BLACKLIST.iter() {
+        let bad_version = Version {
+            major: major, minor: minor, patch: patch,
+            pre: vec![], build: vec![],
+        };
+
+        if &bad_version == llvm_version {
+            return Some(reason);
+        }
+    }
+    None
+}
 /// Check whether the given LLVM version is compatible with this version of
 /// the crate.
 fn is_compatible_llvm(llvm_version: &Version) -> bool {
-    llvm_version.major == CRATE_VERSION.major &&
-        llvm_version.minor == CRATE_VERSION.minor
+    if let Some(reason) = is_blacklisted_llvm(llvm_version) {
+        println!("Found LLVM {}, which is blacklisted: {}", llvm_version, reason);
+        return false;
+    }
+
+    let strict = env::var_os(format!("LLVM_SYS_{}_STRICT_VERSIONING",
+                                     env!("CARGO_PKG_VERSION_MAJOR"))).is_some()
+        || cfg!(feature="strict-versioning");
+    if strict {
+        llvm_version.major == CRATE_VERSION.major &&
+            llvm_version.minor == CRATE_VERSION.minor
+    } else {
+        llvm_version.major >= CRATE_VERSION.major &&
+            llvm_version.minor >= CRATE_VERSION.minor
+    }
 }
 
 /// Get the output from running `llvm-config` with the given argument.

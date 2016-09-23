@@ -31,8 +31,8 @@ mentioning here, by all means let me know.
 
 ## LLVM compatibility
 
-Because the LLVM C [API stability guarantees][c-api-stability] are so weak, this
-crate enforces that the LLVM release in use exactly match the one it was made
+Because the LLVM C [API stability guarantees][c-api-stability] are relatively
+weak, this crate enforces that the LLVM release in use match the one it was made
 for. The crate version is constructed by treating the LLVM version as a real
 number and multiplying by 10, ignoring any fractional part. Thus `llvm-sys`
 version 37 is compatible with LLVM 3.7.x, and `llvm-sys` 41 would be compatible
@@ -40,11 +40,49 @@ with LLVM 4.1.x.
 
 [c-api-stability]: http://llvm.org/releases/3.8.0/docs/DeveloperPolicy.html#c-api-changes
 
-Due to this strictness with versioning, it may be difficult or even impossible
-to provide a compatible LLVM version system-wide for a given project (consider
-a program using two libraries that internally use different versions of LLVM!)
-so environment variables can be set to help the build scripts find your copy
-of the libraries.
+The following table is a compatibility matrix with LLVM versions (rows) and
+versions of this crate (columns). ● denotes an exactly-compatible version, and ◑
+is a binary-compatible version but with elements deprecated (implying that
+movement to the next crate version in the same table row will still compile, but
+may introduce new warnings).
+
+| LLVM version | 36 | 37 | 38 | 39 |
+| ------------ | -- | -- | -- | -- |
+| <3.6         |    |    |    |    |
+| 3.6.x        | ●  |    |    |    |
+| 3.7.0        |    |    |    |    |
+| 3.7.x        |    | ●  |    |    |
+| 3.8.x        |    | ◑  | ●  |    |
+| 3.9.0        |    |    |    | ●  |
+
+The build scripts will not enforce this compatibility matrix strictly,
+permitting compilation against any version of LLVM that is at least as new as
+the crate target version. This is safe in most cases because the LLVM C API is
+meant to maintain binary compatibility across releases with the exception of
+when functions are deprecated and later removed. An incompatible LLVM version
+will generally fail to compile with a link-time error, rather than cause runtime
+errors. Where versions are known to break binary compatibility, the build script
+will prevent compilation.
+
+Depending on your use of the C API, your program may require that only a
+version of LLVM exactly matching your crate version be allowed. This can be set
+with the cargo feature flag `strict-versioning` or by setting the environment
+variable `LLVM_SYS_<version>_STRICT_VERSIONING` (where `<version>` is the target
+crate version) to any value.
+
+llvm-sys blacklists some versions of LLVM that are known to be
+binary-incompatible. If you're feeling lucky, setting
+`LLVM_SYS_<version>_IGNORE_BLACKLIST` to "YES" will permit the use of
+blacklisted library versions (which may cause vexing bugs).
+
+---
+
+It may be difficult or even impossible to provide a compatible LLVM version
+system-wide for a given project (consider a program using two libraries that
+internally use different versions of LLVM!) so environment variables can be set
+to help the build scripts find your copy of the libraries. This is also helpful
+if you are unable to provide a system-wide version of LLVM but can still
+compile it yourself.
 
 `LLVM_SYS_<version>_PREFIX` specifies the install prefix for a compiled and
 installed copy of the libraries, where `<version>` is the major version of
