@@ -3,7 +3,7 @@
 use super::super::prelude::*;
 
 extern "C" {
-    pub fn LLVMAddBBVectorizePass(PM: LLVMPassManagerRef) -> ();
-    pub fn LLVMAddLoopVectorizePass(PM: LLVMPassManagerRef) -> ();
-    pub fn LLVMAddSLPVectorizePass(PM: LLVMPassManagerRef) -> ();
+    pub fn LLVMAddBBVectorizePass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddLoopVectorizePass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddSLPVectorizePass(PM: LLVMPassManagerRef);
 }
