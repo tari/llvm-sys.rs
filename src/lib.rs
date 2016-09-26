@@ -288,10 +288,10 @@ pub enum LLVMValueKind {
     LLVMConstantFPValueKind,
     LLVMConstantPointerNullValueKind,
     LLVMConstantTokenNoneValueKind,
-  
+
     LLVMMetadataAsValueValueKind,
     LLVMInlineAsmValueKind,
-    
+
     LLVMInstructionValueKind,
 }
 
@@ -385,6 +385,5 @@ pub const LLVMAttributeFunctionIndex: ::libc::c_uint = !0; // -1
 pub type LLVMAttributeIndex = ::libc::c_uint;
 
 pub type LLVMDiagnosticHandler = extern "C" fn(arg1: LLVMDiagnosticInfoRef,
-                                               arg2: *mut ::libc::c_void)
-                                               -> ();
-pub type LLVMYieldCallback = extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void) -> ();
+                                               arg2: *mut ::libc::c_void);
+pub type LLVMYieldCallback = extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void);

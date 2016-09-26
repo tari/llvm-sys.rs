@@ -28,6 +28,6 @@ extern "C" {
     /// Open a ghostview window displaying the CFG of the given function.
     ///
     /// Useful for debugging.
-    pub fn LLVMViewFunctionCFG(Fn: LLVMValueRef) -> ();
-    pub fn LLVMViewFunctionCFGOnly(Fn: LLVMValueRef) -> ();
+    pub fn LLVMViewFunctionCFG(Fn: LLVMValueRef);
+    pub fn LLVMViewFunctionCFGOnly(Fn: LLVMValueRef);
 }

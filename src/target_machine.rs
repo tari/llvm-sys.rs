@@ -63,14 +63,14 @@ extern "C" {
                                    Reloc: LLVMRelocMode,
                                    CodeModel: LLVMCodeModel)
                                    -> LLVMTargetMachineRef;
-    pub fn LLVMDisposeTargetMachine(T: LLVMTargetMachineRef) -> ();
+    pub fn LLVMDisposeTargetMachine(T: LLVMTargetMachineRef);
     pub fn LLVMGetTargetMachineTarget(T: LLVMTargetMachineRef) -> LLVMTargetRef;
     pub fn LLVMGetTargetMachineTriple(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
     pub fn LLVMGetTargetMachineCPU(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
     pub fn LLVMGetTargetMachineFeatureString(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
     /// Create a DataLayout based on the target machine.
     pub fn LLVMCreateTargetDataLayout(T: LLVMTargetMachineRef) -> LLVMTargetDataRef;
-    pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef, VerboseAsm: LLVMBool) -> ();
+    pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef, VerboseAsm: LLVMBool);
     pub fn LLVMTargetMachineEmitToFile(T: LLVMTargetMachineRef,
                                        M: LLVMModuleRef,
                                        Filename: *mut ::libc::c_char,
@@ -84,5 +84,5 @@ extern "C" {
                                                OutMemBuf: *mut LLVMMemoryBufferRef)
                                                -> LLVMBool;
     pub fn LLVMGetDefaultTargetTriple() -> *mut ::libc::c_char;
-    pub fn LLVMAddAnalysisPasses(T: LLVMTargetMachineRef, PM: LLVMPassManagerRef) -> ();
+    pub fn LLVMAddAnalysisPasses(T: LLVMTargetMachineRef, PM: LLVMPassManagerRef);
 }

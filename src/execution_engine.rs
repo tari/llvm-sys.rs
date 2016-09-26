@@ -42,11 +42,11 @@ pub type LLVMMemoryManagerFinalizeMemoryCallback =
     extern "C" fn(Opaque: *mut ::libc::c_void,
                   ErrMsg: *mut *mut ::libc::c_char)
                   -> LLVMBool;
-pub type LLVMMemoryManagerDestroyCallback = extern "C" fn(Opaque: *mut ::libc::c_void) -> ();
+pub type LLVMMemoryManagerDestroyCallback = extern "C" fn(Opaque: *mut ::libc::c_void);
 
 extern "C" {
-    pub fn LLVMLinkInMCJIT() -> ();
-    pub fn LLVMLinkInInterpreter() -> ();
+    pub fn LLVMLinkInMCJIT();
+    pub fn LLVMLinkInInterpreter();
 
     // Operations on generic values
     pub fn LLVMCreateGenericValueOfInt(Ty: LLVMTypeRef,
@@ -65,7 +65,7 @@ extern "C" {
     pub fn LLVMGenericValueToFloat(TyRef: LLVMTypeRef,
                                    GenVal: LLVMGenericValueRef)
                                    -> ::libc::c_double;
-    pub fn LLVMDisposeGenericValue(GenVal: LLVMGenericValueRef) -> ();
+    pub fn LLVMDisposeGenericValue(GenVal: LLVMGenericValueRef);
 
     // Operations on execution engines
     pub fn LLVMCreateExecutionEngineForModule(OutEE: *mut LLVMExecutionEngineRef,
@@ -82,8 +82,7 @@ extern "C" {
                                           OutError: *mut *mut ::libc::c_char)
                                           -> LLVMBool;
     pub fn LLVMInitializeMCJITCompilerOptions(Options: *mut LLVMMCJITCompilerOptions,
-                                              SizeOfOptions: ::libc::size_t)
-                                              -> ();
+                                              SizeOfOptions: ::libc::size_t);
 
     /// Create an MCJIT execution engine for a module, with the given options.
     ///
@@ -115,9 +114,9 @@ extern "C" {
                                             OutError: *mut *mut ::libc::c_char)
                                             -> LLVMBool;
 
-    pub fn LLVMDisposeExecutionEngine(EE: LLVMExecutionEngineRef) -> ();
-    pub fn LLVMRunStaticConstructors(EE: LLVMExecutionEngineRef) -> ();
-    pub fn LLVMRunStaticDestructors(EE: LLVMExecutionEngineRef) -> ();
+    pub fn LLVMDisposeExecutionEngine(EE: LLVMExecutionEngineRef);
+    pub fn LLVMRunStaticConstructors(EE: LLVMExecutionEngineRef);
+    pub fn LLVMRunStaticDestructors(EE: LLVMExecutionEngineRef);
     pub fn LLVMRunFunctionAsMain(EE: LLVMExecutionEngineRef,
                                  F: LLVMValueRef,
                                  ArgC: ::libc::c_uint,
@@ -129,8 +128,8 @@ extern "C" {
                            NumArgs: ::libc::c_uint,
                            Args: *mut LLVMGenericValueRef)
                            -> LLVMGenericValueRef;
-    pub fn LLVMFreeMachineCodeForFunction(EE: LLVMExecutionEngineRef, F: LLVMValueRef) -> ();
-    pub fn LLVMAddModule(EE: LLVMExecutionEngineRef, M: LLVMModuleRef) -> ();
+    pub fn LLVMFreeMachineCodeForFunction(EE: LLVMExecutionEngineRef, F: LLVMValueRef);
+    pub fn LLVMAddModule(EE: LLVMExecutionEngineRef, M: LLVMModuleRef);
     pub fn LLVMRemoveModule(EE: LLVMExecutionEngineRef,
                             M: LLVMModuleRef,
                             OutMod: *mut LLVMModuleRef,
@@ -147,8 +146,7 @@ extern "C" {
     pub fn LLVMGetExecutionEngineTargetMachine(EE: LLVMExecutionEngineRef) -> LLVMTargetMachineRef;
     pub fn LLVMAddGlobalMapping(EE: LLVMExecutionEngineRef,
                                 Global: LLVMValueRef,
-                                Addr: *mut ::libc::c_void)
-                                -> ();
+                                Addr: *mut ::libc::c_void);
     pub fn LLVMGetPointerToGlobal(EE: LLVMExecutionEngineRef,
                                   Global: LLVMValueRef)
                                   -> *mut ::libc::c_void;
@@ -174,5 +172,5 @@ extern "C" {
                                               FinalizeMemory: LLVMMemoryManagerFinalizeMemoryCallback,
                                               Destroy: LLVMMemoryManagerDestroyCallback) -> LLVMMCJITMemoryManagerRef;
 
-    pub fn LLVMDisposeMCJITMemoryManager(MM: LLVMMCJITMemoryManagerRef) -> ();
+    pub fn LLVMDisposeMCJITMemoryManager(MM: LLVMMCJITMemoryManagerRef);
 }

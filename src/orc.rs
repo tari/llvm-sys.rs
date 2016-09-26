@@ -14,7 +14,7 @@ pub type LLVMOrcLazyCompileCallbackFn = extern "C" fn(LLVMOrcJITStackRef, *mut :
 #[repr(C)]
 pub enum LLVMOrcErrorCode {
     LLVMOrcErrSuccess = 0,
-    LLVMOrcErrGeneric
+    LLVMOrcErrGeneric,
 }
 
 extern "C" {
