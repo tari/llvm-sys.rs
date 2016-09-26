@@ -121,7 +121,7 @@ extern "C" {
                                        SymbolLookUp: LLVMSymbolLookupCallback)
                                        -> LLVMDisasmContextRef;
     pub fn LLVMSetDisasmOptions(DC: LLVMDisasmContextRef, Options: u64) -> ::libc::c_int;
-    pub fn LLVMDisasmDispose(DC: LLVMDisasmContextRef) -> ();
+    pub fn LLVMDisasmDispose(DC: LLVMDisasmContextRef);
     pub fn LLVMDisasmInstruction(DC: LLVMDisasmContextRef,
                                  Bytes: *mut u8,
                                  BytesSize: u64,

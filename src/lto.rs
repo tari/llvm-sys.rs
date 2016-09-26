@@ -69,8 +69,7 @@ pub enum lto_codegen_diagnostic_severity_t {
 
 pub type lto_diagnostic_handler_t = extern "C" fn(severity: lto_codegen_diagnostic_severity_t,
                                                   diag: *const ::libc::c_char,
-                                                  ctxt: *mut ::libc::c_void)
-                                                  -> ();
+                                                  ctxt: *mut ::libc::c_void);
 
 extern "C" {
     pub fn lto_get_version() -> *const ::libc::c_char;
@@ -82,7 +81,8 @@ extern "C" {
     /// Return true if `Buffer` contains a bitcode file with ObjC code
     /// (category or class) in it.
     pub fn lto_module_has_objc_category(mem: *const ::libc::c_void,
-                                        length: ::libc::size_t) -> lto_bool_t;
+                                        length: ::libc::size_t)
+                                        -> lto_bool_t;
     /// Checks if a buffer is a loadable object file.
     pub fn lto_module_is_object_file_in_memory(mem: *const ::libc::c_void,
                                                length: ::libc::size_t)
@@ -120,9 +120,9 @@ extern "C" {
                                                map_size: ::libc::size_t,
                                                offset: ::libc::off_t)
                                                -> lto_module_t;
-    pub fn lto_module_dispose(_mod: lto_module_t) -> ();
+    pub fn lto_module_dispose(_mod: lto_module_t);
     pub fn lto_module_get_target_triple(_mod: lto_module_t) -> *const ::libc::c_char;
-    pub fn lto_module_set_target_triple(_mod: lto_module_t, triple: *const ::libc::c_char) -> ();
+    pub fn lto_module_set_target_triple(_mod: lto_module_t, triple: *const ::libc::c_char);
     pub fn lto_module_get_num_symbols(_mod: lto_module_t) -> ::libc::c_uint;
     pub fn lto_module_get_symbol_name(_mod: lto_module_t,
                                       index: ::libc::c_uint)
@@ -139,11 +139,10 @@ extern "C" {
     pub fn lto_module_get_linkeropts(_mod: lto_module_t) -> *const ::libc::c_char;
     pub fn lto_codegen_set_diagnostic_handler(arg1: lto_code_gen_t,
                                               arg2: lto_diagnostic_handler_t,
-                                              arg3: *mut ::libc::c_void)
-                                              -> ();
+                                              arg3: *mut ::libc::c_void);
     pub fn lto_codegen_create() -> lto_code_gen_t;
     pub fn lto_codegen_create_in_local_context() -> lto_code_gen_t;
-    pub fn lto_codegen_dispose(arg1: lto_code_gen_t) -> ();
+    pub fn lto_codegen_dispose(arg1: lto_code_gen_t);
     pub fn lto_codegen_add_module(cg: lto_code_gen_t, _mod: lto_module_t) -> lto_bool_t;
     /// Sets the object module for code gneeration. This will transfer ownership
     /// of the module to the code generator.
@@ -152,15 +151,13 @@ extern "C" {
     pub fn lto_codegen_set_module(cg: lto_code_gen_t, _mod: lto_module_t);
     pub fn lto_codegen_set_debug_model(cg: lto_code_gen_t, arg1: lto_debug_model) -> lto_bool_t;
     pub fn lto_codegen_set_pic_model(cg: lto_code_gen_t, arg1: lto_codegen_model) -> lto_bool_t;
-    pub fn lto_codegen_set_cpu(cg: lto_code_gen_t, cpu: *const ::libc::c_char) -> ();
-    pub fn lto_codegen_set_assembler_path(cg: lto_code_gen_t, path: *const ::libc::c_char) -> ();
+    pub fn lto_codegen_set_cpu(cg: lto_code_gen_t, cpu: *const ::libc::c_char);
+    pub fn lto_codegen_set_assembler_path(cg: lto_code_gen_t, path: *const ::libc::c_char);
     pub fn lto_codegen_set_assembler_args(cg: lto_code_gen_t,
                                           args: *mut *const ::libc::c_char,
-                                          nargs: ::libc::c_int)
-                                          -> ();
+                                          nargs: ::libc::c_int);
     pub fn lto_codegen_add_must_preserve_symbol(cg: lto_code_gen_t,
-                                                symbol: *const ::libc::c_char)
-                                                -> ();
+                                                symbol: *const ::libc::c_char);
     pub fn lto_codegen_write_merged_modules(cg: lto_code_gen_t,
                                             path: *const ::libc::c_char)
                                             -> lto_bool_t;
@@ -193,8 +190,8 @@ extern "C" {
     ///
     /// Added in LLVM 3.7.
     pub fn lto_api_version() -> ::libc::c_uint;
-    pub fn lto_codegen_debug_options(cg: lto_code_gen_t, arg1: *const ::libc::c_char) -> ();
-    pub fn lto_initialize_disassembler() -> ();
+    pub fn lto_codegen_debug_options(cg: lto_code_gen_t, arg1: *const ::libc::c_char);
+    pub fn lto_initialize_disassembler();
     /// Sets if we should run the itnernalize pass during optimization and code generation.
     ///
     /// Added in LLVM 3.7.
@@ -249,17 +246,19 @@ extern "C" {
     /// Return a reference to the `index`th object file produced by the
     /// code generator.
     pub fn thinlto_module_get_object(cg: thinlto_code_gen_t,
-                                     index: ::libc::c_uint) -> LTOObjectBuffer;
+                                     index: ::libc::c_uint)
+                                     -> LTOObjectBuffer;
     /// Set which PIC code model to generate.
     ///
     /// Returns true on error.
     pub fn thinlto_codegen_set_pic_model(cg: thinlto_code_gen_t,
-                                         model: lto_codegen_model) -> lto_bool_t;
+                                         model: lto_codegen_model)
+                                         -> lto_bool_t;
 
     // ThinLTO cache control.
-    /// Set the path to a directory to use as cache for increment build.
-    ///
-    /// Setting this activates caching.
+    // Set the path to a directory to use as cache for increment build.
+    //
+    // Setting this activates caching.
     pub fn thinlto_codegen_set_cache_dir(cg: thinlto_code_gen_t,
                                          cache_dir: *const ::libc::c_char);
     /// Set the cache pruning interval, in seconds.
@@ -287,14 +286,11 @@ extern "C" {
     /// Disable code generation (running all stages until codegen).
     ///
     /// The output with codegen disabled is bitcode.
-    pub fn thinlto_codegen_disable_codegen(cg: thinlto_code_gen_t,
-                                           disable: lto_bool_t);
+    pub fn thinlto_codegen_disable_codegen(cg: thinlto_code_gen_t, disable: lto_bool_t);
     /// Perform codegen only; disable all other stages.
-    pub fn thinlto_codegen_set_codegen_only(cg: thinlto_code_gen_t,
-                                            codegen_only: lto_bool_t);
+    pub fn thinlto_codegen_set_codegen_only(cg: thinlto_code_gen_t, codegen_only: lto_bool_t);
     /// Parse -mllvm style debug options.
-    pub fn thinlto_debug_options(options: *const *const ::libc::c_char,
-                                 number: ::libc::c_int);
+    pub fn thinlto_debug_options(options: *const *const ::libc::c_char, number: ::libc::c_int);
     /// Test if a module has ThinLTO linking support.
     pub fn lto_module_is_thinlto(module: lto_module_t) -> lto_bool_t;
     /// Add a symbol to the list of global symbols that must exist in the
