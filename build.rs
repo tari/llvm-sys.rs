@@ -31,7 +31,7 @@ lazy_static!{
         } else {
             println!("Didn't find usable system-wide LLVM.");
         }
-        
+
         // Did the user give us a binary path to use? If yes, try
         // to use that and fail if it doesn't work.
         let binary_prefix_var = format!("LLVM_SYS_{}_PREFIX",
@@ -191,32 +191,46 @@ fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
     Ok(Version::parse(&version_str[start..end]).unwrap())
 }
 
+#[cfg(target_env = "msvc")]
+fn lib_name(name: &str) -> &str {
+    assert!(name.ends_with(".lib"));
+    &name[..name.len() - 4]
+}
+
+#[cfg(not(target_env = "msvc"))]
+fn lib_name(name: &str) -> &str {
+    assert!(name.starts_with("-l"));
+    &name[2..]
+}
+
+fn add_lib(kind: &'static str, name: &str) {
+    println!("cargo:rustc-link-lib={}={}", kind, name);
+}
+
+fn add_libs(kind: &'static str, flag: &'static str) {
+    for name in llvm_config(flag).split_whitespace().map(lib_name) {
+        add_lib(kind, name);
+    }
+}
+
 fn main() {
-    // Parse library linking flags from llvm-config.
-    for arg in llvm_config("--ldflags").split_whitespace() {
-        if arg.starts_with("-L") {
-            println!("cargo:rustc-link-search=native={}", &arg[2..]);
-        }
-    }
+    add_libs("dylib", "--system-libs");
 
-    for arg in llvm_config("--libs").split_whitespace() {
-        if arg.starts_with("-l") {
-            println!("cargo:rustc-link-lib={}", &arg[2..]);
-        }
-    }
+    println!("cargo:rustc-link-search=native={}", llvm_config("--libdir"));
 
-    for arg in llvm_config("--system-libs").split_whitespace() {
-        if arg.starts_with("-l") {
-            println!("cargo:rustc-link-lib=dylib={}", &arg[2..]);
-        }
-    }
-
-    // This breaks the link step on Windows with MSVC.
-    if !cfg!(windows) {
+    if cfg!(target_env = "msvc") {
+        // --libs returns absolute paths when
+        // LLVM was built on Windows with MSVC
+        add_libs("static", "--libnames");
+    } else {
+        add_libs("static", "--libs");
         // Determine which C++ standard library to use: LLVM's or GCC's.
-        let cxxflags = llvm_config("--cxxflags");
-        let libcpp = if cxxflags.contains("stdlib=libc++") { "c++" } else { "stdc++" };
-        println!("cargo:rustc-link-lib={}", libcpp);
+        // This breaks the link step on Windows with MSVC.
+        add_lib("dylib", if llvm_config("--cxxflags").contains("stdlib=libc++") {
+            "c++"
+        } else {
+            "stdc++"
+        });
     }
 
     // Build the extra wrapper functions.
