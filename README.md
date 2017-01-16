@@ -47,7 +47,7 @@ movement to the next crate version in the same table row will still compile, but
 may introduce new warnings).
 
 | LLVM version | 36 | 37 | 38 | 39 |
-| ------------ | -- | -- | -- | -- |
+|--------------|----|----|----|----|
 | <3.6         |    |    |    |    |
 | 3.6.x        | ●  |    |    |    |
 | 3.7.0        |    |    |    |    |
