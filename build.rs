@@ -158,8 +158,8 @@ fn is_compatible_llvm(llvm_version: &Version) -> bool {
 ///
 /// Lazily searches for or compiles LLVM as configured by the environment
 /// variables.
-fn llvm_config(arg: &str) -> String {
-    llvm_config_ex(&*LLVM_CONFIG_PATH, arg)
+fn llvm_config(args: &[&str]) -> String {
+    llvm_config_ex(&*LLVM_CONFIG_PATH, args)
         .expect("Surprising failure from llvm-config")
 }
 
@@ -167,10 +167,10 @@ fn llvm_config(arg: &str) -> String {
 ///
 /// Explicit version of the `llvm_config` function that bubbles errors
 /// up.
-fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str)
+fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, args: &[&str])
         -> io::Result<String> {
     Command::new(binary)
-        .arg(arg)
+        .args(args)
         .output()
         .map(|output| String::from_utf8(output.stdout)
             .expect("Output from llvm-config was not valid UTF-8"))
@@ -178,7 +178,7 @@ fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str)
 
 /// Get the LLVM version using llvm-config.
 fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
-    let version_str = try!(llvm_config_ex(binary.as_ref(), "--version"));
+    let version_str = try!(llvm_config_ex(binary.as_ref(), &["--version"]));
 
     // LLVM isn't really semver and uses version suffixes to build
     // version strings like '3.8.0svn', so limit what we try to parse
@@ -207,26 +207,26 @@ fn add_lib(kind: &'static str, name: &str) {
     println!("cargo:rustc-link-lib={}={}", kind, name);
 }
 
-fn add_libs(kind: &'static str, flag: &'static str) {
-    for name in llvm_config(flag).split_whitespace().map(lib_name) {
+fn add_libs(kind: &'static str, flags: &[&'static str]) {
+    for name in llvm_config(flags).split_whitespace().map(lib_name) {
         add_lib(kind, name);
     }
 }
 
 fn main() {
-    add_libs("dylib", "--system-libs");
+    add_libs("dylib", &["--system-libs"]);
 
-    println!("cargo:rustc-link-search=native={}", llvm_config("--libdir"));
+    println!("cargo:rustc-link-search=native={}", llvm_config(&["--libdir"]));
 
     if cfg!(target_env = "msvc") {
         // --libs returns absolute paths when
         // LLVM was built on Windows with MSVC
-        add_libs("static", "--libnames");
+        add_libs("static", &["--link-static", "--libnames"]);
     } else {
-        add_libs("static", "--libs");
+        add_libs("static", &["--link-static", "--libs"]);
         // Determine which C++ standard library to use: LLVM's or GCC's.
         // This breaks the link step on Windows with MSVC.
-        add_lib("dylib", if llvm_config("--cxxflags").contains("stdlib=libc++") {
+        add_lib("dylib", if llvm_config(&["--cxxflags"]).contains("stdlib=libc++") {
             "c++"
         } else {
             "stdc++"
@@ -234,6 +234,6 @@ fn main() {
     }
 
     // Build the extra wrapper functions.
-    std::env::set_var("CFLAGS", llvm_config("--cflags").trim());
+    std::env::set_var("CFLAGS", llvm_config(&["--cflags"]).trim());
     gcc::compile_library("libtargetwrappers.a", &["wrappers/target.c"]);
 }
