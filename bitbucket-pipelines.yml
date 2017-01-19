@@ -7,5 +7,5 @@ pipelines:
           - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential
           - curl -L https://bitbucket.org/tari/llvm-sys.rs/downloads/llvm-3.9.1.linux.tar.xz | tar -C /usr/local -xJ
           - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-          - PATH=~/rust/bin LLVM_SYS_39_PREFIX=/usr/local/llvm-3.9.1 cargo test
+          - PATH=$PATH:~/rust/bin LLVM_SYS_39_PREFIX=/usr/local/llvm-3.9.1 cargo test
           - ./target/debug/examples/jit-function
