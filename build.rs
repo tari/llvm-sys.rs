@@ -219,18 +219,25 @@ fn main() {
     println!("cargo:rustc-link-search=native={}", llvm_config(&["--libdir"]));
 
     if cfg!(target_env = "msvc") {
-        // --libs returns absolute paths when
-        // LLVM was built on Windows with MSVC
+        // Use --libnames on MSVC because --libs emits full library paths
+        // when built with that compiler.
         add_libs("static", &["--link-static", "--libnames"]);
     } else {
         add_libs("static", &["--link-static", "--libs"]);
-        // Determine which C++ standard library to use: LLVM's or GCC's.
-        // This breaks the link step on Windows with MSVC.
-        add_lib("dylib", if llvm_config(&["--cxxflags"]).contains("stdlib=libc++") {
-            "c++"
+
+        // Link the C++ standard library.
+        if cfg!(target_os = "macos") {
+            // On Mac always use the LLVM one.
+            add_lib("dylib", "c++");
         } else {
-            "stdc++"
-        });
+            // On other platforms detect whether we should use the LLVM
+            // or GCC one.
+            add_lib("dylib", if llvm_config(&["--cxxflags"]).contains("stdlib=libc++") {
+                "c++"       // LLVM
+            } else {
+                "stdc++"    // GCC
+            });
+        }
     }
 
     // Build the extra wrapper functions.
