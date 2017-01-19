@@ -215,7 +215,15 @@ fn main() {
     if !cfg!(windows) {
         // Determine which C++ standard library to use: LLVM's or GCC's.
         let cxxflags = llvm_config("--cxxflags");
-        let libcpp = if cxxflags.contains("stdlib=libc++") { "c++" } else { "stdc++" };
+        let libcpp = if env!(target_os = "macos") {
+            "c++"   // Always LLVM on mac
+        } else {
+            if cxxflags.contains("stdlib=libc++") {
+                "c++"       // LLVM
+            } else {
+                "stdc++"    // GCC
+            }
+        }
         println!("cargo:rustc-link-lib={}", libcpp);
     }
 
