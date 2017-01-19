@@ -7,7 +7,7 @@ license = "MIT"
 keywords = ["bindings", "llvm"]
 
 name = "llvm-sys"
-version = "39.0.0"
+version = "39.0.1"
 authors = [
   "Peter Marheine <peter@taricorp.net>",
   "Scott Olson <scott@solson.me>",
