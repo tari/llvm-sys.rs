@@ -158,6 +158,11 @@ cd your/crate/path
 LLVM_SYS_39_PREFIX=$HOME/llvm-3.9.0 cargo build
 ```
 
+Some build tools (like Visual Studio on Windows) support all configurations
+concurrently so you also need to specify the build type (which defaults to Debug
+on Windows), adding an option like `--config MinSizeRel` to this invocation of
+cmake.
+
 ## Windows
 
 You must use a version of Rust that uses the same compiler as you build LLVM
