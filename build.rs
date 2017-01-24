@@ -201,8 +201,9 @@ fn get_system_libraries() -> Vec<String> {
         .filter(|s| !s.is_empty())
         .map(|flag| {
             if cfg!(target_env = "msvc") {
-                // Need to check how this is formatted for MSVC.
-                panic!("Don't know how to handle MSVC --system-libs ({})", llvm_config("--system-libs"));
+                // Same as --libnames, foo.lib
+                assert!(flag.ends_with(".lib"));
+                &flag[..flag.len() - 4]
             } else {
                 // Linker flags style, -lfoo
                 assert!(flag.starts_with("-l"));
