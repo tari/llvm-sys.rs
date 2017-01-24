@@ -134,6 +134,7 @@ fn is_blacklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
     }
     None
 }
+
 /// Check whether the given LLVM version is compatible with this version of
 /// the crate.
 fn is_compatible_llvm(llvm_version: &Version) -> bool {
@@ -158,8 +159,8 @@ fn is_compatible_llvm(llvm_version: &Version) -> bool {
 ///
 /// Lazily searches for or compiles LLVM as configured by the environment
 /// variables.
-fn llvm_config(args: &[&str]) -> String {
-    llvm_config_ex(&*LLVM_CONFIG_PATH, args)
+fn llvm_config(arg: &str) -> String {
+    llvm_config_ex(&*LLVM_CONFIG_PATH, arg)
         .expect("Surprising failure from llvm-config")
 }
 
@@ -167,10 +168,11 @@ fn llvm_config(args: &[&str]) -> String {
 ///
 /// Explicit version of the `llvm_config` function that bubbles errors
 /// up.
-fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, args: &[&str])
+fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str)
         -> io::Result<String> {
     Command::new(binary)
-        .args(args)
+        .arg(arg)
+        .arg("--link-static")   // Don't use dylib for >= 3.9
         .output()
         .map(|output| String::from_utf8(output.stdout)
             .expect("Output from llvm-config was not valid UTF-8"))
@@ -178,7 +180,7 @@ fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, args: &[&str])
 
 /// Get the LLVM version using llvm-config.
 fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
-    let version_str = try!(llvm_config_ex(binary.as_ref(), &["--version"]));
+    let version_str = try!(llvm_config_ex(binary.as_ref(), "--version"));
 
     // LLVM isn't really semver and uses version suffixes to build
     // version strings like '3.8.0svn', so limit what we try to parse
@@ -191,56 +193,86 @@ fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
     Ok(Version::parse(&version_str[start..end]).unwrap())
 }
 
-#[cfg(target_env = "msvc")]
-fn lib_name(name: &str) -> &str {
-    assert!(name.ends_with(".lib"));
-    &name[..name.len() - 4]
+/// Get the names of the dylibs required by LLVM, including the C++ standard
+/// library.
+fn get_system_libraries() -> Vec<String> {
+    llvm_config("--system-libs")
+        .split(&[' ', '\n'] as &[char])
+        .filter(|s| !s.is_empty())
+        .map(|flag| {
+            if cfg!(target_env = "msvc") {
+                // Need to check how this is formatted for MSVC.
+                panic!("Don't know how to handle MSVC --system-libs ({})", llvm_config("--system-libs"));
+            } else {
+                // Linker flags style, -lfoo
+                assert!(flag.starts_with("-l"));
+                &flag[2..]
+            }
+        })
+        .chain(get_system_libcpp())
+        .map(str::to_owned)
+        .collect::<Vec<String>>()
 }
 
-#[cfg(not(target_env = "msvc"))]
-fn lib_name(name: &str) -> &str {
-    assert!(name.starts_with("-l"));
-    &name[2..]
-}
-
-fn add_lib(kind: &'static str, name: &str) {
-    println!("cargo:rustc-link-lib={}={}", kind, name);
-}
-
-fn add_libs(kind: &'static str, flags: &[&'static str]) {
-    for name in llvm_config(flags).split_whitespace().map(lib_name) {
-        add_lib(kind, name);
+/// Get the library that must be linked for C++, if any.
+fn get_system_libcpp() -> Option<&'static str> {
+    if cfg!(target_env = "msvc") {
+        // MSVC doesn't need an explicit one.
+        None
+    } else if cfg!(target_os = "macos") {
+        // On OS X 10.9 and later, LLVM's libc++ is the default. On earlier
+        // releases GCC's libstdc++ is default. Unfortunately we can't
+        // reasonably detect which one we need (on older ones libc++ is
+        // available and can be selected with -stdlib=lib++), so assume the
+        // latest, at the cost of breaking the build on older OS releases
+        // when LLVM was built against libstdc++.
+        Some("c++")
+    } else {
+        // Otherwise assume GCC's libstdc++.
+        // This assumption is probably wrong on some platforms, but would need
+        // testing on them.
+        Some("stdc++")
     }
+}
+
+/// Get the names of libraries to link against.
+fn get_link_libraries() -> Vec<String> {
+    // Using --libnames in conjunction with --libdir is particularly important
+    // for MSVC when LLVM is in a path with spaces, but it is generally less of
+    // a hack than parsing linker flags output from --libs and --ldflags.
+    llvm_config("--libnames")
+        .split(&[' ', '\n'] as &[char])
+        .filter(|s| !s.is_empty())
+        .map(|name| {
+            // --libnames gives library filenames. Extract only the name that
+            // we need to pass to the linker.
+            if cfg!(target_env = "msvc") {
+                // LLVMfoo.lib
+                assert!(name.ends_with(".lib"));
+                &name[..name.len() - 4]
+            } else {
+                // libLLVMfoo.a
+                assert!(name.starts_with("lib") && name.ends_with(".a"));
+                &name[3..name.len() - 2]
+            }
+        })
+        .map(str::to_owned)
+        .collect::<Vec<String>>()
 }
 
 fn main() {
-    add_libs("dylib", &["--system-libs"]);
+    // Link LLVM libraries
+    println!("cargo:rustc-link-search=native={}", llvm_config("--libdir"));
+    for name in get_link_libraries() {
+        println!("cargo:rustc-link-lib=static={}", name);
+    }
 
-    println!("cargo:rustc-link-search=native={}", llvm_config(&["--libdir"]));
-
-    if cfg!(target_env = "msvc") {
-        // Use --libnames on MSVC because --libs emits full library paths
-        // when built with that compiler.
-        add_libs("static", &["--link-static", "--libnames"]);
-    } else {
-        add_libs("static", &["--link-static", "--libs"]);
-
-        // Link the C++ standard library.
-        if cfg!(target_os = "macos") {
-            // On Mac always use the LLVM one.
-            add_lib("dylib", "c++");
-        } else {
-            // On other platforms detect whether we should use the LLVM
-            // or GCC one.
-            add_lib("dylib", if llvm_config(&["--cxxflags"]).contains("stdlib=libc++") {
-                "c++"       // LLVM
-            } else {
-                "stdc++"    // GCC
-            });
-        }
+    // Link system libraries
+    for name in get_system_libraries() {
+        println!("cargo:rustc-link-lib=dylib={}", name);
     }
 
     // Build the extra wrapper functions.
-    std::env::set_var("CFLAGS", llvm_config(&["--cflags"]).trim());
+    std::env::set_var("CFLAGS", llvm_config("--cflags").trim());
     gcc::compile_library("libtargetwrappers.a", &["wrappers/target.c"]);
 }
