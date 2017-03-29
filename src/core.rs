@@ -1,7 +1,6 @@
 //! The LLVM intermediate representation.
 
 use super::*;
-use super::prelude::*;
 
 // Core
 extern "C" {

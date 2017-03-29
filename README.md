@@ -46,14 +46,15 @@ is a binary-compatible version but with elements deprecated (implying that
 movement to the next crate version in the same table row will still compile, but
 may introduce new warnings).
 
-| LLVM version | 36 | 37 | 38 | 39 |
-|--------------|----|----|----|----|
-| <3.6         |    |    |    |    |
-| 3.6.x        | ●  |    |    |    |
-| 3.7.0        |    |    |    |    |
-| 3.7.x        |    | ●  |    |    |
-| 3.8.x        |    | ◑  | ●  |    |
-| 3.9.0        |    |    |    | ●  |
+| LLVM version | 36 | 37 | 38 | 39 | 40 |
+|--------------|----|----|----|----|----|
+| <3.6         |    |    |    |    |    |
+| 3.6.x        | ●  |    |    |    |    |
+| 3.7.0        |    |    |    |    |    |
+| 3.7.x        |    | ●  |    |    |    |
+| 3.8.x        |    | ◑  | ●  |    |    |
+| 3.9.x        |    |    |    | ●  |    |
+| 4.0.0        |    |    |    |    | ●  |
 
 The build scripts will not enforce this compatibility matrix strictly,
 permitting compilation against any version of LLVM that is at least as new as

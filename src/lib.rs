@@ -6,8 +6,6 @@
 #![allow(non_upper_case_globals)]
 
 extern crate libc;
-#[macro_use]
-extern crate bitflags;
 
 use self::prelude::*;
 
