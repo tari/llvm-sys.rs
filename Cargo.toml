@@ -5,7 +5,7 @@ repository = "https://bitbucket.org/tari/llvm-sys.rs"
 readme = "README.md"
 license = "MIT"
 keywords = ["bindings", "llvm"]
-
+links = "llvm"
 name = "llvm-sys"
 version = "40.0.0"
 authors = [

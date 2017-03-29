@@ -262,8 +262,14 @@ fn get_link_libraries() -> Vec<String> {
 }
 
 fn main() {
+    let libdir = llvm_config("--libdir");
+
+    // Export information to other crates
+    println!("cargo:config_path={}", LLVM_CONFIG_PATH.display()); // will be DEP_LLVM_CONFIG_PATH
+    println!("cargo:libdir={}", libdir); // DEP_LLVM_LIBDIR
+
     // Link LLVM libraries
-    println!("cargo:rustc-link-search=native={}", llvm_config("--libdir"));
+    println!("cargo:rustc-link-search=native={}", libdir);
     for name in get_link_libraries() {
         println!("cargo:rustc-link-lib=static={}", name);
     }
