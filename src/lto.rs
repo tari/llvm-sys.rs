@@ -248,6 +248,16 @@ extern "C" {
     pub fn thinlto_module_get_object(cg: thinlto_code_gen_t,
                                      index: ::libc::c_uint)
                                      -> LTOObjectBuffer;
+    /// Return the number of object files produced by the code generator.
+    ///
+    /// Usually the same as the number of input files, but not guaranteed.
+    pub fn thinlto_module_get_num_object_files(cg: thinlto_code_gen_t) -> ::libc::c_uint;
+    /// Return the path to the ith output object file.
+    ///
+    /// Use `thinlto_module_get_num_object_files` to get the number of available objects.
+    pub fn thinlto_module_get_object_file(cg: thinlto_code_gen_t,
+                                          index: ::libc::c_uint)
+                                          -> *const ::libc::c_char;
     /// Set which PIC code model to generate.
     ///
     /// Returns true on error.
@@ -280,6 +290,12 @@ extern "C" {
     ///
     /// This is meant to make the bitcode files available for debugging.
     pub fn thinlto_codegen_set_savetemps_dir(cg: thinlto_code_gen_t,
+                                             save_temps_dir: *const ::libc::c_char);
+    /// Set the path to a directory to save generated object files.
+    ///
+    /// Set this to request on-disk rather than in-memory buffers. When set, use
+    /// `thinlto_module_get_object_file` instead of `thinlto_module_get_object`.
+    pub fn thinlto_set_generated_objects_dir(cg: thinlto_code_gen_t,
                                              save_temps_dir: *const ::libc::c_char);
     /// Set the CPU to generate code for.
     pub fn thinlto_codegen_set_cpu(cg: thinlto_code_gen_t, cpu: *const ::libc::c_char);

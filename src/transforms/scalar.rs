@@ -12,6 +12,7 @@ extern "C" {
     pub fn LLVMAddScalarizerPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddMergedLoadStoreMotionPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddGVNPass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddNewGVNPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddIndVarSimplifyPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddInstructionCombiningPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddJumpThreadingPass(PM: LLVMPassManagerRef);
@@ -39,6 +40,7 @@ extern "C" {
     pub fn LLVMAddVerifierPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddCorrelatedValuePropagationPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddEarlyCSEPass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddEarlyCSEMemSSAPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLowerExpectIntrinsicPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddTypeBasedAliasAnalysisPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddScopedNoAliasAAPass(PM: LLVMPassManagerRef);
