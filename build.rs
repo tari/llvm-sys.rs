@@ -187,10 +187,10 @@ fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
     // to only the numeric bits.
     let re = Regex::new(r"^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)")
         .unwrap();
-    let (start, end) = re.find(&version_str)
+    let m = re.find(&version_str)
         .expect("Could not determine LLVM version from llvm-config.");
 
-    Ok(Version::parse(&version_str[start..end]).unwrap())
+    Ok(Version::parse(&version_str[m.start()..m.end()]).unwrap())
 }
 
 /// Get the names of the dylibs required by LLVM, including the C++ standard
