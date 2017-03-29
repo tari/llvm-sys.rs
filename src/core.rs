@@ -349,6 +349,7 @@ extern "C" {
     pub fn LLVMConstNUWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstFMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMConstExactUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstSDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstExactSDiv(LHSConstant: LLVMValueRef,
                               RHSConstant: LLVMValueRef)
@@ -501,7 +502,6 @@ extern "C" {
     pub fn LLVMSetFunctionCallConv(Fn: LLVMValueRef, CC: ::libc::c_uint);
     pub fn LLVMGetGC(Fn: LLVMValueRef) -> *const ::libc::c_char;
     pub fn LLVMSetGC(Fn: LLVMValueRef, Name: *const ::libc::c_char);
-    pub fn LLVMAddFunctionAttr(Fn: LLVMValueRef, PA: LLVMAttribute);
     pub fn LLVMAddAttributeAtIndex(F: LLVMValueRef, Idx: LLVMAttributeIndex, A: LLVMAttributeRef);
     pub fn LLVMGetAttributeCountAtIndex(F: LLVMValueRef,
                                         Idx: LLVMAttributeIndex)
@@ -528,8 +528,6 @@ extern "C" {
     pub fn LLVMAddTargetDependentFunctionAttr(Fn: LLVMValueRef,
                                               A: *const ::libc::c_char,
                                               V: *const ::libc::c_char);
-    pub fn LLVMGetFunctionAttr(Fn: LLVMValueRef) -> LLVMAttribute;
-    pub fn LLVMRemoveFunctionAttr(Fn: LLVMValueRef, PA: LLVMAttribute);
 
     // ..->Function Values->Function Parameters
     pub fn LLVMCountParams(Fn: LLVMValueRef) -> ::libc::c_uint;
@@ -540,9 +538,6 @@ extern "C" {
     pub fn LLVMGetLastParam(Fn: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMGetNextParam(Arg: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMGetPreviousParam(Arg: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMAddAttribute(Arg: LLVMValueRef, PA: LLVMAttribute);
-    pub fn LLVMRemoveAttribute(Arg: LLVMValueRef, PA: LLVMAttribute);
-    pub fn LLVMGetAttribute(Arg: LLVMValueRef) -> LLVMAttribute;
     pub fn LLVMSetParamAlignment(Arg: LLVMValueRef, Align: ::libc::c_uint);
 }
 
@@ -630,10 +625,6 @@ extern "C" {
     pub fn LLVMGetNumArgOperands(Instr: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetInstructionCallConv(Instr: LLVMValueRef, CC: ::libc::c_uint);
     pub fn LLVMGetInstructionCallConv(Instr: LLVMValueRef) -> ::libc::c_uint;
-    pub fn LLVMAddInstrAttribute(Instr: LLVMValueRef, index: ::libc::c_uint, arg1: LLVMAttribute);
-    pub fn LLVMRemoveInstrAttribute(Instr: LLVMValueRef,
-                                    index: ::libc::c_uint,
-                                    arg1: LLVMAttribute);
     pub fn LLVMSetInstrParamAlignment(Instr: LLVMValueRef,
                                       index: ::libc::c_uint,
                                       Align: ::libc::c_uint);
@@ -945,6 +936,11 @@ extern "C" {
                          RHS: LLVMValueRef,
                          Name: *const ::libc::c_char)
                          -> LLVMValueRef;
+    pub fn LLVMBuildExactUDiv(arg1: LLVMBuilderRef,
+                              LHS: LLVMValueRef,
+                              RHS: LLVMValueRef,
+                              Name: *const ::libc::c_char)
+                              -> LLVMValueRef;
     pub fn LLVMBuildSDiv(arg1: LLVMBuilderRef,
                          LHS: LLVMValueRef,
                          RHS: LLVMValueRef,

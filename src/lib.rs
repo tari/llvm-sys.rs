@@ -70,64 +70,6 @@ pub mod transforms {
     pub mod vectorize;
 }
 
-bitflags! {
-    #[repr(C)]
-    pub flags LLVMAttribute: ::libc::c_int {
-        #[allow(non_upper_case_globals)] 
-        const LLVMZExtAttribute = 1 << 0,
-        #[allow(non_upper_case_globals)] 
-        const LLVMSExtAttribute = 1 << 1,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNoReturnAttribute= 4,
-        #[allow(non_upper_case_globals)] 
-        const LLVMInRegAttribute= 8,
-        #[allow(non_upper_case_globals)] 
-        const LLVMStructRetAttribute= 16,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNoUnwindAttribute= 32,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNoAliasAttribute= 64,
-        #[allow(non_upper_case_globals)] 
-        const LLVMByValAttribute= 128,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNestAttribute= 256,
-        #[allow(non_upper_case_globals)] 
-        const LLVMReadNoneAttribute= 512,
-        #[allow(non_upper_case_globals)] 
-        const LLVMReadOnlyAttribute= 1024,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNoInlineAttribute= 2048,
-        #[allow(non_upper_case_globals)] 
-        const LLVMAlwaysInlineAttribute= 4096,
-        #[allow(non_upper_case_globals)] 
-        const LLVMOptimizeForSizeAttribute= 8192,
-        #[allow(non_upper_case_globals)] 
-        const LLVMStackProtectAttribute= 16384,
-        #[allow(non_upper_case_globals)] 
-        const LLVMStackProtectReqAttribute= 32768,
-        #[allow(non_upper_case_globals)] 
-        const LLVMAlignment= 2031616,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNoCaptureAttribute= 2097152,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNoRedZoneAttribute= 4194304,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNoImplicitFloatAttribute= 8388608,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNakedAttribute= 16777216,
-        #[allow(non_upper_case_globals)] 
-        const LLVMInlineHintAttribute= 33554432,
-        #[allow(non_upper_case_globals)] 
-        const LLVMStackAlignment= 469762048,
-        #[allow(non_upper_case_globals)] 
-        const LLVMReturnsTwice= 536870912,
-        #[allow(non_upper_case_globals)] 
-        const LLVMUWTable= 1073741824,
-        #[allow(non_upper_case_globals)] 
-        const LLVMNonLazyBind = 1 << 31
-    }
-}
-
 #[repr(C)]
 pub enum LLVMOpcode {
     LLVMRet = 1,
