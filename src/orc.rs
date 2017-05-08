@@ -85,7 +85,7 @@ extern "C" {
 
     /// Get symbol address from JIT instance.
     pub fn LLVMOrcGetSymbolAddress(JITStack: LLVMOrcJITStackRef,
-                                   SymbolName: ::libc::c_char)
+                                   SymbolName: *const ::libc::c_char)
                                    -> LLVMOrcTargetAddress;
 
     /// Dispose of an ORC JIT stack.
