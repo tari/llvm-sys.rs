@@ -505,9 +505,9 @@ extern "C" {
     pub fn LLVMGetAttributeCountAtIndex(F: LLVMValueRef,
                                         Idx: LLVMAttributeIndex)
                                         -> ::libc::c_uint;
-    pub fn LLVMGetAttributeAtIndex(F: LLVMValueRef,
-                                   Idx: LLVMAttributeIndex,
-                                   Attrs: *mut LLVMAttributeRef);
+    pub fn LLVMGetAttributesAtIndex(F: LLVMValueRef,
+                                    Idx: LLVMAttributeIndex,
+                                    Attrs: *mut LLVMAttributeRef);
     pub fn LLVMGetEnumAttributeAtIndex(F: LLVMValueRef,
                                        Idx: LLVMAttributeIndex,
                                        KindID: ::libc::c_uint)
