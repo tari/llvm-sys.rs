@@ -230,6 +230,15 @@ fn main() {
         println!("cargo:rustc-link-lib={}", libcpp);
     }
 
+    // Link libffi if the user requested this workaround.
+    // See https://bitbucket.org/tari/llvm-sys.rs/issues/12/
+    let force_ffi = env::var_os(format!("LLVM_SYS_{}_FFI_WORKAROUND",
+                                        env!("CARGO_PKG_VERSION_MAJOR")))
+        .is_some();
+    if force_ffi {
+        println!("cargo:rustc-link-lib=dylib={}", "ffi");
+    }
+
     // Build the extra wrapper functions.
     std::env::set_var("CFLAGS", llvm_config("--cflags").trim());
     gcc::compile_library("libtargetwrappers.a", &["wrappers/target.c"]);
