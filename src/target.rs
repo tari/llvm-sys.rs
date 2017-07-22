@@ -102,6 +102,13 @@ extern "C" {
     pub fn LLVMInitializeX86AsmPrinter();
     pub fn LLVMInitializeX86AsmParser();
     pub fn LLVMInitializeX86Disassembler();
+
+    pub fn LLVMInitializeBPFTargetInfo();
+    pub fn LLVMInitializeBPFTarget();
+    pub fn LLVMInitializeBPFTargetMC();
+    pub fn LLVMInitializeBPFAsmPrinter();
+    // No AsmParser
+    pub fn LLVMInitializeBPFDisassembler();
 }
 
 extern "C" {
