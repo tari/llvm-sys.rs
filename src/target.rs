@@ -15,7 +15,7 @@ pub enum LLVMOpaqueTargetLibraryInfotData {}
 pub type LLVMTargetLibraryInfoRef = *mut LLVMOpaqueTargetLibraryInfotData;
 
 extern "C" {
-    pub fn LLVMInitializeR600TargetInfo();
+    pub fn LLVMInitializeAMDGPUTargetInfo();
     pub fn LLVMInitializeSystemZTargetInfo();
     pub fn LLVMInitializeHexagonTargetInfo();
     pub fn LLVMInitializeNVPTXTargetInfo();
@@ -28,7 +28,7 @@ extern "C" {
     pub fn LLVMInitializePowerPCTargetInfo();
     pub fn LLVMInitializeSparcTargetInfo();
     pub fn LLVMInitializeX86TargetInfo();
-    pub fn LLVMInitializeR600Target();
+    pub fn LLVMInitializeAMDGPUTarget();
     pub fn LLVMInitializeSystemZTarget();
     pub fn LLVMInitializeHexagonTarget();
     pub fn LLVMInitializeNVPTXTarget();
@@ -41,7 +41,7 @@ extern "C" {
     pub fn LLVMInitializePowerPCTarget();
     pub fn LLVMInitializeSparcTarget();
     pub fn LLVMInitializeX86Target();
-    pub fn LLVMInitializeR600TargetMC();
+    pub fn LLVMInitializeAMDGPUTargetMC();
     pub fn LLVMInitializeSystemZTargetMC();
     pub fn LLVMInitializeHexagonTargetMC();
     pub fn LLVMInitializeNVPTXTargetMC();
@@ -54,7 +54,7 @@ extern "C" {
     pub fn LLVMInitializePowerPCTargetMC();
     pub fn LLVMInitializeSparcTargetMC();
     pub fn LLVMInitializeX86TargetMC();
-    pub fn LLVMInitializeR600AsmPrinter();
+    pub fn LLVMInitializeAMDGPUAsmPrinter();
     pub fn LLVMInitializeSystemZAsmPrinter();
     pub fn LLVMInitializeHexagonAsmPrinter();
     pub fn LLVMInitializeNVPTXAsmPrinter();
@@ -66,7 +66,7 @@ extern "C" {
     pub fn LLVMInitializePowerPCAsmPrinter();
     pub fn LLVMInitializeSparcAsmPrinter();
     pub fn LLVMInitializeX86AsmPrinter();
-    pub fn LLVMInitializeR600AsmParser();
+    pub fn LLVMInitializeAMDGPUAsmParser();
     pub fn LLVMInitializeSystemZAsmParser();
     pub fn LLVMInitializeMipsAsmParser();
     pub fn LLVMInitializeAArch64AsmParser();
