@@ -15,74 +15,93 @@ pub enum LLVMOpaqueTargetLibraryInfotData {}
 pub type LLVMTargetLibraryInfoRef = *mut LLVMOpaqueTargetLibraryInfotData;
 
 extern "C" {
-    pub fn LLVMInitializeAMDGPUTargetInfo() -> ();
-    pub fn LLVMInitializeSystemZTargetInfo() -> ();
-    pub fn LLVMInitializeHexagonTargetInfo() -> ();
-    pub fn LLVMInitializeNVPTXTargetInfo() -> ();
-    pub fn LLVMInitializeCppBackendTargetInfo() -> ();
-    pub fn LLVMInitializeMSP430TargetInfo() -> ();
-    pub fn LLVMInitializeXCoreTargetInfo() -> ();
-    pub fn LLVMInitializeMipsTargetInfo() -> ();
-    pub fn LLVMInitializeAArch64TargetInfo() -> ();
-    pub fn LLVMInitializeARMTargetInfo() -> ();
-    pub fn LLVMInitializePowerPCTargetInfo() -> ();
-    pub fn LLVMInitializeSparcTargetInfo() -> ();
-    pub fn LLVMInitializeX86TargetInfo() -> ();
-    pub fn LLVMInitializeAMDGPUTarget() -> ();
-    pub fn LLVMInitializeSystemZTarget() -> ();
-    pub fn LLVMInitializeHexagonTarget() -> ();
-    pub fn LLVMInitializeNVPTXTarget() -> ();
-    pub fn LLVMInitializeCppBackendTarget() -> ();
-    pub fn LLVMInitializeMSP430Target() -> ();
-    pub fn LLVMInitializeXCoreTarget() -> ();
-    pub fn LLVMInitializeMipsTarget() -> ();
-    pub fn LLVMInitializeAArch64Target() -> ();
-    pub fn LLVMInitializeARMTarget() -> ();
-    pub fn LLVMInitializePowerPCTarget() -> ();
-    pub fn LLVMInitializeSparcTarget() -> ();
-    pub fn LLVMInitializeX86Target() -> ();
-    pub fn LLVMInitializeAMDGPUTargetMC() -> ();
-    pub fn LLVMInitializeSystemZTargetMC() -> ();
-    pub fn LLVMInitializeHexagonTargetMC() -> ();
-    pub fn LLVMInitializeNVPTXTargetMC() -> ();
-    pub fn LLVMInitializeCppBackendTargetMC() -> ();
-    pub fn LLVMInitializeMSP430TargetMC() -> ();
-    pub fn LLVMInitializeXCoreTargetMC() -> ();
-    pub fn LLVMInitializeMipsTargetMC() -> ();
-    pub fn LLVMInitializeAArch64TargetMC() -> ();
-    pub fn LLVMInitializeARMTargetMC() -> ();
-    pub fn LLVMInitializePowerPCTargetMC() -> ();
-    pub fn LLVMInitializeSparcTargetMC() -> ();
-    pub fn LLVMInitializeX86TargetMC() -> ();
-    pub fn LLVMInitializeAMDGPUAsmPrinter() -> ();
-    pub fn LLVMInitializeSystemZAsmPrinter() -> ();
-    pub fn LLVMInitializeHexagonAsmPrinter() -> ();
-    pub fn LLVMInitializeNVPTXAsmPrinter() -> ();
-    pub fn LLVMInitializeMSP430AsmPrinter() -> ();
-    pub fn LLVMInitializeXCoreAsmPrinter() -> ();
-    pub fn LLVMInitializeMipsAsmPrinter() -> ();
-    pub fn LLVMInitializeAArch64AsmPrinter() -> ();
-    pub fn LLVMInitializeARMAsmPrinter() -> ();
-    pub fn LLVMInitializePowerPCAsmPrinter() -> ();
-    pub fn LLVMInitializeSparcAsmPrinter() -> ();
-    pub fn LLVMInitializeX86AsmPrinter() -> ();
-    pub fn LLVMInitializeAMDGPUAsmParser() -> ();
-    pub fn LLVMInitializeSystemZAsmParser() -> ();
-    pub fn LLVMInitializeMipsAsmParser() -> ();
-    pub fn LLVMInitializeAArch64AsmParser() -> ();
-    pub fn LLVMInitializeARMAsmParser() -> ();
-    pub fn LLVMInitializePowerPCAsmParser() -> ();
-    pub fn LLVMInitializeSparcAsmParser() -> ();
-    pub fn LLVMInitializeX86AsmParser() -> ();
-    pub fn LLVMInitializeSystemZDisassembler() -> ();
-    pub fn LLVMInitializeHexagonDisassembler() -> ();
-    pub fn LLVMInitializeXCoreDisassembler() -> ();
-    pub fn LLVMInitializeMipsDisassembler() -> ();
-    pub fn LLVMInitializeAArch64Disassembler() -> ();
-    pub fn LLVMInitializeARMDisassembler() -> ();
-    pub fn LLVMInitializePowerPCDisassembler() -> ();
-    pub fn LLVMInitializeSparcDisassembler() -> ();
-    pub fn LLVMInitializeX86Disassembler() -> ();
+    pub fn LLVMInitializeAMDGPUTargetInfo();
+    pub fn LLVMInitializeAMDGPUTarget();
+    pub fn LLVMInitializeAMDGPUTargetMC();
+    pub fn LLVMInitializeAMDGPUAsmPrinter();
+    pub fn LLVMInitializeAMDGPUAsmParser();
+    // Disassembler?
+
+    pub fn LLVMInitializeSystemZTargetInfo();
+    pub fn LLVMInitializeSystemZTarget();
+    pub fn LLVMInitializeSystemZTargetMC();
+    pub fn LLVMInitializeSystemZAsmPrinter();
+    pub fn LLVMInitializeSystemZAsmParser();
+    pub fn LLVMInitializeSystemZDisassembler();
+
+    pub fn LLVMInitializeHexagonTargetInfo();
+    pub fn LLVMInitializeHexagonTarget();
+    pub fn LLVMInitializeHexagonTargetMC();
+    pub fn LLVMInitializeHexagonAsmPrinter();
+    // AsmParser?
+    pub fn LLVMInitializeHexagonDisassembler();
+
+    pub fn LLVMInitializeNVPTXTargetInfo();
+    pub fn LLVMInitializeNVPTXTarget();
+    pub fn LLVMInitializeNVPTXTargetMC();
+    pub fn LLVMInitializeNVPTXAsmPrinter();
+    // AsmParser?
+
+    pub fn LLVMInitializeCppBackendTargetInfo();
+    pub fn LLVMInitializeCppBackendTarget();
+    pub fn LLVMInitializeCppBackendTargetMC();
+    // AsmPrinter?
+    // AsmParser?
+
+    pub fn LLVMInitializeMSP430TargetInfo();
+    pub fn LLVMInitializeMSP430Target();
+    pub fn LLVMInitializeMSP430TargetMC();
+    pub fn LLVMInitializeMSP430AsmPrinter();
+    // AsmParser?
+
+    pub fn LLVMInitializeXCoreTargetInfo();
+    pub fn LLVMInitializeXCoreTarget();
+    pub fn LLVMInitializeXCoreTargetMC();
+    pub fn LLVMInitializeXCoreAsmPrinter();
+    // AsmParser?
+    pub fn LLVMInitializeXCoreDisassembler();
+
+    pub fn LLVMInitializeMipsTargetInfo();
+    pub fn LLVMInitializeMipsTarget();
+    pub fn LLVMInitializeMipsTargetMC();
+    pub fn LLVMInitializeMipsAsmPrinter();
+    pub fn LLVMInitializeMipsAsmParser();
+    pub fn LLVMInitializeMipsDisassembler();
+
+    pub fn LLVMInitializeAArch64TargetInfo();
+    pub fn LLVMInitializeAArch64Target();
+    pub fn LLVMInitializeAArch64TargetMC();
+    pub fn LLVMInitializeAArch64AsmPrinter();
+    pub fn LLVMInitializeAArch64AsmParser();
+    pub fn LLVMInitializeAArch64Disassembler();
+
+    pub fn LLVMInitializeARMTargetInfo();
+    pub fn LLVMInitializeARMTarget();
+    pub fn LLVMInitializeARMTargetMC();
+    pub fn LLVMInitializeARMAsmPrinter();
+    pub fn LLVMInitializeARMAsmParser();
+    pub fn LLVMInitializeARMDisassembler();
+
+    pub fn LLVMInitializePowerPCTargetInfo();
+    pub fn LLVMInitializePowerPCTarget();
+    pub fn LLVMInitializePowerPCTargetMC();
+    pub fn LLVMInitializePowerPCAsmPrinter();
+    pub fn LLVMInitializePowerPCAsmParser();
+    pub fn LLVMInitializePowerPCDisassembler();
+
+    pub fn LLVMInitializeSparcTargetInfo();
+    pub fn LLVMInitializeSparcTarget();
+    pub fn LLVMInitializeSparcTargetMC();
+    pub fn LLVMInitializeSparcAsmPrinter();
+    pub fn LLVMInitializeSparcAsmParser();
+    pub fn LLVMInitializeSparcDisassembler();
+
+    pub fn LLVMInitializeX86TargetInfo();
+    pub fn LLVMInitializeX86Target();
+    pub fn LLVMInitializeX86TargetMC();
+    pub fn LLVMInitializeX86AsmPrinter();
+    pub fn LLVMInitializeX86AsmParser();
+    pub fn LLVMInitializeX86Disassembler();
 }
 
 extern "C" {
