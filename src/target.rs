@@ -109,6 +109,20 @@ extern "C" {
     pub fn LLVMInitializeBPFAsmPrinter();
     // No AsmParser
     pub fn LLVMInitializeBPFDisassembler();
+
+    pub fn LLVMInitializeLanaiTargetInfo();
+    pub fn LLVMInitializeLanaiTarget();
+    pub fn LLVMInitializeLanaiTargetMC();
+    pub fn LLVMInitializeLanaiAsmPrinter();
+    pub fn LLVMInitializeLanaiAsmParser();
+    pub fn LLVMInitializeLanaiDisassembler();
+
+    pub fn LLVMInitializeRISCVTargetInfo();
+    pub fn LLVMInitializeRISCVTarget();
+    pub fn LLVMInitializeRISCVTargetMC();
+    // No AsmPrinter
+    // No AsmParser
+    // No Disassembler
 }
 
 extern "C" {
