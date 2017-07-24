@@ -20,7 +20,7 @@ extern "C" {
     /// Get the diagnostic handler of this context.
     pub fn LLVMContextGetDiagnosticHandler(C: LLVMContextRef) -> LLVMDiagnosticHandler;
     /// Get the diagnostic context of this context.
-    pub fn LLVMContextGetdiagnosticContext(C: LLVMContextRef) -> *mut ::libc::c_void;
+    pub fn LLVMContextGetDiagnosticContext(C: LLVMContextRef) -> *mut ::libc::c_void;
     pub fn LLVMContextSetYieldCallback(C: LLVMContextRef,
                                        Callback: LLVMYieldCallback,
                                        OpaqueHandle: *mut ::libc::c_void);
