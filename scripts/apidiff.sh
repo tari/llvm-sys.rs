@@ -34,3 +34,5 @@ else
 fi
 
 svn diff $(branch_url $R1)/include/llvm-c $(branch_url $R2)/include/llvm-c | $colordiff
+
+echo "For new major verions, check llvm/Config/ for new target functions."
