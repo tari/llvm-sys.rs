@@ -108,7 +108,7 @@ extern "C" {
     pub fn LLVMInitializeBPFTargetMC();
     pub fn LLVMInitializeBPFAsmPrinter();
     // No AsmParser
-    pub fn LLVMInitializeBPFDisassembler();
+    // No Disassembler
 }
 
 extern "C" {
