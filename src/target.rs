@@ -3,6 +3,7 @@
 use super::prelude::*;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMByteOrdering {
     LLVMBigEndian = 0,
     LLVMLittleEndian = 1,
