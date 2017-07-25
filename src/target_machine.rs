@@ -10,6 +10,7 @@ pub enum LLVMTarget {}
 pub type LLVMTargetRef = *mut LLVMTarget;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMCodeGenOptLevel {
     LLVMCodeGenLevelNone = 0,
     LLVMCodeGenLevelLess = 1,
@@ -18,6 +19,7 @@ pub enum LLVMCodeGenOptLevel {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMRelocMode {
     LLVMRelocDefault = 0,
     LLVMRelocStatic = 1,
@@ -26,7 +28,7 @@ pub enum LLVMRelocMode {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMCodeModel {
     LLVMCodeModelDefault = 0,
     LLVMCodeModelJITDefault = 1,
@@ -37,6 +39,7 @@ pub enum LLVMCodeModel {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMCodeGenFileType {
     LLVMAssemblyFile = 0,
     LLVMObjectFile = 1,

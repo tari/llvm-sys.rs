@@ -5,6 +5,7 @@
 pub type llvm_lto_t = *mut ::libc::c_void;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum llvm_lto_status_t {
     LLVM_LTO_UNKNOWN = 0,
     LLVM_LTO_OPT_SUCCESS = 1,
