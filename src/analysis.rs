@@ -3,6 +3,7 @@
 use super::prelude::*;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMVerifierFailureAction {
     /// Print to stderr and abort the process.
     LLVMAbortProcessAction = 0,

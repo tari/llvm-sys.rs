@@ -12,6 +12,7 @@ pub type LLVMOrcTargetAddress = u64;
 pub type LLVMOrcSymbolResolverFn = extern "C" fn(*const ::libc::c_char, *mut ::libc::c_void) -> u64;
 pub type LLVMOrcLazyCompileCallbackFn = extern "C" fn(LLVMOrcJITStackRef, *mut ::libc::c_void);
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMOrcErrorCode {
     LLVMOrcErrSuccess = 0,
     LLVMOrcErrGeneric,
