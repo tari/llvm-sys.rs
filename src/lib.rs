@@ -69,6 +69,7 @@ pub mod transforms {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMOpcode {
     LLVMRet = 1,
     LLVMBr = 2,
@@ -137,6 +138,7 @@ pub enum LLVMOpcode {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMTypeKind {
     LLVMVoidTypeKind = 0,
     LLVMHalfTypeKind = 1,
@@ -158,6 +160,7 @@ pub enum LLVMTypeKind {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMLinkage {
     LLVMExternalLinkage = 0,
     LLVMAvailableExternallyLinkage = 1,
@@ -179,6 +182,7 @@ pub enum LLVMLinkage {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMVisibility {
     LLVMDefaultVisibility = 0,
     LLVMHiddenVisibility = 1,
@@ -186,6 +190,7 @@ pub enum LLVMVisibility {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMDLLStorageClass {
     LLVMDefaultStorageClass = 0,
     LLVMDLLImportStorageClass = 1,
@@ -193,6 +198,7 @@ pub enum LLVMDLLStorageClass {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMCallConv {
     LLVMCCallConv = 0,
     LLVMFastCallConv = 8,
@@ -204,6 +210,7 @@ pub enum LLVMCallConv {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMValueKind {
     LLVMArgumentValueKind,
     LLVMBasicBlockValueKind,
@@ -236,6 +243,7 @@ pub enum LLVMValueKind {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMIntPredicate {
     LLVMIntEQ = 32,
     LLVMIntNE = 33,
@@ -250,6 +258,7 @@ pub enum LLVMIntPredicate {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMRealPredicate {
     LLVMRealPredicateFalse = 0,
     LLVMRealOEQ = 1,
@@ -270,12 +279,14 @@ pub enum LLVMRealPredicate {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMLandingPadClauseTy {
     LLVMLandingPadCatch = 0,
     LLVMLandingPadFilter = 1,
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMThreadLocalMode {
     LLVMNotThreadLocal = 0,
     LLVMGeneralDynamicTLSModel = 1,
@@ -285,6 +296,7 @@ pub enum LLVMThreadLocalMode {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMAtomicOrdering {
     LLVMAtomicOrderingNotAtomic = 0,
     LLVMAtomicOrderingUnordered = 1,
@@ -296,6 +308,7 @@ pub enum LLVMAtomicOrdering {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpXchg = 0,
     LLVMAtomicRMWBinOpAdd = 1,
@@ -311,6 +324,7 @@ pub enum LLVMAtomicRMWBinOp {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMDiagnosticSeverity {
     LLVMDSError = 0,
     LLVMDSWarning = 1,

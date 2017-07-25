@@ -12,6 +12,7 @@ pub type lto_bool_t = u8;
 
 // This looks kind of like bitflags but I'm not sure.
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum lto_symbol_attributes {
     LTO_SYMBOL_ALIGNMENT_MASK = 31,
     LTO_SYMBOL_PERMISSIONS_MASK = 224,
@@ -37,12 +38,14 @@ pub enum lto_symbol_attributes {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum lto_debug_model {
     LTO_DEBUG_MODEL_NONE = 0,
     LTO_DEBUG_MODEL_DWARF = 1,
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum lto_codegen_model {
     LTO_CODEGEN_PIC_MODEL_STATIC = 0,
     LTO_CODEGEN_PIC_MODEL_DYNAMIC = 1,
@@ -60,6 +63,7 @@ pub enum LLVMOpaqueThinLTOCodeGenerator {}
 pub type thinlto_code_gen_t = *mut LLVMOpaqueThinLTOCodeGenerator;
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum lto_codegen_diagnostic_severity_t {
     LTO_DS_ERROR = 0,
     LTO_DS_WARNING = 1,
