@@ -36,5 +36,5 @@ pipelines:
             - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential zlib1g-dev
             - apt-get update && apt-get install -y llvm-3.7 llvm-3.7-dev 
             - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-            - PATH=$PATH:~/rust/bin LLVM_SYS_37_PREFIX=/usr/lib/llvm-3.8 LLVM_SYS_37_FFI_WORKAROUND=1 cargo test
+            - PATH=$PATH:~/rust/bin LLVM_SYS_37_PREFIX=/usr/lib/llvm-3.7 LLVM_SYS_37_FFI_WORKAROUND=1 cargo test
             - ./target/debug/examples/jit-function
