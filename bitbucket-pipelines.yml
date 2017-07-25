@@ -5,7 +5,7 @@ pipelines:
     - step:
         script:
           - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-4.0 main >> /etc/apt/sources.list
-          - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+          - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
           - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential llvm-4.0 llvm-4.0-dev 
           - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
           - PATH=$PATH:~/rust/bin LLVM_SYS_40_PREFIX=/usr/local/llvm-4.0.0 cargo test
@@ -15,7 +15,7 @@ pipelines:
         - step:
             script:
               - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main >> /etc/apt/sources.list
-              - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
+              - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
               - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential llvm-3.9 llvm-3.9-dev 
               - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
               - PATH=$PATH:~/rust/bin LLVM_SYS_39_PREFIX=/usr/local/llvm-3.9.1 cargo test
