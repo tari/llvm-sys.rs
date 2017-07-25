@@ -3,38 +3,38 @@ image: ubuntu:latest
 pipelines:
   default:
     - step:
-      script:
-        - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential libffi-dev zlib1g-dev
-        - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-4.0 main >> /etc/apt/sources.list
-        - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
-        - apt-get update && apt-get install -y llvm-4.0 llvm-4.0-dev 
-        - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-        - PATH=$PATH:~/rust/bin LLVM_SYS_40_PREFIX=/usr/lib/llvm-4.0 LLVM_SYS_40_FFI_WORKAROUND=1 cargo test
-        - ./target/debug/examples/jit-function
+        script:
+          - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential libffi-dev zlib1g-dev
+          - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-4.0 main >> /etc/apt/sources.list
+          - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
+          - apt-get update && apt-get install -y llvm-4.0 llvm-4.0-dev 
+          - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
+          - PATH=$PATH:~/rust/bin LLVM_SYS_40_PREFIX=/usr/lib/llvm-4.0 LLVM_SYS_40_FFI_WORKAROUND=1 cargo test
+          - ./target/debug/examples/jit-function
   branches:
     llvm-3.9:
       - step:
-        script:
-          - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential zlib1g-dev
-          - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main >> /etc/apt/sources.list
-          - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
-          - apt-get update && apt-get install llvm-3.9 llvm-3.9-dev 
-          - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-          - PATH=$PATH:~/rust/bin LLVM_SYS_39_PREFIX=/usr/lib/llvm-3.9 LLVM_SYS_39_FFI_WORKAROUND=1 cargo test
-          - ./target/debug/examples/jit-function
+          script:
+            - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential zlib1g-dev
+            - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main >> /etc/apt/sources.list
+            - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
+            - apt-get update && apt-get install llvm-3.9 llvm-3.9-dev 
+            - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
+            - PATH=$PATH:~/rust/bin LLVM_SYS_39_PREFIX=/usr/lib/llvm-3.9 LLVM_SYS_39_FFI_WORKAROUND=1 cargo test
+            - ./target/debug/examples/jit-function
     llvm-3.8:
       - step:
-        script:
-          - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential zlib1g-dev
-          - apt-get update && apt-get install llvm-3.8 llvm-3.8-dev 
-          - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-          - PATH=$PATH:~/rust/bin LLVM_SYS_38_PREFIX=/usr/lib/llvm-3.8 LLVM_SYS_38_FFI_WORKAROUND=1 cargo test
-          - ./target/debug/examples/jit-function
+          script:
+            - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential zlib1g-dev
+            - apt-get update && apt-get install llvm-3.8 llvm-3.8-dev 
+            - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
+            - PATH=$PATH:~/rust/bin LLVM_SYS_38_PREFIX=/usr/lib/llvm-3.8 LLVM_SYS_38_FFI_WORKAROUND=1 cargo test
+            - ./target/debug/examples/jit-function
     llvm-3.7:
       - step:
-        script:
-          - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential zlib1g-dev
-          - apt-get update && apt-get install llvm-3.7 llvm-3.7-dev 
-          - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-          - PATH=$PATH:~/rust/bin LLVM_SYS_37_PREFIX=/usr/lib/llvm-3.8 LLVM_SYS_37_FFI_WORKAROUND=1 cargo test
-          - ./target/debug/examples/jit-function
+          script:
+            - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential zlib1g-dev
+            - apt-get update && apt-get install llvm-3.7 llvm-3.7-dev 
+            - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
+            - PATH=$PATH:~/rust/bin LLVM_SYS_37_PREFIX=/usr/lib/llvm-3.8 LLVM_SYS_37_FFI_WORKAROUND=1 cargo test
+            - ./target/debug/examples/jit-function
