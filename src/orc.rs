@@ -81,7 +81,7 @@ extern "C" {
                                 -> LLVMOrcModuleHandle;
 
     /// Remove a module set from the JIT.
-    pub fn LLVMRemoveModule(JITStack: LLVMOrcJITStackRef, H: LLVMOrcModuleHandle);
+    pub fn LLVMOrcRemoveModule(JITStack: LLVMOrcJITStackRef, H: LLVMOrcModuleHandle);
 
     /// Get symbol address from JIT instance.
     pub fn LLVMOrcGetSymbolAddress(JITStack: LLVMOrcJITStackRef,
