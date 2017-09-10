@@ -4,7 +4,7 @@ Rust bindings to LLVM's C API.
 
 ```toml
 [dependencies]
-llvm-sys = "40"
+llvm-sys = "50"
 ```
 
 There must be a compatible version of LLVM available. By default `llvm-sys`
@@ -38,7 +38,7 @@ number and multiplying by 10, ignoring any fractional part. Thus `llvm-sys`
 version 37 is compatible with LLVM 3.7.x, and `llvm-sys` 41 would be compatible
 with LLVM 4.1.x.
 
-[c-api-stability]: http://llvm.org/releases/3.8.0/docs/DeveloperPolicy.html#c-api-changes
+[c-api-stability]: http://llvm.org/docs/DeveloperPolicy.html#c-api-changes
 
 The following table is a compatibility matrix with LLVM versions (rows) and
 versions of this crate (columns). ● denotes an exactly-compatible version, and ◑
@@ -46,15 +46,16 @@ is a binary-compatible version but with elements deprecated (implying that
 movement to the next crate version in the same table row will still compile, but
 may introduce new warnings).
 
-| LLVM version | 36 | 37 | 38 | 39 | 40 |
-|--------------|----|----|----|----|----|
-| <3.6         |    |    |    |    |    |
-| 3.6.x        | ●  |    |    |    |    |
-| 3.7.0        |    |    |    |    |    |
-| 3.7.x        |    | ●  |    |    |    |
-| 3.8.x        |    | ◑  | ●  |    |    |
-| 3.9.x        |    |    |    | ●  |    |
-| 4.0.0        |    |    |    |    | ●  |
+| LLVM version | 36 | 37 | 38 | 39 | 40 | 50 |
+|--------------|----|----|----|----|----|----|
+| <3.6         |    |    |    |    |    |    |
+| 3.6.x        | ●  |    |    |    |    |    |
+| 3.7.0        |    |    |    |    |    |    |
+| 3.7.x        |    | ●  |    |    |    |    |
+| 3.8.x        |    | ◑  | ●  |    |    |    |
+| 3.9.x        |    |    |    | ●  |    |    |
+| 4.0.0        |    |    |    |    | ●  |    |
+| 5.0.0        |    |    |    |    |    | ●  |
 
 The build scripts will not enforce this compatibility matrix strictly,
 permitting compilation against any version of LLVM that is at least as new as
