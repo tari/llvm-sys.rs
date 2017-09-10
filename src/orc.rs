@@ -4,6 +4,10 @@ use super::prelude::*;
 use super::object::LLVMObjectFileRef;
 use super::target_machine::LLVMTargetMachineRef;
 
+pub enum LLVMOpaqueSharedModule {}
+pub type LLVMSharedModuleRef = *mut LLVMOpaqueSharedModule;
+pub enum LLVMOpaqueSharedObjectBuffer {}
+pub type LLVMSharedObjectBufferRef = *mut LLVMOpaqueSharedObjectBuffer;
 pub enum LLVMOrcOpaqueJITStack {}
 pub type LLVMOrcJITStackRef = *mut LLVMOrcOpaqueJITStack;
 pub type LLVMOrcModuleHandle = u32;
@@ -19,6 +23,14 @@ pub enum LLVMOrcErrorCode {
 }
 
 extern "C" {
+    /// Turn an LLVMModuleRef into an LLVMSharedModuleRef.
+    ///
+    /// The JIT shares ownership of modules; dispose of the returned
+    /// shared module with `LLVMOrcDisposeSharedModule`.
+    pub fn LLVMOrcMakeSharedModule(Mod: LLVMModuleRef) -> LLVMSharedModuleRef;
+    pub fn LLVMOrcDisposeSharedModuleRef(SharedMod: LLVMSharedModuleRef);
+    pub fn LLVMOrcMakeSharedObjectBuffer(ObjBuffer: LLVMMemoryBufferRef) -> LLVMSharedObjectBufferRef;
+    pub fn LLVMOrcDisposeSharedObjectBufferRef(SharedObjBuffer: LLVMSharedObjectBufferRef);
     /// Create an ORC JIT stack.
     ///
     /// The client owns the returned stack and must call OrcDisposeInstance
@@ -44,9 +56,10 @@ extern "C" {
 
     /// Create a lazy compile callback.
     pub fn LLVMOrcCreateLazyCompileCallback(JITStack: LLVMOrcJITStackRef,
+                                            RetAddr: *mut LLVMOrcTargetAddress,
                                             Callback: LLVMOrcLazyCompileCallbackFn,
                                             CallbackCtx: *mut ::libc::c_void)
-                                            -> LLVMOrcTargetAddress;
+                                            -> LLVMOrcErrorCode;
 
     /// Create a named indirect call stub.
     pub fn LLVMOrcCreateIndirectStub(JITStack: LLVMOrcJITStackRef,
@@ -62,33 +75,37 @@ extern "C" {
 
     /// Add a module to be eagerly compiled.
     pub fn LLVMOrcAddEagerlyCompiledIR(JITStack: LLVMOrcJITStackRef,
+                                       RetHandle: *mut LLVMOrcModuleHandle,
                                        Mod: LLVMModuleRef,
                                        SymbolResolver: LLVMOrcSymbolResolverFn,
                                        SymbolResolverCtx: *mut ::libc::c_void)
-                                       -> LLVMOrcModuleHandle;
+                                       -> LLVMOrcErrorCode;
 
     /// Add a module to be lazily compiled one function at a time.
     pub fn LLVMOrcAddLazilyCompiledIR(JITStack: LLVMOrcJITStackRef,
+                                      RetHandle: *mut LLVMOrcModuleHandle,
                                       Mod: LLVMModuleRef,
                                       SymbolResolver: LLVMOrcSymbolResolverFn,
                                       SymbolResolverCtx: *mut ::libc::c_void)
-                                      -> LLVMOrcModuleHandle;
+                                      -> LLVMOrcErrorCode;
 
     /// Add an object file.
     pub fn LLVMOrcAddObjectFile(JITStack: LLVMOrcJITStackRef,
+                                RetHandle: *mut LLVMOrcModuleHandle,
                                 Obj: LLVMObjectFileRef,
                                 SymbolResolver: LLVMOrcSymbolResolverFn,
                                 SymbolResolverCtx: *mut ::libc::c_void)
-                                -> LLVMOrcModuleHandle;
+                                -> LLVMOrcErrorCode;
 
     /// Remove a module set from the JIT.
-    pub fn LLVMOrcRemoveModule(JITStack: LLVMOrcJITStackRef, H: LLVMOrcModuleHandle);
+    pub fn LLVMOrcRemoveModule(JITStack: LLVMOrcJITStackRef, H: LLVMOrcModuleHandle) -> LLVMOrcErrorCode;
 
     /// Get symbol address from JIT instance.
     pub fn LLVMOrcGetSymbolAddress(JITStack: LLVMOrcJITStackRef,
+                                   RetAddr: *mut LLVMOrcTargetAddress,
                                    SymbolName: *const ::libc::c_char)
-                                   -> LLVMOrcTargetAddress;
+                                   -> LLVMOrcErrorCode;
 
     /// Dispose of an ORC JIT stack.
-    pub fn LLVMOrcDisposeInstance(JITStack: LLVMOrcJITStackRef);
+    pub fn LLVMOrcDisposeInstance(JITStack: LLVMOrcJITStackRef) -> LLVMOrcErrorCode;
 }

@@ -15,7 +15,9 @@ pub enum LLVMModule {}
 pub enum LLVMType {}
 pub enum LLVMValue {}
 pub enum LLVMBasicBlock {}
+pub enum LLVMOpaqueMetadata {}
 pub enum LLVMBuilder {}
+pub enum LLVMOpaqueDIBuilder {}
 pub enum LLVMModuleProvider {}
 pub enum LLVMPassManager {}
 pub enum LLVMPassRegistry {}
@@ -34,7 +36,9 @@ pub mod prelude {
     pub type LLVMTypeRef = *mut super::LLVMType;
     pub type LLVMValueRef = *mut super::LLVMValue;
     pub type LLVMBasicBlockRef = *mut super::LLVMBasicBlock;
+    pub type LLVMMetadataRef = *mut super::LLVMOpaqueMetadata;
     pub type LLVMBuilderRef = *mut super::LLVMBuilder;
+    pub type LLVMDIBuilderRef = *mut super::LLVMOpaqueDIBuilder;
     pub type LLVMModuleProviderRef = *mut super::LLVMModuleProvider;
     pub type LLVMPassManagerRef = *mut super::LLVMPassManager;
     pub type LLVMPassRegistryRef = *mut super::LLVMPassRegistry;
