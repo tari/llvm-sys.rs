@@ -21,7 +21,7 @@ strict-versioning = []
 libc = "0.2"
 
 [build-dependencies]
-gcc = "0.3"
+gcc = "0.3.53"
 lazy_static = "0.2.1"
 regex = "0.2"
 semver = "0.6"
