@@ -210,6 +210,10 @@ extern "C" {
 
     // Core->Types->Sequential
     pub fn LLVMGetElementType(Ty: LLVMTypeRef) -> LLVMTypeRef;
+    /// Get the subtypes of the given type.
+    pub fn LLVMGetSubtypes(Tp: LLVMTypeRef, Arr: *mut LLVMTypeRef);
+    /// Return the number of types in the derived type.
+    pub fn LLVMGetNumContainedTypes(Tp: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMArrayType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMGetArrayLength(ArrayTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMPointerType(ElementType: LLVMTypeRef, AddressSpace: ::libc::c_uint) -> LLVMTypeRef;
@@ -552,6 +556,12 @@ extern "C" {
                                Count: ::libc::c_uint)
                                -> LLVMValueRef;
     pub fn LLVMMDNode(Vals: *mut LLVMValueRef, Count: ::libc::c_uint) -> LLVMValueRef;
+    /// Obtain Metadata as a Value.
+    pub fn LLVMMetadataAsValue(C: LLVMContextRef,
+                               MD: LLVMMetadataRef)
+                               -> LLVMValueRef;
+    /// Obtain a Value as Metadata.
+    pub fn LLVMValueAsMetadata(Val: LLVMValueRef) -> LLVMMetadataRef;
     /// Obtain the underlying string from a MDString value.
     ///
     /// `Len` is written to contain the length of the returned string.
