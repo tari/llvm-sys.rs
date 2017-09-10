@@ -314,5 +314,7 @@ fn main() {
 
     // Build the extra wrapper functions.
     std::env::set_var("CFLAGS", get_llvm_cflags());
-    gcc::compile_library("libtargetwrappers.a", &["wrappers/target.c"]);
+    gcc::Build::new()
+        .file("wrappers/target.c")
+        .compile("targetwrappers");
 }
