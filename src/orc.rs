@@ -76,7 +76,7 @@ extern "C" {
     /// Add a module to be eagerly compiled.
     pub fn LLVMOrcAddEagerlyCompiledIR(JITStack: LLVMOrcJITStackRef,
                                        RetHandle: *mut LLVMOrcModuleHandle,
-                                       Mod: LLVMModuleRef,
+                                       Mod: LLVMSharedModuleRef,
                                        SymbolResolver: LLVMOrcSymbolResolverFn,
                                        SymbolResolverCtx: *mut ::libc::c_void)
                                        -> LLVMOrcErrorCode;
@@ -84,7 +84,7 @@ extern "C" {
     /// Add a module to be lazily compiled one function at a time.
     pub fn LLVMOrcAddLazilyCompiledIR(JITStack: LLVMOrcJITStackRef,
                                       RetHandle: *mut LLVMOrcModuleHandle,
-                                      Mod: LLVMModuleRef,
+                                      Mod: LLVMSharedModuleRef,
                                       SymbolResolver: LLVMOrcSymbolResolverFn,
                                       SymbolResolverCtx: *mut ::libc::c_void)
                                       -> LLVMOrcErrorCode;
