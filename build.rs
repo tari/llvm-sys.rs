@@ -186,12 +186,19 @@ fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
     // LLVM isn't really semver and uses version suffixes to build
     // version strings like '3.8.0svn', so limit what we try to parse
     // to only the numeric bits.
-    let re = Regex::new(r"^(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)")
+    let re = Regex::new(r"^(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))??")
         .unwrap();
-    let m = re.find(&version_str)
-        .expect("Could not determine LLVM version from llvm-config.");
+    let c = re.captures(&version_str).expect(
+        "Could not determine LLVM version from llvm-config.",
+    );
 
-    Ok(Version::parse(&version_str[m.start()..m.end()]).unwrap())
+    // some systems don't have a patch number but Version wants it so we just append .0 if it isn't
+    // there
+    let s = match c.name("patch") {
+        None => format!("{}.0", &c[0]),
+        Some(_) => c[0].to_string()
+    };
+    Ok(Version::parse(&s).unwrap())
 }
 
 /// Get the names of the dylibs required by LLVM, including the C++ standard
