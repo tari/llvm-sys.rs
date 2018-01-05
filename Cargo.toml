@@ -16,7 +16,7 @@ authors = [
 build = "build.rs"
 
 [badges]
-appveyor = { service = "bitbucket", repository = "tari/llvm-sys.rs" }
+appveyor = { service = "bitbucket", repository = "tari/llvm-sys.rs", branch = "default" }
 
 [features]
 strict-versioning = []
