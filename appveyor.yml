@@ -1,0 +1,16 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+init:
+- cmd: >-
+    curl -sSf https://win.rustup.rs -o rustup-init.exe
+    rustup-init.exe --default-host x86_64-pc-windows-msvc -y
+    del /F rustup-init.exe
+    set PATH=%PATH%;C:\\Libraries\\llvm-5.0.0\\bin;C:\\Users\\appveyor\\.cargo\\bin
+    llvm-config --version
+    rustc -Vv
+    cargo -V
+build: off
+test_script:
+- cmd: >-
+    cargo test
+    .\target\debug\examples\jit-function.exe
