@@ -486,7 +486,7 @@ extern "C" {
     // ..->Function Values
     pub fn LLVMDeleteFunction(Fn: LLVMValueRef);
     /// Check whether the given function has a personality function.
-    pub fn LLVMHasPersonalityFunction(Fn: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMHasPersonalityFn(Fn: LLVMValueRef) -> LLVMBool;
     /// Obtain the personality function attached to the function.
     ///
     /// Added in LLVM 3.7.
