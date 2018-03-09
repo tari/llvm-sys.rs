@@ -225,6 +225,8 @@ extern "C" {
     pub fn LLVMVoidTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMLabelTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMX86MMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    pub fn LLVMTokenTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    pub fn LLVMMetadataTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMVoidType() -> LLVMTypeRef;
     pub fn LLVMLabelType() -> LLVMTypeRef;
     pub fn LLVMX86MMXType() -> LLVMTypeRef;
