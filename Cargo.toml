@@ -8,7 +8,7 @@ keywords = ["bindings", "llvm"]
 categories = ["external-ffi-bindings"]
 links = "llvm"
 name = "llvm-sys"
-version = "50.0.3"
+version = "60.0.0"
 authors = [
   "Peter Marheine <peter@taricorp.net>",
   "Scott Olson <scott@solson.me>",
@@ -26,6 +26,6 @@ libc = "0.2"
 
 [build-dependencies]
 gcc = "0.3.53"
-lazy_static = "0.2.1"
+lazy_static = "1.0"
 regex = "0.2"
-semver = "0.6"
+semver = "0.9"
