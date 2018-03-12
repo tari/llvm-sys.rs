@@ -56,7 +56,7 @@ may introduce new warnings).
 | 3.9.x        |    |    |    | ●  |    |    |    |
 | 4.0.0        |    |    |    |    | ●  |    |    |
 | 5.0.x        |    |    |    |    |    | ●  |    |
-| 6.0.0        |    |    |    |    |    | ●  | ●  |
+| 6.0.0        |    |    |    |    |    |    | ●  |
 
 The build scripts will not enforce this compatibility matrix strictly,
 permitting compilation against any version of LLVM that is at least as new as
