@@ -8,7 +8,6 @@ extern "C" {
     pub fn LLVMAddBitTrackingDCEPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddAlignmentFromAssumptionsPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddCFGSimplificationPass(PM: LLVMPassManagerRef);
-    pub fn LLVMAddLateCFGSimplificationPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddDeadStoreEliminationPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddScalarizerPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddMergedLoadStoreMotionPass(PM: LLVMPassManagerRef);
