@@ -1,13 +1,10 @@
 //! The ORC JIT.
 
 use super::prelude::*;
-use super::object::LLVMObjectFileRef;
 use super::target_machine::LLVMTargetMachineRef;
 
 pub enum LLVMOpaqueSharedModule {}
 pub type LLVMSharedModuleRef = *mut LLVMOpaqueSharedModule;
-pub enum LLVMOpaqueSharedObjectBuffer {}
-pub type LLVMSharedObjectBufferRef = *mut LLVMOpaqueSharedObjectBuffer;
 pub enum LLVMOrcOpaqueJITStack {}
 pub type LLVMOrcJITStackRef = *mut LLVMOrcOpaqueJITStack;
 pub type LLVMOrcModuleHandle = u32;
@@ -29,8 +26,6 @@ extern "C" {
     /// shared module with `LLVMOrcDisposeSharedModule`.
     pub fn LLVMOrcMakeSharedModule(Mod: LLVMModuleRef) -> LLVMSharedModuleRef;
     pub fn LLVMOrcDisposeSharedModuleRef(SharedMod: LLVMSharedModuleRef);
-    pub fn LLVMOrcMakeSharedObjectBuffer(ObjBuffer: LLVMMemoryBufferRef) -> LLVMSharedObjectBufferRef;
-    pub fn LLVMOrcDisposeSharedObjectBufferRef(SharedObjBuffer: LLVMSharedObjectBufferRef);
     /// Create an ORC JIT stack.
     ///
     /// The client owns the returned stack and must call OrcDisposeInstance
@@ -92,7 +87,7 @@ extern "C" {
     /// Add an object file.
     pub fn LLVMOrcAddObjectFile(JITStack: LLVMOrcJITStackRef,
                                 RetHandle: *mut LLVMOrcModuleHandle,
-                                Obj: LLVMObjectFileRef,
+                                Obj: LLVMMemoryBufferRef,
                                 SymbolResolver: LLVMOrcSymbolResolverFn,
                                 SymbolResolverCtx: *mut ::libc::c_void)
                                 -> LLVMOrcErrorCode;

@@ -4,6 +4,7 @@
 //! information.
 
 #![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
 
 extern crate libc;
 
@@ -51,6 +52,7 @@ pub mod analysis;
 pub mod bit_reader;
 pub mod bit_writer;
 pub mod core;
+pub mod debuginfo;
 pub mod disassembler;
 pub mod error_handling;
 pub mod execution_engine;

@@ -5,6 +5,7 @@ use super::super::prelude::*;
 extern "C" {
     pub fn LLVMAddArgumentPromotionPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddConstantMergePass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddCalledValuePropagationPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddDeadArgEliminationPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddFunctionAttrsPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddFunctionInliningPass(PM: LLVMPassManagerRef);
