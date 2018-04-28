@@ -124,6 +124,13 @@ extern "C" {
     // No AsmPrinter
     // No AsmParser
     // No Disassembler
+    
+    pub fn LLVMInitializeWebAssemblyTargetInfo();
+    pub fn LLVMInitializeWebAssemblyTarget();
+    pub fn LLVMInitializeWebAssemblyTargetMC();
+    pub fn LLVMInitializeWebAssemblyAsmPrinter();
+    pub fn LLVMInitializeWebAssemblyAsmParser();
+    pub fn LLVMInitializeWebAssemblyDisassembler();
 }
 
 extern "C" {
