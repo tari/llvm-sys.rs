@@ -42,12 +42,6 @@ extern "C" {
     pub fn LLVMInitializeNVPTXAsmPrinter();
     // AsmParser?
 
-    pub fn LLVMInitializeCppBackendTargetInfo();
-    pub fn LLVMInitializeCppBackendTarget();
-    pub fn LLVMInitializeCppBackendTargetMC();
-    // AsmPrinter?
-    // AsmParser?
-
     pub fn LLVMInitializeMSP430TargetInfo();
     pub fn LLVMInitializeMSP430Target();
     pub fn LLVMInitializeMSP430TargetMC();
