@@ -1,4 +1,4 @@
-//! Bindings to LLVM's C API, version 5.0.
+//! Bindings to LLVM's C API.
 //!
 //! Refer to the [LLVM documentation](http://llvm.org/docs/) for more
 //! information.
