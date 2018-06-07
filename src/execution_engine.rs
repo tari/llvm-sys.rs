@@ -24,23 +24,23 @@ pub struct LLVMMCJITCompilerOptions {
 }
 
 pub type LLVMMemoryManagerAllocateCodeSectionCallback =
-    extern "C" fn(Opaque: *mut ::libc::c_void,
-                  Size: ::libc::uintptr_t,
-                  Alignment: ::libc::c_uint,
-                  SectionID: ::libc::c_uint,
-                  SectionName: *const ::libc::c_char) -> *mut u8;
+    Option<extern "C" fn(Opaque: *mut ::libc::c_void,
+                         Size: ::libc::uintptr_t,
+                         Alignment: ::libc::c_uint,
+                         SectionID: ::libc::c_uint,
+                         SectionName: *const ::libc::c_char) -> *mut u8>;
 pub type LLVMMemoryManagerAllocateDataSectionCallback =
-    extern "C" fn(Opaque: *mut ::libc::c_void,
-                  Size: ::libc::uintptr_t,
-                  Alignment: ::libc::c_uint,
-                  SectionID: ::libc::c_uint,
-                  SectionName: *const ::libc::c_char,
-                  IsReadOnly: LLVMBool) -> *mut u8;
+    Option<extern "C" fn(Opaque: *mut ::libc::c_void,
+                         Size: ::libc::uintptr_t,
+                         Alignment: ::libc::c_uint,
+                         SectionID: ::libc::c_uint,
+                         SectionName: *const ::libc::c_char,
+                         IsReadOnly: LLVMBool) -> *mut u8>;
 pub type LLVMMemoryManagerFinalizeMemoryCallback =
-    extern "C" fn(Opaque: *mut ::libc::c_void,
-                  ErrMsg: *mut *mut ::libc::c_char) -> LLVMBool;
+    Option<extern "C" fn(Opaque: *mut ::libc::c_void,
+                         ErrMsg: *mut *mut ::libc::c_char) -> LLVMBool>;
 pub type LLVMMemoryManagerDestroyCallback =
-    extern "C" fn(Opaque: *mut ::libc::c_void) -> ();
+    Option<extern "C" fn(Opaque: *mut ::libc::c_void) -> ()>;
 
 extern "C" {
     pub fn LLVMLinkInMCJIT() -> ();
