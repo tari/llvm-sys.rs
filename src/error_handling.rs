@@ -1,4 +1,4 @@
-pub type LLVMFatalErrorHandler = extern "C" fn(Reason: *const ::libc::c_char);
+pub type LLVMFatalErrorHandler = Option<extern "C" fn(Reason: *const ::libc::c_char)>;
 
 extern "C" {
     /// Install a fatal error handler.
