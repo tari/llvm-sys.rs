@@ -67,9 +67,9 @@ pub enum lto_codegen_diagnostic_severity_t {
     LTO_DS_NOTE = 2,
 }
 
-pub type lto_diagnostic_handler_t = extern "C" fn(severity: lto_codegen_diagnostic_severity_t,
-                                                  diag: *const ::libc::c_char,
-                                                  ctxt: *mut ::libc::c_void);
+pub type lto_diagnostic_handler_t = Option<extern "C" fn(severity: lto_codegen_diagnostic_severity_t,
+                                                         diag: *const ::libc::c_char,
+                                                         ctxt: *mut ::libc::c_void)>;
 
 extern "C" {
     pub fn lto_get_version() -> *const ::libc::c_char;

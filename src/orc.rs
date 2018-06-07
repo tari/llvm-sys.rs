@@ -9,8 +9,8 @@ pub type LLVMOrcJITStackRef = *mut LLVMOrcOpaqueJITStack;
 pub type LLVMOrcModuleHandle = u32;
 pub type LLVMOrcTargetAddress = u64;
 
-pub type LLVMOrcSymbolResolverFn = extern "C" fn(*const ::libc::c_char, *mut ::libc::c_void) -> u64;
-pub type LLVMOrcLazyCompileCallbackFn = extern "C" fn(LLVMOrcJITStackRef, *mut ::libc::c_void);
+pub type LLVMOrcSymbolResolverFn = Option<extern "C" fn(*const ::libc::c_char, *mut ::libc::c_void) -> u64>;
+pub type LLVMOrcLazyCompileCallbackFn = Option<extern "C" fn(LLVMOrcJITStackRef, *mut ::libc::c_void)>;
 #[repr(C)]
 pub enum LLVMOrcErrorCode {
     LLVMOrcErrSuccess = 0,
