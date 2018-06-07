@@ -344,7 +344,6 @@ pub enum LLVMDiagnosticSeverity {
     LLVMDSNote = 3,
 }
 
-pub type LLVMDiagnosticHandler = extern "C" fn(arg1: LLVMDiagnosticInfoRef,
-                                               arg2: *mut ::libc::c_void)
-                                               -> ();
-pub type LLVMYieldCallback = extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void) -> ();
+pub type LLVMDiagnosticHandler = Option<extern "C" fn(arg1: LLVMDiagnosticInfoRef,
+                                               arg2: *mut ::libc::c_void)>;
+pub type LLVMYieldCallback = Option<extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void)>;
