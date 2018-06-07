@@ -42,7 +42,7 @@ pub type LLVMMemoryManagerFinalizeMemoryCallback =
     extern "C" fn(Opaque: *mut ::libc::c_void,
                   ErrMsg: *mut *mut ::libc::c_char)
                   -> LLVMBool;
-pub type LLVMMemoryManagerDestroyCallback = extern "C" fn(Opaque: *mut ::libc::c_void);
+pub type LLVMMemoryManagerDestroyCallback = Option<extern "C" fn(Opaque: *mut ::libc::c_void)>;
 
 extern "C" {
     pub fn LLVMLinkInMCJIT();

@@ -5,13 +5,13 @@
 pub enum LLVMOpaqueDisasmContext {}
 pub type LLVMDisasmContextRef = *mut LLVMOpaqueDisasmContext;
 
-pub type LLVMOpInfoCallback = extern "C" fn(DisInfo: *mut ::libc::c_void,
-                                            PC: u64,
-                                            Offset: u64,
-                                            Size: u64,
-                                            TagType: ::libc::c_int,
-                                            TagBuf: *mut ::libc::c_void)
-                                            -> ::libc::c_int;
+pub type LLVMOpInfoCallback = Option<extern "C" fn(DisInfo: *mut ::libc::c_void,
+                                                   PC: u64,
+                                                   Offset: u64,
+                                                   Size: u64,
+                                                   TagType: ::libc::c_int,
+                                                   TagBuf: *mut ::libc::c_void)
+                                                   -> ::libc::c_int>;
 
 #[repr(C)]
 pub struct LLVMOpInfoSymbol1 {
@@ -91,12 +91,12 @@ pub const LLVMDisassembler_Option_SetInstrComments: u64 = 8;
 /// The option to print latency information alongside instructions
 pub const LLVMDisassembler_Option_PrintLatency: u64 = 16;
 
-pub type LLVMSymbolLookupCallback = extern "C" fn(DisInfo: *mut ::libc::c_void,
-                                                  ReferenceValue: u64,
-                                                  ReferenceType: *mut u64,
-                                                  ReferencePC: u64,
-                                                  ReferenceName: *mut *const ::libc::c_char)
-                                                  -> *const ::libc::c_char;
+pub type LLVMSymbolLookupCallback = Option<extern "C" fn(DisInfo: *mut ::libc::c_void,
+                                                         ReferenceValue: u64,
+                                                         ReferenceType: *mut u64,
+                                                         ReferencePC: u64,
+                                                         ReferenceName: *mut *const ::libc::c_char)
+                                                         -> *const ::libc::c_char>;
 
 extern "C" {
     pub fn LLVMCreateDisasm(TripleName: *const ::libc::c_char,
