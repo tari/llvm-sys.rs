@@ -21,6 +21,8 @@ informative:
 
  * [Tari's merthc](https://bitbucket.org/tari/merthc)
  * [Wilfred's BF compiler](https://crates.io/crates/bfc)
+ * Jay Phelps wrote about [building a minimal compiler targeting
+   WebAssembly](https://medium.com/@jayphelps/93e8c193fdb4)
 
 Most of the interfaces are not documented in these bindings. Refer to the
 [LLVM documentation](http://llvm.org/docs/) for more information, particularly
@@ -97,6 +99,11 @@ automatically, but such a feature should only be considered for building
 one-off releases because its high cost is ill-suited to repeated builds.
 
 ## Compiling LLVM
+
+If you need to compile LLVM or manage multiple versions,
+[llvmenv](https://crates.io/crates/llvmenv) may simplify the process. Consider
+using it if you don't have special requirements or previous experience with
+LLVM!
 
 While the [getting started guide](http://llvm.org/docs/GettingStarted.html) is
 the official guide to compiling LLVM, this section will attempt to provide
