@@ -49,31 +49,16 @@ lazy_static!{
                 panic!("LLVM binaries specified by {} are the wrong version.
                         (Found {}, need {}.)", binary_prefix_var, ver, *CRATE_VERSION);
             }
-        } else {
-            println!("{} not set, not using precompiled binaries", binary_prefix_var);
         }
 
-        // No binaries. Offer to download and compile a blessed version,
-        // but only with positive confirmation. It's a fairly large download,
-        // takes a while and could get wiped out by a `cargo clean` so it's
-        // useful if doing an install but is in general not recommended.
-        let autobuild_var = format!("LLVM_SYS_{}_AUTOBUILD",
-                                    env!("CARGO_PKG_VERSION_MAJOR"));
-        match env::var_os(&autobuild_var) {
-            Some(ref x) => {
-                if x == "YES" {
-                    unimplemented!();
-                } else {
-                    println!("{} must be exactly \"YES\" to enable autobuild (is {:?})",
-                             autobuild_var, x);
-                }
-            }
-            None => {
-                println!("{} not set, will not automatically compile LLVM",
-                         autobuild_var);
-            }
-        }
-
+        println!("No suitable version of LLVM was found system-wide or pointed
+                  to by {}.
+                  
+                  Consider using `llvmenv` to compile an appropriate copy of LLVM, and
+                  refer to the llvm-sys documentation for more information.
+                  
+                  llvm-sys: https://crates.io/crates/llvm-sys
+                  llvmenv: https://crates.io/crates/llvmenv", binary_prefix_var);
         panic!("Could not find a compatible version of LLVM");
     };
 }
