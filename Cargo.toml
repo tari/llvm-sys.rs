@@ -16,6 +16,7 @@ build = "build.rs"
 
 [features]
 strict-versioning = []
+no-llvm-linking = []
 
 [dependencies]
 bitflags = "0.7"
