@@ -216,6 +216,10 @@ fn get_llvm_cflags() -> String {
 }
 
 fn main() {
+    if cfg!(feature = "no-llvm-linking") {
+       return;
+    }
+
     // Parse library linking flags from llvm-config.
     for arg in llvm_config("--ldflags").split_whitespace() {
         if arg.starts_with("-L") {
