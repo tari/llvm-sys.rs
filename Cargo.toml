@@ -16,6 +16,7 @@ build = "build.rs"
 
 [features]
 strict-versioning = []
+no-llvm-linking = []
 
 [dependencies]
 libc = "0.2"
