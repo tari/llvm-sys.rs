@@ -286,6 +286,10 @@ fn get_llvm_cflags() -> String {
 }
 
 fn main() {
+    if cfg!(feature = "no-llvm-linking") {
+        return;
+    }
+
     // Link LLVM libraries
     println!("cargo:rustc-link-search=native={}", llvm_config("--libdir"));
     for name in get_link_libraries() {
