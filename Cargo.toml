@@ -20,6 +20,7 @@ appveyor = { service = "bitbucket", repository = "tari/llvm-sys.rs", branch = "d
 
 [features]
 strict-versioning = []
+no-llvm-linking = []
 
 [dependencies]
 libc = "0.2"

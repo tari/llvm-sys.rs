@@ -293,6 +293,10 @@ fn get_llvm_cflags() -> String {
 }
 
 fn main() {
+    if cfg!(feature = "no-llvm-linking") {
+        return;
+    }
+
     let libdir = llvm_config("--libdir");
 
     // Export information to other crates
