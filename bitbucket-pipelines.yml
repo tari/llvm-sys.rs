@@ -5,13 +5,23 @@ pipelines:
     - step:
         script:
           - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential libffi-dev zlib1g-dev
-          - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main >> /etc/apt/sources.list
+          - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-7 main >> /etc/apt/sources.list
           - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
-          - apt-get update && apt-get install -y llvm-6.0 llvm-6.0-dev
+          - apt-get update && apt-get install -y llvm-7 llvm-7-dev
           - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-          - PATH=$PATH:~/rust/bin LLVM_SYS_60_PREFIX=/usr/lib/llvm-6.0 LLVM_SYS_60_FFI_WORKAROUND=1 cargo test
+          - PATH=$PATH:~/rust/bin LLVM_SYS_70_PREFIX=/usr/lib/llvm-7 cargo test
           - ./target/debug/examples/jit-function
   branches:
+    llvm-6.0:
+      - step:
+          script:
+            - apt-get update && apt-get install -y curl file sudo mercurial xz-utils build-essential libffi-dev zlib1g-dev
+            - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main >> /etc/apt/sources.list
+            - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
+            - apt-get update && apt-get install -y llvm-6.0 llvm-6.0-dev
+            - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
+            - PATH=$PATH:~/rust/bin LLVM_SYS_60_PREFIX=/usr/lib/llvm-6.0 LLVM_SYS_60_FFI_WORKAROUND=1 cargo test
+            - ./target/debug/examples/jit-function
     llvm-5.0:
       - step:
           script:
