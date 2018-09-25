@@ -15,12 +15,13 @@ fn main() {
         // Then create it in our module.
         let void = llvm::core::LLVMVoidTypeInContext(context);
         let function_type = llvm::core::LLVMFunctionType(void, ptr::null_mut(), 0, 0);
-        let function = llvm::core::LLVMAddFunction(module, b"nop\0".as_ptr() as *const _,
-                                                   function_type);
+        let function =
+            llvm::core::LLVMAddFunction(module, b"nop\0".as_ptr() as *const _, function_type);
 
         // Create a basic block in the function and set our builder to generate
         // code in it.
-        let bb = llvm::core::LLVMAppendBasicBlockInContext(context, function,
+        let bb = llvm::core::LLVMAppendBasicBlockInContext(context,
+                                                           function,
                                                            b"entry\0".as_ptr() as *const _);
         llvm::core::LLVMPositionBuilderAtEnd(builder, bb);
 
