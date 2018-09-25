@@ -96,6 +96,18 @@ extern "C" {
     pub fn LLVMSetModuleIdentifier(M: LLVMModuleRef,
                                    Ident: *const ::libc::c_char,
                                    Len: ::libc::size_t);
+
+    /// Obtain the module's original source file name.
+    ///
+    /// Len holds the length of the returned string, returns the original source file name of M.
+    pub fn LLVMGetSourceFileName(M: LLVMModuleRef,
+                                 Len: *mut ::libc::size_t)
+                                 -> *const ::libc::c_char;
+    /// Set the original source file name of a module to a string Name with length Len.
+    pub fn LLVMSetSourceFileName(M: LLVMModuleRef,
+                                 Name: *const ::libc::c_char,
+                                 Len: ::libc::size_t);
+
     #[deprecated(since="3.9", note="Confusingly named. Use LLVMGetDataLayoutStr.")]
     pub fn LLVMGetDataLayout(M: LLVMModuleRef) -> *const ::libc::c_char;
     /// Obtain the data layout for a module.
@@ -103,13 +115,66 @@ extern "C" {
     pub fn LLVMSetDataLayout(M: LLVMModuleRef, DataLayoutStr: *const ::libc::c_char);
     pub fn LLVMGetTarget(M: LLVMModuleRef) -> *const ::libc::c_char;
     pub fn LLVMSetTarget(M: LLVMModuleRef, Triple: *const ::libc::c_char);
+
+    /// Returns the module flags as an array of flag-key-value triples.  The caller is responsible for freeing this array by calling LLVMDisposeModuleFlagsMetadata.
+    pub fn LLVMCopyModuleFlagsMetadata(M: LLVMModuleRef,
+                                       Len: *mut ::libc::size_t)
+                                       -> *mut LLVMModuleFlagEntry;
+    /// Destroys module flags metadata entries.
+    pub fn LLVMDisposeModuleFlagsMetadata(Entries: *mut LLVMModuleFlagEntry);
+    /// Returns the flag behavior for a module flag entry at a specific index.
+    pub fn LLVMModuleFlagEntriesGetFlagBehavior(Entries: *mut LLVMModuleFlagEntry,
+                                                Index: ::libc::c_uint)
+                                                -> LLVMModuleFlagBehavior;
+    /// Returns the key for a module flag entry at a specific index.
+    pub fn LLVMModuleFlagEntriesGetKey(Entries: *mut LLVMModuleFlagEntry,
+                                       Index: ::libc::c_uint,
+                                       Len: *mut ::libc::size_t)
+                                       -> *const ::libc::c_char;
+    /// Returns the metadata for a module flag entry at a specific index.
+    pub fn LLVMModuleFlagEntriesGetMetadata(Entries: *mut LLVMModuleFlagEntry,
+                                            Index: ::libc::c_uint)
+                                            -> LLVMMetadataRef;
+    /// Add a module-level flag to the module-level flags metadata if it doesn't already exist.
+    pub fn LLVMGetModuleFlag(M: LLVMModuleRef,
+                             Key: *const ::libc::c_char,
+                             KeyLen: ::libc::size_t)
+                             -> LLVMMetadataRef;
+    /// Add a module-level flag to the module-level flags metadata if it doesn't already exist.
+    pub fn LLVMAddModuleFlag(M: LLVMModuleRef,
+                             Behavior: LLVMModuleFlagBehavior,
+                             Key: *const ::libc::c_char,
+                             KeyLen: ::libc::size_t,
+                             Val: LLVMMetadataRef);
+
     pub fn LLVMDumpModule(M: LLVMModuleRef);
     pub fn LLVMPrintModuleToFile(M: LLVMModuleRef,
                                  Filename: *const ::libc::c_char,
                                  ErrorMessage: *mut *mut ::libc::c_char)
                                  -> LLVMBool;
     pub fn LLVMPrintModuleToString(M: LLVMModuleRef) -> *mut ::libc::c_char;
+
+    pub fn LLVMGetModuleInlineAsm(M: LLVMModuleRef,
+                                  Len: *mut ::libc::size_t)
+                                  -> *const ::libc::c_char;
+    #[deprecated(since = "7.0", note="Use LLVMSetModuleInlineAsm2 instead")]
     pub fn LLVMSetModuleInlineAsm(M: LLVMModuleRef, Asm: *const ::libc::c_char);
+    pub fn LLVMSetModuleInlineAsm2(M: LLVMModuleRef,
+                                   Asm: *const ::libc::c_char,
+                                   Len: ::libc::size_t);
+    pub fn LLVMAppendModuleInlineAsm(M: LLVMModuleRef,
+                                     Asm: *const ::libc::c_char,
+                                     Len: ::libc::size_t);
+    pub fn LLVMGetInlineAsm(Ty: LLVMTypeRef,
+                            AsmString: *mut ::libc::c_char,
+                            AsmStringSize: ::libc::size_t,
+                            Constraints: *mut ::libc::c_char,
+                            ConstraintsSize: ::libc::size_t,
+                            HasSideEffects: LLVMBool,
+                            IsAlignStack: LLVMBool,
+                            Dialect: LLVMInlineAsmDialect)
+                            -> LLVMValueRef;
+
     pub fn LLVMGetModuleContext(M: LLVMModuleRef) -> LLVMContextRef;
     pub fn LLVMGetTypeByName(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
     pub fn LLVMGetNamedMetadataNumOperands(M: LLVMModuleRef,
@@ -238,8 +303,18 @@ extern "C" {
     // Get the enumerated kind of a Value instance.
     pub fn LLVMGetValueKind(Val: LLVMValueRef) -> LLVMValueKind;
     pub fn LLVMTypeOf(Val: LLVMValueRef) -> LLVMTypeRef;
+
+    #[deprecated(since = "7.0", note = "Use LLVMGetValueName2 instead")]
     pub fn LLVMGetValueName(Val: LLVMValueRef) -> *const ::libc::c_char;
+    pub fn LLVMGetValueName2(Val: LLVMValueRef,
+                             Length: *mut ::libc::size_t)
+                             -> *const ::libc::c_char;
+    #[deprecated(since = "7.0", note = "Use LLVMSetValueName2 instead")]
     pub fn LLVMSetValueName(Val: LLVMValueRef, Name: *const ::libc::c_char);
+    pub fn LLVMSetValueName2(Val: LLVMValueRef,
+                             Name: *const ::libc::c_char,
+                             NameLen: ::libc::size_t);
+
     pub fn LLVMDumpValue(Val: LLVMValueRef);
     pub fn LLVMPrintValueToString(Val: LLVMValueRef) -> *mut ::libc::c_char;
     pub fn LLVMReplaceAllUsesWith(OldVal: LLVMValueRef, NewVal: LLVMValueRef);
@@ -354,7 +429,9 @@ extern "C" {
     pub fn LLVMConstNUWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstFMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstExactUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMConstExactUDiv(LHSConstant: LLVMValueRef,
+                              RHSConstant: LLVMValueRef)
+                              -> LLVMValueRef;
     pub fn LLVMConstSDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstExactSDiv(LHSConstant: LLVMValueRef,
                               RHSConstant: LLVMValueRef)
@@ -431,6 +508,7 @@ extern "C" {
                                 IdxList: *mut ::libc::c_uint,
                                 NumIdx: ::libc::c_uint)
                                 -> LLVMValueRef;
+    #[deprecated(since="7.0", note="Use LLVMGetInlineAsm instead")]
     pub fn LLVMConstInlineAsm(Ty: LLVMTypeRef,
                               AsmString: *const ::libc::c_char,
                               Constraints: *const ::libc::c_char,
@@ -450,8 +528,14 @@ extern "C" {
     pub fn LLVMSetVisibility(Global: LLVMValueRef, Viz: LLVMVisibility);
     pub fn LLVMGetDLLStorageClass(Global: LLVMValueRef) -> LLVMDLLStorageClass;
     pub fn LLVMSetDLLStorageClass(Global: LLVMValueRef, Class: LLVMDLLStorageClass);
+
+    pub fn LLVMGetUnnamedAddress(Global: LLVMValueRef) -> LLVMUnnamedAddr;
+    pub fn LLVMSetUnnamedAddress(Global: LLVMValueRef, UnnamedAddr: LLVMUnnamedAddr);
+    #[deprecated(since="7.0", note="Use LLVMGetUnnamedAddress instead")]
     pub fn LLVMHasUnnamedAddr(Global: LLVMValueRef) -> LLVMBool;
+    #[deprecated(since="7.0", note="Use LLVMSetUnnamedAddress instead")]
     pub fn LLVMSetUnnamedAddr(Global: LLVMValueRef, HasUnnamedAddr: LLVMBool);
+
     pub fn LLVMGetAlignment(V: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetAlignment(V: LLVMValueRef, Bytes: ::libc::c_uint);
 
@@ -483,6 +567,30 @@ extern "C" {
     pub fn LLVMSetExternallyInitialized(GlobalVar: LLVMValueRef, IsExtInit: LLVMBool);
 
     // Core->Values->Constants->Global Aliases
+    /// Obtain a GlobalAlias value from a Module by its name.
+    ///
+    /// The returned value corresponds to a llvm::GlobalAlias value.
+    pub fn LLVMGetNamedGlobalAlias(M: LLVMModuleRef,
+                                   Name: *const ::libc::c_char,
+                                   NameLen: ::libc::size_t)
+                                   -> LLVMValueRef;
+    /// Obtain an iterator to the first GlobalAlias in a Module.
+    pub fn LLVMGetFirstGlobalAlias(M: LLVMModuleRef) -> LLVMValueRef;
+    /// Obtain an iterator to the last GlobalAlias in a Module.
+    pub fn LLVMGetLastGlobalAlias(M: LLVMModuleRef) -> LLVMValueRef;
+    /// Advance a GlobalAlias iterator to the next GlobalAlias.
+    ///
+    /// Returns NULL if the iterator was already at the end and there are no more global aliases.
+    pub fn LLVMGetNextGlobalAlias(GA: LLVMValueRef) -> LLVMValueRef;
+    /// Decrement a GlobalAlias iterator to the previous GlobalAlias.
+    ///
+    /// Returns NULL if the iterator was already at the beginning and there are no previous global aliases.
+    pub fn LLVMGetPreviousGlobalAlias(GA: LLVMValueRef) -> LLVMValueRef;
+    /// Retrieve the target value of an alias.
+    pub fn LLVMAliasGetAliasee(Alias: LLVMValueRef) -> LLVMValueRef;
+    /// Set the target value of an alias.
+    pub fn LLVMAliasSetAliasee(Alias: LLVMValueRef, Aliasee: LLVMValueRef);
+
     pub fn LLVMAddAlias(M: LLVMModuleRef,
                         Ty: LLVMTypeRef,
                         Aliasee: LLVMValueRef,
@@ -559,9 +667,7 @@ extern "C" {
                                -> LLVMValueRef;
     pub fn LLVMMDNode(Vals: *mut LLVMValueRef, Count: ::libc::c_uint) -> LLVMValueRef;
     /// Obtain Metadata as a Value.
-    pub fn LLVMMetadataAsValue(C: LLVMContextRef,
-                               MD: LLVMMetadataRef)
-                               -> LLVMValueRef;
+    pub fn LLVMMetadataAsValue(C: LLVMContextRef, MD: LLVMMetadataRef) -> LLVMValueRef;
     /// Obtain a Value as Metadata.
     pub fn LLVMValueAsMetadata(Val: LLVMValueRef) -> LLVMMetadataRef;
     /// Obtain the underlying string from a MDString value.
@@ -632,7 +738,7 @@ extern "C" {
     // Instructions->Call Sites and Invocations
     // Obtain the argument count for a call instruction.
     //
-    // The provided value should be either a CallInst or InvokeInst.
+    // The provided value should be either a CallInst, InvokeInst or FuncletPadInst.
     pub fn LLVMGetNumArgOperands(Instr: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetInstructionCallConv(Instr: LLVMValueRef, CC: ::libc::c_uint);
     pub fn LLVMGetInstructionCallConv(Instr: LLVMValueRef) -> ::libc::c_uint;
@@ -673,11 +779,11 @@ extern "C" {
     pub fn LLVMSetTailCall(CallInst: LLVMValueRef, IsTailCall: LLVMBool);
     /// Return the normal destination basic block of an invoke instruction.
     pub fn LLVMGetNormalDest(InvokeInst: LLVMValueRef) -> LLVMBasicBlockRef;
-    /// Return the unwind destination basic block of an invoke instruction.
+    /// Return the unwind destination basic block.
     pub fn LLVMGetUnwindDest(InvokeInst: LLVMValueRef) -> LLVMBasicBlockRef;
-    /// Set the normal destination basic block of an invoke instruction.
+    /// Set the normal destination basic block.
     pub fn LLVMSetNormalDest(InvokeInst: LLVMValueRef, B: LLVMBasicBlockRef);
-    /// Set the unwind destination basic block of an invoke instruction.
+    /// Set the unwind destination basic block.
     pub fn LLVMSetUnwindDest(InvokeInst: LLVMValueRef, B: LLVMBasicBlockRef);
 
     // Instructions->Terminators
@@ -851,14 +957,41 @@ extern "C" {
                            Catch: LLVMBasicBlockRef,
                            Name: *const ::libc::c_char)
                            -> LLVMValueRef;
+    pub fn LLVMBuildUnreachable(B: LLVMBuilderRef) -> LLVMValueRef;
+
+    pub fn LLVMBuildResume(B: LLVMBuilderRef, Exn: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMBuildLandingPad(B: LLVMBuilderRef,
                                Ty: LLVMTypeRef,
                                PersFn: LLVMValueRef,
                                NumClauses: ::libc::c_uint,
                                Name: *const ::libc::c_char)
                                -> LLVMValueRef;
-    pub fn LLVMBuildResume(B: LLVMBuilderRef, Exn: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMBuildUnreachable(arg1: LLVMBuilderRef) -> LLVMValueRef;
+    pub fn LLVMBuildCleanupRet(B: LLVMBuilderRef,
+                               CatchPad: LLVMValueRef,
+                               BB: LLVMBasicBlockRef)
+                               -> LLVMValueRef;
+    pub fn LLVMBuildCatchRet(B: LLVMBuilderRef,
+                             CatchPad: LLVMValueRef,
+                             BB: LLVMBasicBlockRef)
+                             -> LLVMValueRef;
+    pub fn LLVMBuildCatchPad(B: LLVMBuilderRef,
+                             ParentPad: LLVMValueRef,
+                             Args: *mut LLVMValueRef,
+                             NumArgs: ::libc::c_uint,
+                             Name: *const ::libc::c_char)
+                             -> LLVMValueRef;
+    pub fn LLVMBuildCleanupPad(B: LLVMBuilderRef,
+                               ParentPad: LLVMValueRef,
+                               Args: *mut LLVMValueRef,
+                               NumArgs: ::libc::c_uint,
+                               Name: *const ::libc::c_char)
+                               -> LLVMValueRef;
+    pub fn LLVMBuildCatchSwitch(B: LLVMBuilderRef,
+                                ParentPad: LLVMValueRef,
+                                UnwindBB: LLVMBasicBlockRef,
+                                NumHandler: ::libc::c_uint,
+                                Name: *const ::libc::c_char)
+                                -> LLVMValueRef;
 
     /// Add a case to a `switch` instruction
     pub fn LLVMAddCase(Switch: LLVMValueRef, OnVal: LLVMValueRef, Dest: LLVMBasicBlockRef);
@@ -880,6 +1013,33 @@ extern "C" {
 
     /// Set the cleanup flag in a `landingpad` instruction.
     pub fn LLVMSetCleanup(LandingPad: LLVMValueRef, Val: LLVMBool);
+
+    /// Add a destination to the catchswitch instruction
+    pub fn LLVMAddHandler(CatchSwitch: LLVMValueRef, Dest: LLVMBasicBlockRef);
+
+    /// Get the number of handlers on the catchswitch instruction
+    pub fn LLVMGetNumHandlers(CatchSwitch: LLVMValueRef) -> ::libc::c_uint;
+
+    /// Obtain the basic blocks acting as handlers for a catchswitch instruction.
+    ///
+    /// The Handlers parameter should point to a pre-allocated array of LLVMBasicBlockRefs at least LLVMGetNumHandlers() large. On return, the first LLVMGetNumHandlers() entries in the array will be populated with LLVMBasicBlockRef instances.
+    pub fn LLVMGetHandlers(CatchSwitch: LLVMValueRef, Handlers: *mut LLVMBasicBlockRef);
+
+    // Funclets
+    /// Get the number of funcletpad arguments.
+    pub fn LLVMGetArgOperand(Funclet: LLVMValueRef, i: ::libc::c_uint) -> LLVMValueRef;
+
+    /// Set a funcletpad argument at the given index.
+    pub fn LLVMSetArgOperand(Funclet: LLVMValueRef, i: ::libc::c_uint, value: LLVMValueRef);
+
+    /// Get the parent catchswitch instruction of a catchpad instruction.
+    ///
+    /// This only works on llvm::CatchPadInst instructions.
+    pub fn LLVMGetParentCatchSwitch(CatchPad: LLVMValueRef) -> LLVMValueRef;
+
+    /// Set the parent catchswitch instruction of a catchpad instruction.
+    /// This only works on llvm::CatchPadInst instructions.
+    pub fn LLVMSetParentCatchSwitch(CatchPad: LLVMValueRef, CatchSwitch: LLVMValueRef);
 
     // Arithmetic
     pub fn LLVMBuildAdd(arg1: LLVMBuilderRef,

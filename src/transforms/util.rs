@@ -1,0 +1,7 @@
+use super::super::prelude::*;
+
+extern "C" {
+    pub fn LLVMAddLowerSwitchPass(PM: LLVMPassManagerRef);
+
+    pub fn LLVMAddPromoteMemoryToRegisterPass(PM: LLVMPassManagerRef);
+}

@@ -29,6 +29,11 @@ pub enum LLVMDIFlags {
     LLVMDIFlagBitField = 1 << 19,
     LLVMDIFlagNoReturn = 1 << 20,
     LLVMDIFlagMainSubprogram = 1 << 21,
+    LLVMDIFlagTypePassByValue = 1 << 22,
+    LLVMDIFlagTypePassByReference = 1 << 23,
+    LLVMDIFlagFixedEnum = 1 << 24,
+    LLVMDIFlagThunk = 1 << 25,
+    LLVMDIFlagTrivial = 1 << 26,
     LLVMDIFlagIndirectVirtualBase = (1 << 2) | (1 << 5),
 }
 
@@ -81,7 +86,7 @@ pub enum LLVMDWARFSourceLanguage {
     // Vendor extensions:
     LLVMDWARFSourceLanguageMips_Assembler,
     LLVMDWARFSourceLanguageGOOGLE_RenderScript,
-    LLVMDWARFSourceLanguageBORLAND_Delphi
+    LLVMDWARFSourceLanguageBORLAND_Delphi,
 }
 
 /// The amount of debug information to emit.
@@ -91,6 +96,8 @@ pub enum LLVMDWARFEmissionKind {
     LLVMDWARFEmissionKindFull,
     LLVMDWARFEmissionKindLineTablesOnly,
 }
+
+pub type LLVMDWARFTypeEncoding = ::libc::c_uint;
 
 extern "C" {
     /// The current debug metadata version number.
@@ -104,37 +111,575 @@ extern "C" {
     /// Construct a builder for a module and collect unresolved nodes.
     pub fn LLVMCreateDIBuilder(M: LLVMModuleRef) -> LLVMDIBuilderRef;
     /// Deallocate a builder and everything it owns.
-    /// 
+    ///
     /// The builder must be finalized before this.
     pub fn LLVMDisposeDIBuilder(Builder: LLVMDIBuilderRef);
     /// Construct any deferred debug info descriptors.
     pub fn LLVMDIBuilderFinalize(Builder: LLVMDIBuilderRef);
     pub fn LLVMDIBuilderCreateCompileUnit(Builder: LLVMDIBuilderRef,
-                                       Lang: LLVMDWARFSourceLanguage,
-                                       FileRef: LLVMMetadataRef,
-                                       Producer: *const ::libc::c_char,
-                                       ProducerLen: ::libc::size_t,
-                                       isOptimized: LLVMBool,
-                                       Flags: *const ::libc::c_char,
-                                       FlagsLen: ::libc::size_t,
-                                       RuntimeVer: ::libc::c_uint,
-                                       SplitName: *const ::libc::c_char,
-                                       SplitNameLen: ::libc::size_t,
-                                       Kind: LLVMDWARFEmissionKind,
-                                       DWOId: ::libc::c_uint,
-                                       SplitDebugInlining: LLVMBool,
-                                       DebugInfoForProfiling: LLVMBool) -> LLVMMetadataRef;
+                                          Lang: LLVMDWARFSourceLanguage,
+                                          FileRef: LLVMMetadataRef,
+                                          Producer: *const ::libc::c_char,
+                                          ProducerLen: ::libc::size_t,
+                                          isOptimized: LLVMBool,
+                                          Flags: *const ::libc::c_char,
+                                          FlagsLen: ::libc::size_t,
+                                          RuntimeVer: ::libc::c_uint,
+                                          SplitName: *const ::libc::c_char,
+                                          SplitNameLen: ::libc::size_t,
+                                          Kind: LLVMDWARFEmissionKind,
+                                          DWOId: ::libc::c_uint,
+                                          SplitDebugInlining: LLVMBool,
+                                          DebugInfoForProfiling: LLVMBool)
+                                          -> LLVMMetadataRef;
     /// Create a file descriptor to hold debugging information for a file.
     pub fn LLVMDIBuilderCreateFile(Builder: LLVMDIBuilderRef,
-                                Filename: *const ::libc::c_char,
-                                FilenameLen: ::libc::size_t,
-                                Directory: *const ::libc::c_char,
-                                DirectoryLen: ::libc::size_t) -> LLVMMetadataRef;
+                                   Filename: *const ::libc::c_char,
+                                   FilenameLen: ::libc::size_t,
+                                   Directory: *const ::libc::c_char,
+                                   DirectoryLen: ::libc::size_t)
+                                   -> LLVMMetadataRef;
+
+    /// Creates a new descriptor for a module with the specified parent scope.
+    pub fn LLVMDIBuilderCreateModule(Builder: LLVMDIBuilderRef,
+                                     ParentScope: LLVMMetadataRef,
+                                     Name: *const ::libc::c_char,
+                                     NameLen: ::libc::size_t,
+                                     ConfigMacros: *const ::libc::c_char,
+                                     ConfigMacrosLen: ::libc::size_t,
+                                     IncludePath: *const ::libc::c_char,
+                                     IncludePathLen: ::libc::size_t,
+                                     ISysRoot: *const ::libc::c_char,
+                                     ISysRootLen: ::libc::size_t)
+                                     -> LLVMMetadataRef;
+
+    /// Creates a new descriptor for a namespace with the specified parent scope.
+    pub fn LLVMDIBuilderCreateNameSpace(Builder: LLVMDIBuilderRef,
+                                        ParentScope: LLVMMetadataRef,
+                                        Name: *const ::libc::c_char,
+                                        NameLen: ::libc::size_t,
+                                        ExportSymbols: LLVMBool)
+                                        -> LLVMMetadataRef;
+
+    /// Create a new descriptor for the specified subprogram.
+    pub fn LLVMDIBuilderCreateFunction(Builder: LLVMDIBuilderRef,
+                                       Scope: LLVMMetadataRef,
+                                       Name: *const ::libc::c_char,
+                                       NameLen: ::libc::size_t,
+                                       LinkageName: *const ::libc::c_char,
+                                       LinkageNameLen: ::libc::size_t,
+                                       File: LLVMMetadataRef,
+                                       LineNo: ::libc::c_uint,
+                                       Ty: LLVMMetadataRef,
+                                       IsLocalToUnit: LLVMBool,
+                                       IsDefinition: LLVMBool,
+                                       ScopeLine: ::libc::c_uint,
+                                       Flags: LLVMDIFlags,
+                                       IsOptimized: LLVMBool)
+                                       -> LLVMMetadataRef;
+
+    /// Create a descriptor for a lexical block with the specified parent context.
+    pub fn LLVMDIBuilderCreateLexicalBlock(Builder: LLVMDIBuilderRef,
+                                           Scope: LLVMMetadataRef,
+                                           File: LLVMMetadataRef,
+                                           Line: ::libc::c_uint,
+                                           Column: ::libc::c_uint)
+                                           -> LLVMMetadataRef;
+
+    /// Create a descriptor for a lexical block with a new file attached.
+    pub fn LLVMDIBuilderCreateLexicalBlockFile(Builder: LLVMDIBuilderRef,
+                                               Scope: LLVMMetadataRef,
+                                               File: LLVMMetadataRef,
+                                               Discriminator: ::libc::c_uint)
+                                               -> LLVMMetadataRef;
+
+    /// Create a descriptor for an imported namespace. Suitable for e.g. C++ using declarations.
+    pub fn LLVMDIBuilderCreateImportedModuleFromNamespace(Builder: LLVMDIBuilderRef,
+                                                          Scope: LLVMMetadataRef,
+                                                          NS: LLVMMetadataRef,
+                                                          File: LLVMMetadataRef,
+                                                          Line: ::libc::c_uint)
+                                                          -> LLVMMetadataRef;
+
+    /// Create a descriptor for an imported module that aliases another imported entity descriptor.
+    pub fn LLVMDIBuilderCreateImportedModuleFromAlias(Builder: LLVMDIBuilderRef,
+                                                      Scope: LLVMMetadataRef,
+                                                      ImportedEntity: LLVMMetadataRef,
+                                                      File: LLVMMetadataRef,
+                                                      Line: ::libc::c_uint)
+                                                      -> LLVMMetadataRef;
+
+    /// Create a descriptor for an imported module.
+    pub fn LLVMDIBuilderCreateImportedModuleFromModule(Builder: LLVMDIBuilderRef,
+                                                       Scope: LLVMMetadataRef,
+                                                       M: LLVMMetadataRef,
+                                                       File: LLVMMetadataRef,
+                                                       Line: ::libc::c_uint)
+                                                       -> LLVMMetadataRef;
+
+    /// Create a descriptor for an imported function, type, or variable.
+    ///
+    /// Suitable for e.g. FORTRAN-style USE declarations.
+    pub fn LLVMDIBuilderCreateImportedDeclaration(Builder: LLVMDIBuilderRef,
+                                                  Scope: LLVMMetadataRef,
+                                                  Decl: LLVMMetadataRef,
+                                                  File: LLVMMetadataRef,
+                                                  Line: ::libc::c_uint,
+                                                  Name: *const ::libc::c_char,
+                                                  NameLen: ::libc::size_t)
+                                                  -> LLVMMetadataRef;
+
     /// Creates a new DebugLocation that describes a source location.
     pub fn LLVMDIBuilderCreateDebugLocation(Ctx: LLVMContextRef,
-                                         Line: ::libc::c_uint,
-                                         Column: ::libc::c_uint,
-                                         Scope: LLVMMetadataRef,
-                                         InlinedAt: LLVMMetadataRef) -> LLVMMetadataRef;
+                                            Line: ::libc::c_uint,
+                                            Column: ::libc::c_uint,
+                                            Scope: LLVMMetadataRef,
+                                            InlinedAt: LLVMMetadataRef)
+                                            -> LLVMMetadataRef;
 
+
+    /// Get the line number of this debug location.
+    pub fn LLVMDILocationGetLine(Location: LLVMMetadataRef) -> ::libc::c_uint;
+
+    /// Get the column number of this debug location.
+    pub fn LLVMDILocationGetColumn(Location: LLVMMetadataRef) -> ::libc::c_uint;
+
+    /// Get the local scope associated with this debug location.
+    pub fn LLVMDILocationGetScope(Location: LLVMMetadataRef) -> LLVMMetadataRef;
+
+    /// Create a type array.
+    pub fn LLVMDIBuilderGetOrCreateTypeArray(Builder: LLVMDIBuilderRef,
+                                             Data: *mut LLVMMetadataRef,
+                                             NumElements: ::libc::size_t)
+                                             -> LLVMMetadataRef;
+
+    /// Create subroutine type.
+    pub fn LLVMDIBuilderCreateSubroutineType(Builder: LLVMDIBuilderRef,
+                                             File: LLVMMetadataRef,
+                                             ParameterTypes: *mut LLVMMetadataRef,
+                                             NumParameterTypes: ::libc::c_uint,
+                                             Flags: LLVMDIFlags)
+                                             -> LLVMMetadataRef;
+
+
+    /// Create debugging information entry for an enumeration.
+    pub fn LLVMDIBuilderCreateEnumerationType(Builder: LLVMDIBuilderRef,
+                                              Scope: LLVMMetadataRef,
+                                              Name: *const ::libc::c_char,
+                                              NameLen: ::libc::size_t,
+                                              File: LLVMMetadataRef,
+                                              LineNumber: ::libc::c_uint,
+                                              SizeInBits: u64,
+                                              AlignInBits: u32,
+                                              Elements: *mut LLVMMetadataRef,
+                                              NumElements: ::libc::c_uint,
+                                              ClassTy: LLVMMetadataRef)
+                                              -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a union.
+    pub fn LLVMDIBuilderCreateUnionType(Builder: LLVMDIBuilderRef,
+                                        Scope: LLVMMetadataRef,
+                                        Name: *const ::libc::c_char,
+                                        NameLen: ::libc::size_t,
+                                        File: LLVMMetadataRef,
+                                        LineNumber: ::libc::c_uint,
+                                        SizeInBits: u64,
+                                        AlignInBits: u32,
+                                        Flags: LLVMDIFlags,
+                                        Elements: *mut LLVMMetadataRef,
+                                        NumElements: ::libc::c_uint,
+                                        RunTimeLang: ::libc::c_uint,
+                                        UniqueId: *const ::libc::c_char,
+                                        UniqueIdLen: ::libc::size_t)
+                                        -> LLVMMetadataRef;
+
+    /// Create debugging information entry for an array.
+    pub fn LLVMDIBuilderCreateArrayType(Builder: LLVMDIBuilderRef,
+                                        Size: u64,
+                                        AlignInBits: u32,
+                                        Ty: LLVMMetadataRef,
+                                        Subscripts: *mut LLVMMetadataRef,
+                                        NumSubscripts: ::libc::c_uint)
+                                        -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a vector type.
+    pub fn LLVMDIBuilderCreateVectorType(Builder: LLVMDIBuilderRef,
+                                         Size: u64,
+                                         AlignInBits: u32,
+                                         Ty: LLVMMetadataRef,
+                                         Subscripts: *mut LLVMMetadataRef,
+                                         NumSubscripts: ::libc::c_uint)
+                                         -> LLVMMetadataRef;
+
+    /// Create a DWARF unspecified type.
+    pub fn LLVMDIBuilderCreateUnspecifiedType(Builder: LLVMDIBuilderRef,
+                                              Name: *const ::libc::c_char,
+                                              NameLen: ::libc::size_t)
+                                              -> LLVMMetadataRef;
+
+
+    /// Create debugging information entry for a basic type.
+    pub fn LLVMDIBuilderCreateBasicType(Builder: LLVMDIBuilderRef,
+                                        Name: *const ::libc::c_char,
+                                        NameLen: ::libc::size_t,
+                                        SizeInBits: u64,
+                                        Encoding: LLVMDWARFTypeEncoding)
+                                        -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a pointer.
+    pub fn LLVMDIBuilderCreatePointerType(Builder: LLVMDIBuilderRef,
+                                          PointeeTy: LLVMMetadataRef,
+                                          SizeInBits: u64,
+                                          AlignInBits: u32,
+                                          AddressSpace: ::libc::c_uint,
+                                          Name: *const ::libc::c_char,
+                                          NameLen: ::libc::size_t)
+                                          -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a struct.
+    pub fn LLVMDIBuilderCreateStructType(Builder: LLVMDIBuilderRef,
+                                         Scope: LLVMMetadataRef,
+                                         Name: *const ::libc::c_char,
+                                         NameLen: ::libc::size_t,
+                                         File: LLVMMetadataRef,
+                                         LineNumber: ::libc::c_uint,
+                                         SizeInBits: u64,
+                                         AlignInBits: u32,
+                                         Flags: LLVMDIFlags,
+                                         DerivedFrom: LLVMMetadataRef,
+                                         Elements: *mut LLVMMetadataRef,
+                                         NumElements: ::libc::c_uint,
+                                         RunTimeLang: ::libc::c_uint,
+                                         VTableHolder: LLVMMetadataRef,
+                                         UniqueId: *const ::libc::c_char,
+                                         UniqueIdLen: ::libc::size_t)
+                                         -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a member.
+    pub fn LLVMDIBuilderCreateMemberType(Builder: LLVMDIBuilderRef,
+                                         Scope: LLVMMetadataRef,
+                                         Name: *const ::libc::c_char,
+                                         NameLen: ::libc::size_t,
+                                         File: LLVMMetadataRef,
+                                         LineNo: ::libc::c_uint,
+                                         SizeInBits: u64,
+                                         AlignInBits: u32,
+                                         OffsetInBits: u64,
+                                         Flags: LLVMDIFlags,
+                                         Ty: LLVMMetadataRef)
+                                         -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a C++ static data member.
+    pub fn LLVMDIBuilderCreateStaticMemberType(Builder: LLVMDIBuilderRef,
+                                               Scope: LLVMMetadataRef,
+                                               Name: *const ::libc::c_char,
+                                               NameLen: ::libc::size_t,
+                                               File: LLVMMetadataRef,
+                                               LineNumber: ::libc::c_uint,
+                                               Type: LLVMMetadataRef,
+                                               Flags: LLVMDIFlags,
+                                               ConstantVal: LLVMValueRef,
+                                               AlignInBits: u32)
+                                               -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a pointer to member.
+    pub fn LLVMDIBuilderCreateMemberPointerType(Builder: LLVMDIBuilderRef,
+                                                PointeeType: LLVMMetadataRef,
+                                                ClassType: LLVMMetadataRef,
+                                                SizeInBits: u64,
+                                                AlignInBits: u32,
+                                                Flags: LLVMDIFlags)
+                                                -> LLVMMetadataRef;
+
+    /// Create debugging information entry for Objective-C instance variable.
+    pub fn LLVMDIBuilderCreateObjCIVar(Builder: LLVMDIBuilderRef,
+                                       Name: *const ::libc::c_char,
+                                       NameLen: ::libc::size_t,
+                                       File: LLVMMetadataRef,
+                                       LineNo: ::libc::c_uint,
+                                       SizeInBits: u64,
+                                       AlignInBits: u32,
+                                       OffsetInBits: u64,
+                                       Flags: LLVMDIFlags,
+                                       Ty: LLVMMetadataRef,
+                                       PropertyNode: LLVMMetadataRef)
+                                       -> LLVMMetadataRef;
+
+    /// Create debugging information entry for Objective-C property.
+    pub fn LLVMDIBuilderCreateObjCProperty(Builder: LLVMDIBuilderRef,
+                                           Name: *const ::libc::c_char,
+                                           NameLen: ::libc::size_t,
+                                           File: LLVMMetadataRef,
+                                           LineNo: ::libc::c_uint,
+                                           GetterName: *const ::libc::c_char,
+                                           GetterNameLen: ::libc::size_t,
+                                           SetterName: *const ::libc::c_char,
+                                           SetterNameLen: ::libc::size_t,
+                                           PropertyAttributes: ::libc::c_uint,
+                                           Ty: LLVMMetadataRef)
+                                           -> LLVMMetadataRef;
+
+    /// Create a uniqued DIType* clone with FlagObjectPointer and FlagArtificial set.
+    pub fn LLVMDIBuilderCreateObjectPointerType(Builder: LLVMDIBuilderRef,
+                                                Type: LLVMMetadataRef)
+                                                -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a qualified type, e.g. 'const int'.
+    pub fn LLVMDIBuilderCreateQualifiedType(Builder: LLVMDIBuilderRef,
+                                            Tag: ::libc::c_uint,
+                                            Type: LLVMMetadataRef)
+                                            -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a c++ style reference or rvalue reference type.
+    pub fn LLVMDIBuilderCreateReferenceType(Builder: LLVMDIBuilderRef,
+                                            Tag: ::libc::c_uint,
+                                            Type: LLVMMetadataRef)
+                                            -> LLVMMetadataRef;
+
+    /// Create C++11 nullptr type.
+    pub fn LLVMDIBuilderCreateNullPtrType(Builder: LLVMDIBuilderRef) -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a typedef.
+    pub fn LLVMDIBuilderCreateTypedef(Builder: LLVMDIBuilderRef,
+                                      Type: LLVMMetadataRef,
+                                      Name: *const ::libc::c_char,
+                                      NameLen: ::libc::size_t,
+                                      File: LLVMMetadataRef,
+                                      LineNo: ::libc::c_uint,
+                                      Scope: LLVMMetadataRef)
+                                      -> LLVMMetadataRef;
+
+    /// Create debugging information entry to establish inheritance relationship between two types.
+    pub fn LLVMDIBuilderCreateInheritance(Builder: LLVMDIBuilderRef,
+                                          Ty: LLVMMetadataRef,
+                                          BaseTy: LLVMMetadataRef,
+                                          BaseOffset: u64,
+                                          VBPtrOffset: u32,
+                                          Flags: LLVMDIFlags)
+                                          -> LLVMMetadataRef;
+
+    /// Create a permanent forward-declared type.
+    pub fn LLVMDIBuilderCreateForwardDecl(Builder: LLVMDIBuilderRef,
+                                          Tag: ::libc::c_uint,
+                                          Name: *const ::libc::c_char,
+                                          NameLen: ::libc::size_t,
+                                          Scope: LLVMMetadataRef,
+                                          File: LLVMMetadataRef,
+                                          Line: ::libc::c_uint,
+                                          RuntimeLang: ::libc::c_uint,
+                                          SizeInBits: u64,
+                                          AlignInBits: u32,
+                                          UniqueIdentifier: *const ::libc::c_char,
+                                          UniqueIdentifierLen: ::libc::size_t)
+                                          -> LLVMMetadataRef;
+
+    /// Create a temporary forward-declared type.
+    pub fn LLVMDIBuilderCreateReplaceableCompositeType(Builder: LLVMDIBuilderRef,
+                                                       Tag: ::libc::c_uint,
+                                                       Name: *const ::libc::c_char,
+                                                       NameLen: ::libc::size_t,
+                                                       Scope: LLVMMetadataRef,
+                                                       File: LLVMMetadataRef,
+                                                       Line: ::libc::c_uint,
+                                                       RuntimeLang: ::libc::c_uint,
+                                                       SizeInBits: u64,
+                                                       AlignInBits: u32,
+                                                       Flags: LLVMDIFlags,
+                                                       UniqueIdentifier: *const ::libc::c_char,
+                                                       UniqueIdentifierLen: ::libc::size_t)
+                                                       -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a bit field member.
+    pub fn LLVMDIBuilderCreateBitFieldMemberType(Builder: LLVMDIBuilderRef,
+                                                 Scope: LLVMMetadataRef,
+                                                 Name: *const ::libc::c_char,
+                                                 NameLen: ::libc::size_t,
+                                                 File: LLVMMetadataRef,
+                                                 LineNumber: ::libc::c_uint,
+                                                 SizeInBits: u64,
+                                                 OffsetInBits: u64,
+                                                 StorageOffsetInBits: u64,
+                                                 Flags: LLVMDIFlags,
+                                                 Type: LLVMMetadataRef)
+                                                 -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a class.
+    pub fn LLVMDIBuilderCreateClassType(Builder: LLVMDIBuilderRef,
+                                        Scope: LLVMMetadataRef,
+                                        Name: *const ::libc::c_char,
+                                        NameLen: ::libc::size_t,
+                                        File: LLVMMetadataRef,
+                                        LineNumber: ::libc::c_uint,
+                                        SizeInBits: u64,
+                                        AlignInBits: u32,
+                                        OffsetInBits: u64,
+                                        Flags: LLVMDIFlags,
+                                        DerivedFrom: LLVMMetadataRef,
+                                        Elements: *mut LLVMMetadataRef,
+                                        NumElements: ::libc::c_uint,
+                                        VTableHolder: LLVMMetadataRef,
+                                        TemplateParamsNode: LLVMMetadataRef,
+                                        UniqueIdentifier: *const ::libc::c_char,
+                                        UniqueIdentifierLen: ::libc::size_t)
+                                        -> LLVMMetadataRef;
+
+    /// Create a uniqued DIType* clone with FlagArtificial set.
+    pub fn LLVMDIBuilderCreateArtificialType(Builder: LLVMDIBuilderRef,
+                                             Type: LLVMMetadataRef)
+                                             -> LLVMMetadataRef;
+
+    /// Get the name of this DIType.
+    pub fn LLVMDITypeGetName(DType: LLVMMetadataRef,
+                             Length: *mut ::libc::size_t)
+                             -> *const ::libc::c_char;
+
+    /// Get the size of this DIType in bits.
+    pub fn LLVMDITypeGetSizeInBits(DType: LLVMMetadataRef) -> u64;
+
+    /// Get the offset of this DIType in bits.
+    pub fn LLVMDITypeGetOffsetInBits(DType: LLVMMetadataRef) -> u64;
+
+    /// Get the alignment of this DIType in bits.
+    pub fn LLVMDITypeGetAlignInBits(DType: LLVMMetadataRef) -> u32;
+
+    /// Get the source line where this DIType is declared.
+    pub fn LLVMDITypeGetLine(DType: LLVMMetadataRef) -> ::libc::c_uint;
+
+    /// Get the flags associated with this DIType.
+    pub fn LLVMDITypeGetFlags(DType: LLVMMetadataRef) -> LLVMDIFlags;
+
+    /// Create a descriptor for a value range.
+    pub fn LLVMDIBuilderGetOrCreateSubrange(Builder: LLVMDIBuilderRef,
+                                            LowerBound: i64,
+                                            Count: i64)
+                                            -> LLVMMetadataRef;
+
+    /// Create an array of DI Nodes.
+    pub fn LLVMDIBuilderGetOrCreateArray(Builder: LLVMDIBuilderRef,
+                                         Data: *mut LLVMMetadataRef,
+                                         NumElements: ::libc::size_t)
+                                         -> LLVMMetadataRef;
+
+    /// Create a new descriptor for the specified variable which has a complex
+    pub fn LLVMDIBuilderCreateExpression(Builder: LLVMDIBuilderRef,
+                                         Addr: *mut i64,
+                                         Length: ::libc::size_t)
+                                         -> LLVMMetadataRef;
+
+    /// Create a new descriptor for the specified variable that does not have an
+    pub fn LLVMDIBuilderCreateConstantValueExpression(Builder: LLVMDIBuilderRef,
+                                                      Value: i64)
+                                                      -> LLVMMetadataRef;
+
+    /// Create a new descriptor for the specified variable.
+    pub fn LLVMDIBuilderCreateGlobalVariableExpression(Builder: LLVMDIBuilderRef,
+                                                       Scope: LLVMMetadataRef,
+                                                       Name: *const ::libc::c_char,
+                                                       NameLen: ::libc::size_t,
+                                                       Linkage: *const ::libc::c_char,
+                                                       LinkLen: ::libc::size_t,
+                                                       File: LLVMMetadataRef,
+                                                       LineNo: ::libc::c_uint,
+                                                       Ty: LLVMMetadataRef,
+                                                       LocalToUnit: LLVMBool,
+                                                       Expr: LLVMMetadataRef,
+                                                       Decl: LLVMMetadataRef,
+                                                       AlignInBits: u32)
+                                                       -> LLVMMetadataRef;
+
+    /// Create a new temporary \c MDNode.  Suitable for use in constructing cyclic
+    pub fn LLVMTemporaryMDNode(Ctx: LLVMContextRef,
+                               Data: *mut LLVMMetadataRef,
+                               NumElements: ::libc::size_t)
+                               -> LLVMMetadataRef;
+
+    /// Deallocate a temporary node.
+    pub fn LLVMDisposeTemporaryMDNode(TempNode: LLVMMetadataRef);
+
+    /// Replace all uses of temporary metadata.
+    pub fn LLVMMetadataReplaceAllUsesWith(TempTargetMetadata: LLVMMetadataRef,
+                                          Replacement: LLVMMetadataRef);
+
+    /// Create a new descriptor for the specified global variable that is temporary
+    pub fn LLVMDIBuilderCreateTempGlobalVariableFwdDecl(Builder: LLVMDIBuilderRef,
+                                                        Scope: LLVMMetadataRef,
+                                                        Name: *const ::libc::c_char,
+                                                        NameLen: ::libc::size_t,
+                                                        Linkage: *const ::libc::c_char,
+                                                        LnkLen: ::libc::size_t,
+                                                        File: LLVMMetadataRef,
+                                                        LineNo: ::libc::c_uint,
+                                                        Ty: LLVMMetadataRef,
+                                                        LocalToUnit: LLVMBool,
+                                                        Decl: LLVMMetadataRef,
+                                                        AlignInBits: u32)
+                                                        -> LLVMMetadataRef;
+
+    /// Insert a new llvm.dbg.declare intrinsic call before the given instruction.
+    pub fn LLVMDIBuilderInsertDeclareBefore(Builder: LLVMDIBuilderRef,
+                                            Storage: LLVMValueRef,
+                                            VarInfo: LLVMMetadataRef,
+                                            Expr: LLVMMetadataRef,
+                                            DebugLoc: LLVMMetadataRef,
+                                            Instr: LLVMValueRef)
+                                            -> LLVMValueRef;
+
+    /// Insert a new llvm.dbg.declare intrinsic call at the end of the given basic block. If the basic block has a terminator instruction, the intrinsic is inserted before that terminator instruction.
+    pub fn LLVMDIBuilderInsertDeclareAtEnd(Builder: LLVMDIBuilderRef,
+                                           Storage: LLVMValueRef,
+                                           VarInfo: LLVMMetadataRef,
+                                           Expr: LLVMMetadataRef,
+                                           DebugLoc: LLVMMetadataRef,
+                                           Block: LLVMBasicBlockRef)
+                                           -> LLVMValueRef;
+
+    /// Insert a new llvm.dbg.value intrinsic call before the given instruction.
+    pub fn LLVMDIBuilderInsertDbgValueBefore(Builder: LLVMDIBuilderRef,
+                                             Val: LLVMValueRef,
+                                             VarInfo: LLVMMetadataRef,
+                                             Expr: LLVMMetadataRef,
+                                             DebugLoc: LLVMMetadataRef,
+                                             Instr: LLVMValueRef)
+                                             -> LLVMValueRef;
+
+    /// Insert a new llvm.dbg.value intrinsic call at the end of the given basic block. If the basic block has a terminator instruction, the intrinsic is inserted before that terminator instruction.
+    pub fn LLVMDIBuilderInsertDbgValueAtEnd(Builder: LLVMDIBuilderRef,
+                                            Val: LLVMValueRef,
+                                            VarInfo: LLVMMetadataRef,
+                                            Expr: LLVMMetadataRef,
+                                            DebugLoc: LLVMMetadataRef,
+                                            Block: LLVMBasicBlockRef)
+                                            -> LLVMValueRef;
+
+    /// Create a new descriptor for a local auto variable.
+    pub fn LLVMDIBuilderCreateAutoVariable(Builder: LLVMDIBuilderRef,
+                                           Scope: LLVMMetadataRef,
+                                           Name: *const ::libc::c_char,
+                                           NameLen: ::libc::size_t,
+                                           File: LLVMMetadataRef,
+                                           LineNo: ::libc::c_uint,
+                                           Ty: LLVMMetadataRef,
+                                           AlwaysPreserve: LLVMBool,
+                                           Flags: LLVMDIFlags,
+                                           AlignInBits: u32)
+                                           -> LLVMMetadataRef;
+
+    /// Create a new descriptor for a function parameter variable.
+    pub fn LLVMDIBuilderCreateParameterVariable(Builder: LLVMDIBuilderRef,
+                                                Scope: LLVMMetadataRef,
+                                                Name: *const ::libc::c_char,
+                                                NameLen: ::libc::size_t,
+                                                ArgNo: ::libc::c_uint,
+                                                File: LLVMMetadataRef,
+                                                LineNo: ::libc::c_uint,
+                                                Ty: LLVMMetadataRef,
+                                                AlwaysPreserve: LLVMBool,
+                                                Flags: LLVMDIFlags)
+                                                -> LLVMMetadataRef;
+
+    /// Get the metadata of the subprogram attached to a function.
+    pub fn LLVMGetSubprogram(Func: LLVMValueRef) -> LLVMMetadataRef;
+
+    /// Set the subprogram attached to a function.
+    pub fn LLVMSetSubprogram(Func: LLVMValueRef, SP: LLVMMetadataRef);
 }

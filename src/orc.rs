@@ -3,15 +3,16 @@
 use super::prelude::*;
 use super::target_machine::LLVMTargetMachineRef;
 
-pub enum LLVMOpaqueSharedModule {}
-pub type LLVMSharedModuleRef = *mut LLVMOpaqueSharedModule;
 pub enum LLVMOrcOpaqueJITStack {}
 pub type LLVMOrcJITStackRef = *mut LLVMOrcOpaqueJITStack;
-pub type LLVMOrcModuleHandle = u32;
+pub type LLVMOrcModuleHandle = u64;
 pub type LLVMOrcTargetAddress = u64;
 
-pub type LLVMOrcSymbolResolverFn = Option<extern "C" fn(*const ::libc::c_char, *mut ::libc::c_void) -> u64>;
-pub type LLVMOrcLazyCompileCallbackFn = Option<extern "C" fn(LLVMOrcJITStackRef, *mut ::libc::c_void)>;
+pub type LLVMOrcSymbolResolverFn = Option<extern "C" fn(*const ::libc::c_char,
+                                                        *mut ::libc::c_void)
+                                                        -> u64>;
+pub type LLVMOrcLazyCompileCallbackFn = Option<extern "C" fn(LLVMOrcJITStackRef,
+                                                             *mut ::libc::c_void)>;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMOrcErrorCode {
@@ -20,12 +21,6 @@ pub enum LLVMOrcErrorCode {
 }
 
 extern "C" {
-    /// Turn an LLVMModuleRef into an LLVMSharedModuleRef.
-    ///
-    /// The JIT shares ownership of modules; dispose of the returned
-    /// shared module with `LLVMOrcDisposeSharedModule`.
-    pub fn LLVMOrcMakeSharedModule(Mod: LLVMModuleRef) -> LLVMSharedModuleRef;
-    pub fn LLVMOrcDisposeSharedModuleRef(SharedMod: LLVMSharedModuleRef);
     /// Create an ORC JIT stack.
     ///
     /// The client owns the returned stack and must call OrcDisposeInstance
@@ -71,7 +66,7 @@ extern "C" {
     /// Add a module to be eagerly compiled.
     pub fn LLVMOrcAddEagerlyCompiledIR(JITStack: LLVMOrcJITStackRef,
                                        RetHandle: *mut LLVMOrcModuleHandle,
-                                       Mod: LLVMSharedModuleRef,
+                                       Mod: LLVMModuleRef,
                                        SymbolResolver: LLVMOrcSymbolResolverFn,
                                        SymbolResolverCtx: *mut ::libc::c_void)
                                        -> LLVMOrcErrorCode;
@@ -79,7 +74,7 @@ extern "C" {
     /// Add a module to be lazily compiled one function at a time.
     pub fn LLVMOrcAddLazilyCompiledIR(JITStack: LLVMOrcJITStackRef,
                                       RetHandle: *mut LLVMOrcModuleHandle,
-                                      Mod: LLVMSharedModuleRef,
+                                      Mod: LLVMModuleRef,
                                       SymbolResolver: LLVMOrcSymbolResolverFn,
                                       SymbolResolverCtx: *mut ::libc::c_void)
                                       -> LLVMOrcErrorCode;
@@ -93,7 +88,9 @@ extern "C" {
                                 -> LLVMOrcErrorCode;
 
     /// Remove a module set from the JIT.
-    pub fn LLVMOrcRemoveModule(JITStack: LLVMOrcJITStackRef, H: LLVMOrcModuleHandle) -> LLVMOrcErrorCode;
+    pub fn LLVMOrcRemoveModule(JITStack: LLVMOrcJITStackRef,
+                               H: LLVMOrcModuleHandle)
+                               -> LLVMOrcErrorCode;
 
     /// Get symbol address from JIT instance.
     pub fn LLVMOrcGetSymbolAddress(JITStack: LLVMOrcJITStackRef,
@@ -101,6 +98,25 @@ extern "C" {
                                    SymbolName: *const ::libc::c_char)
                                    -> LLVMOrcErrorCode;
 
+    /// Get symbol address from JIT instance, searching only the specified handle.
+    pub fn LLVMOrcGetSymbolAddressIn(JITStack: LLVMOrcJITStackRef,
+                                     RetAddr: *mut LLVMOrcTargetAddress,
+                                     H: LLVMOrcModuleHandle,
+                                     SymbolName: *const ::libc::c_char)
+                                     -> LLVMOrcErrorCode;
+
     /// Dispose of an ORC JIT stack.
     pub fn LLVMOrcDisposeInstance(JITStack: LLVMOrcJITStackRef) -> LLVMOrcErrorCode;
+
+    /// Register a JIT Event Listener.
+    ///
+    /// A NULL listener is ignored.
+    pub fn LLVMOrcRegisterJITEventListener(JITStack: LLVMOrcJITStackRef,
+                                           L: LLVMJITEventListenerRef);
+
+    /// Unegister a JIT Event Listener.
+    ///
+    /// A NULL listener is ignored.
+    pub fn LLVMOrcUnregisterJITEventListener(JITStack: LLVMOrcJITStackRef,
+                                             L: LLVMJITEventListenerRef);
 }

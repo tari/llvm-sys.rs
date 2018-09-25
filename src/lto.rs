@@ -71,9 +71,10 @@ pub enum lto_codegen_diagnostic_severity_t {
     LTO_DS_NOTE = 2,
 }
 
-pub type lto_diagnostic_handler_t = Option<extern "C" fn(severity: lto_codegen_diagnostic_severity_t,
-                                                         diag: *const ::libc::c_char,
-                                                         ctxt: *mut ::libc::c_void)>;
+pub type lto_diagnostic_handler_t =
+    Option<extern "C" fn(severity: lto_codegen_diagnostic_severity_t,
+                         diag: *const ::libc::c_char,
+                         ctxt: *mut ::libc::c_void)>;
 
 extern "C" {
     pub fn lto_get_version() -> *const ::libc::c_char;
@@ -96,7 +97,7 @@ extern "C" {
                                                           length: ::libc::size_t,
                                                           target_triple_prefix:
                                                               *const ::libc::c_char)
-     -> lto_bool_t;
+-> lto_bool_t;
     pub fn lto_module_create(path: *const ::libc::c_char) -> lto_module_t;
     pub fn lto_module_create_from_memory(mem: *const ::libc::c_void,
                                          length: ::libc::size_t)
@@ -277,7 +278,7 @@ extern "C" {
                                          cache_dir: *const ::libc::c_char);
     /// Set the cache pruning interval, in seconds.
     ///
-    /// A negative value disables pruning, and 0 is ignored.
+    /// A negative value disables pruning, and 0 will force pruning to occur.
     pub fn thinlto_codegen_set_cache_pruning_interval(cg: thinlto_code_gen_t,
                                                       interval: ::libc::c_int);
     /// Set the maximum cache size to persist across builds.
@@ -286,10 +287,20 @@ extern "C" {
     /// and 50 means no more than half of the available disk space. 0 is ignored, and
     /// values over 100 will be reduced to 100.
     pub fn thinlto_codegen_set_final_cache_size_relative_to_available_space(
-            cg: thinlto_code_gen_t, percentage: ::libc::c_uint);
+cg: thinlto_code_gen_t, percentage: ::libc::c_uint);
     /// Set the expiration (in seconds) for cache entries.
     pub fn thinlto_codegen_set_cache_entry_expiration(cg: thinlto_code_gen_t,
                                                       expiration: ::libc::c_uint);
+    /// Set the maximum size of the cache directory (in bytes). A value over the
+    /// amount of available space on the disk will be reduced to the amount of
+    /// available space. An unspecified default value will be applied. A value of 0
+    /// will be ignored.
+    pub fn thinlto_codegen_set_cache_size_bytes(cg: thinlto_code_gen_t,
+                                                max_size_bytes: ::libc::c_uint);
+    /// Sets the maximum number of files in the cache directory. An unspecified default value will be applied. A value of 0 will be ignored.
+    pub fn thinlto_codegen_set_cache_size_files(cg: thinlto_code_gen_t,
+                                                max_size_files: ::libc::c_uint);
+
     /// Set the path to a directory to use as temporary bitcode storage.
     ///
     /// This is meant to make the bitcode files available for debugging.

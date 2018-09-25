@@ -4,6 +4,7 @@ use super::super::prelude::*;
 
 extern "C" {
     pub fn LLVMAddAggressiveDCEPass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddAggressiveInstCombinerPass(PM: LLVMPassManagerRef);
     /// Added in LLVM 3.7.
     pub fn LLVMAddBitTrackingDCEPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddAlignmentFromAssumptionsPass(PM: LLVMPassManagerRef);
@@ -22,11 +23,10 @@ extern "C" {
     pub fn LLVMAddLoopRotatePass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopRerollPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopUnrollPass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddLoopUnrollAndJamPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopUnswitchPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddMemCpyOptPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddPartiallyInlineLibCallsPass(PM: LLVMPassManagerRef);
-    pub fn LLVMAddLowerSwitchPass(PM: LLVMPassManagerRef);
-    pub fn LLVMAddPromoteMemoryToRegisterPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddReassociatePass(PM: LLVMPassManagerRef);
     pub fn LLVMAddSCCPPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddScalarReplAggregatesPass(PM: LLVMPassManagerRef);

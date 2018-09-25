@@ -9,6 +9,7 @@ extern "C" {
     pub fn LLVMInitializeObjCARCOpts(R: LLVMPassRegistryRef);
     pub fn LLVMInitializeVectorization(R: LLVMPassRegistryRef);
     pub fn LLVMInitializeInstCombine(R: LLVMPassRegistryRef);
+    pub fn LLVMInitializeAggressiveInstCombiner(R: LLVMPassRegistryRef);
     pub fn LLVMInitializeIPO(R: LLVMPassRegistryRef);
     pub fn LLVMInitializeInstrumentation(R: LLVMPassRegistryRef);
     pub fn LLVMInitializeAnalysis(R: LLVMPassRegistryRef);

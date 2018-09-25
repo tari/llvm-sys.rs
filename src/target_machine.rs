@@ -86,6 +86,14 @@ extern "C" {
                                                ErrorMessage: *mut *mut ::libc::c_char,
                                                OutMemBuf: *mut LLVMMemoryBufferRef)
                                                -> LLVMBool;
+
     pub fn LLVMGetDefaultTargetTriple() -> *mut ::libc::c_char;
+    /// Normalize a target triple. The result needs to be disposed with LLVMDisposeMessage.
+    pub fn LLVMNormalizeTargetTriple(triple: *const ::libc::c_char) -> *mut ::libc::c_char;
+    /// Get the host CPU as a string. The result needs to be disposed with LLVMDisposeMessage.
+    pub fn LLVMGetHostCPUName() -> *mut ::libc::c_char;
+    /// Get the host CPU's features as a string. The result needs to be disposed with LLVMDisposeMessage.
+    pub fn LLVMGetHostCPUFeatures() -> *mut ::libc::c_char;
+
     pub fn LLVMAddAnalysisPasses(T: LLVMTargetMachineRef, PM: LLVMPassManagerRef);
 }

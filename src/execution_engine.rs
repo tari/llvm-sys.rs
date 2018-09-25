@@ -38,10 +38,9 @@ pub type LLVMMemoryManagerAllocateDataSectionCallback =
                   SectionName: *const ::libc::c_char,
                   IsReadOnly: LLVMBool)
                   -> *mut u8;
-pub type LLVMMemoryManagerFinalizeMemoryCallback =
-    extern "C" fn(Opaque: *mut ::libc::c_void,
-                  ErrMsg: *mut *mut ::libc::c_char)
-                  -> LLVMBool;
+pub type LLVMMemoryManagerFinalizeMemoryCallback = extern "C" fn(Opaque: *mut ::libc::c_void,
+                                                                 ErrMsg: *mut *mut ::libc::c_char)
+                                                                 -> LLVMBool;
 pub type LLVMMemoryManagerDestroyCallback = Option<extern "C" fn(Opaque: *mut ::libc::c_void)>;
 
 extern "C" {
@@ -170,7 +169,14 @@ extern "C" {
                                               AllocateCodeSection: LLVMMemoryManagerAllocateCodeSectionCallback,
                                               AllocateDataSection: LLVMMemoryManagerAllocateDataSectionCallback,
                                               FinalizeMemory: LLVMMemoryManagerFinalizeMemoryCallback,
-                                              Destroy: LLVMMemoryManagerDestroyCallback) -> LLVMMCJITMemoryManagerRef;
+Destroy: LLVMMemoryManagerDestroyCallback) -> LLVMMCJITMemoryManagerRef;
 
     pub fn LLVMDisposeMCJITMemoryManager(MM: LLVMMCJITMemoryManagerRef);
+
+    // JIT event listener functions
+    pub fn LLVMCreateGDBRegistrationListener() -> LLVMJITEventListenerRef;
+    pub fn LLVMCreateIntelJITEventListener() -> LLVMJITEventListenerRef;
+    pub fn LLVMCreateOprofileJITEventListener() -> LLVMJITEventListenerRef;
+    pub fn LLVMCreatePerfJITEventListener() -> LLVMJITEventListenerRef;
+
 }

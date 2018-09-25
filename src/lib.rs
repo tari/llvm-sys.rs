@@ -24,6 +24,9 @@ pub enum LLVMPassManager {}
 pub enum LLVMPassRegistry {}
 pub enum LLVMUse {}
 pub enum LLVMDiagnosticInfo {}
+pub enum LLVMComdat {}
+pub enum LLVMOpaqueModuleFlagEntry {}
+pub enum LLVMOpaqueJITEventListener {}
 pub enum LLVMOpaqueAttributeRef {}
 
 /// Core types used throughout LLVM.
@@ -45,12 +48,16 @@ pub mod prelude {
     pub type LLVMPassRegistryRef = *mut super::LLVMPassRegistry;
     pub type LLVMUseRef = *mut super::LLVMUse;
     pub type LLVMDiagnosticInfoRef = *mut super::LLVMDiagnosticInfo;
+    pub type LLVMComdatRef = *mut super::LLVMComdat;
+    pub type LLVMModuleFlagEntry = *mut super::LLVMOpaqueModuleFlagEntry;
+    pub type LLVMJITEventListenerRef = *mut super::LLVMOpaqueJITEventListener;
     pub type LLVMAttributeRef = *mut super::LLVMOpaqueAttributeRef;
 }
 
 pub mod analysis;
 pub mod bit_reader;
 pub mod bit_writer;
+pub mod comdat;
 pub mod core;
 pub mod debuginfo;
 pub mod disassembler;
@@ -68,9 +75,11 @@ pub mod support;
 pub mod target_machine;
 
 pub mod transforms {
+    pub mod instcombine;
     pub mod ipo;
     pub mod pass_manager_builder;
     pub mod scalar;
+    pub mod util;
     pub mod vectorize;
 }
 
@@ -197,6 +206,17 @@ pub enum LLVMVisibility {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LLVMUnnamedAddr {
+    /// Address of the GV is significant.
+    LLVMNoUnnamedAddr,
+    /// Address of the GV is locally insignificant.
+    LLVMLocalUnnamedAddr,
+    /// Address of the GV is globally insignificant.
+    LLVMGlobalUnnamedAddr,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMDLLStorageClass {
     LLVMDefaultStorageClass = 0,
     LLVMDLLImportStorageClass = 1,
@@ -209,10 +229,45 @@ pub enum LLVMCallConv {
     LLVMCCallConv = 0,
     LLVMFastCallConv = 8,
     LLVMColdCallConv = 9,
+    LLVMGHCCallConv = 10,
+    LLVMHiPECallConv = 11,
     LLVMWebKitJSCallConv = 12,
     LLVMAnyRegCallConv = 13,
+    LLVMPreserveMostCallConv = 14,
+    LLVMPreserveAllCallConv = 15,
+    LLVMSwiftCallConv = 16,
+    LLVMCXXFASTTLSCallConv = 17,
     LLVMX86StdcallCallConv = 64,
     LLVMX86FastcallCallConv = 65,
+    LLVMARMAPCSCallConv = 66,
+    LLVMARMAAPCSCallConv = 67,
+    LLVMARMAAPCSVFPCallConv = 68,
+    LLVMMSP430INTRCallConv = 69,
+    LLVMX86ThisCallCallConv = 70,
+    LLVMPTXKernelCallConv = 71,
+    LLVMPTXDeviceCallConv = 72,
+    LLVMSPIRFUNCCallConv = 75,
+    LLVMSPIRKERNELCallConv = 76,
+    LLVMIntelOCLBICallConv = 77,
+    LLVMX8664SysVCallConv = 78,
+    LLVMWin64CallConv = 79,
+    LLVMX86VectorCallCallConv = 80,
+    LLVMHHVMCallConv = 81,
+    LLVMHHVMCCallConv = 82,
+    LLVMX86INTRCallConv = 83,
+    LLVMAVRINTRCallConv = 84,
+    LLVMAVRSIGNALCallConv = 85,
+    LLVMAVRBUILTINCallConv = 86,
+    LLVMAMDGPUVSCallConv = 87,
+    LLVMAMDGPUGSCallConv = 88,
+    LLVMAMDGPUPSCallConv = 89,
+    LLVMAMDGPUCSCallConv = 90,
+    LLVMAMDGPUKERNELCallConv = 91,
+    LLVMX86RegCallCallConv = 92,
+    LLVMAMDGPUHSCallConv = 93,
+    LLVMMSP430BUILTINCallConv = 94,
+    LLVMAMDGPULSCallConv = 95,
+    LLVMAMDGPUESCallConv = 96,
 }
 
 #[repr(C)]
@@ -336,6 +391,30 @@ pub enum LLVMDiagnosticSeverity {
     LLVMDSWarning = 1,
     LLVMDSRemark = 2,
     LLVMDSNote = 3,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LLVMInlineAsmDialect {
+    LLVMInlineAsmDialectATT,
+    LLVMInlineAsmDialectIntel,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LLVMModuleFlagBehavior {
+    /// Emits an error if two values disagree, otherwise the resulting value is that of the operands.
+    LLVMModuleFlagBehaviorError,
+    /// Emits a warning if two values disagree. The result value will be the operand for the flag from the first module being linked.
+    LLVMModuleFlagBehaviorWarning,
+    /// Adds a requirement that another module flag be present and have a specified value after linking is performed. The value must be a metadata pair, where the first element of the pair is the ID of the module flag to be restricted, and the second element of the pair is the value the module flag should be restricted to. This behavior can be used to restrict the allowable results (via triggering of an error) of linking IDs with the **Override** behavior.
+    LLVMModuleFlagBehaviorRequire,
+    /// Uses the specified value, regardless of the behavior or value of the other module. If both modules specify **Override**, but the values differ, an error will be emitted.
+    LLVMModuleFlagBehaviorOverride,
+    /// Appends the two values, which are required to be metadata nodes.
+    LLVMModuleFlagBehaviorAppend,
+    /// Appends the two values, which are required to be metadata nodes. However, duplicate entries in the second list are dropped during the append operation.
+    LLVMModuleFlagBehaviorAppendUnique,
 }
 
 pub const LLVMAttributeReturnIndex: ::libc::c_uint = 0;
