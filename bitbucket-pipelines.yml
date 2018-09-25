@@ -9,7 +9,7 @@ pipelines:
           - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
           - apt-get update && apt-get install -y llvm-7 llvm-7-dev
           - curl https://static.rust-lang.org/rustup.sh | sh -s -- --prefix=$HOME/rust
-          - PATH=$PATH:~/rust/bin LLVM_SYS_70_PREFIX=/usr/lib/llvm-7 cargo test
+          - PATH=$PATH:~/rust/bin LLVM_SYS_70_PREFIX=/usr/lib/llvm-7 LLVM_SYS_70_FFI_WORKAROUND=1 cargo test
           - ./target/debug/examples/jit-function
   branches:
     llvm-6.0:
