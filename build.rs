@@ -234,6 +234,8 @@ fn get_system_libcpp() -> Option<&'static str> {
         // latest, at the cost of breaking the build on older OS releases
         // when LLVM was built against libstdc++.
         Some("c++")
+    } else if cfg!(target_os = "freebsd") {
+        Some("c++")
     } else {
         // Otherwise assume GCC's libstdc++.
         // This assumption is probably wrong on some platforms, but would need
