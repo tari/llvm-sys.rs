@@ -279,6 +279,12 @@ fn get_llvm_cflags() -> String {
 }
 
 fn main() {
+    // Build the extra wrapper functions.
+    std::env::set_var("CFLAGS", get_llvm_cflags());
+    cc::Build::new()
+        .file("wrappers/target.c")
+        .compile("targetwrappers");
+
     if cfg!(feature = "no-llvm-linking") {
         return;
     }
@@ -308,10 +314,4 @@ fn main() {
     if force_ffi {
         println!("cargo:rustc-link-lib=dylib={}", "ffi");
     }
-
-    // Build the extra wrapper functions.
-    std::env::set_var("CFLAGS", get_llvm_cflags());
-    cc::Build::new()
-        .file("wrappers/target.c")
-        .compile("targetwrappers");
 }
