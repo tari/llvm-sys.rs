@@ -1,5 +1,6 @@
-extern crate gcc;
-#[macro_use] extern crate lazy_static;
+extern crate cc;
+#[macro_use]
+extern crate lazy_static;
 extern crate regex;
 extern crate semver;
 
@@ -310,7 +311,7 @@ fn main() {
 
     // Build the extra wrapper functions.
     std::env::set_var("CFLAGS", get_llvm_cflags());
-    gcc::Build::new()
+    cc::Build::new()
         .file("wrappers/target.c")
         .compile("targetwrappers");
 }
