@@ -26,7 +26,7 @@ no-llvm-linking = []
 libc = "0.2"
 
 [build-dependencies]
-gcc = "0.3.53"
+cc = "1.0"
 lazy_static = "1.0"
 regex = "0.2"
 semver = "0.9"
