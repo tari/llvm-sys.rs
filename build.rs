@@ -1,4 +1,4 @@
-extern crate gcc;
+extern crate cc;
 #[macro_use]
 extern crate lazy_static;
 extern crate regex;
@@ -327,5 +327,5 @@ fn main() {
 
     // Build the extra wrapper functions.
     std::env::set_var("CFLAGS", get_llvm_cflags());
-    gcc::Build::new().file("wrappers/target.c").compile("targetwrappers");
+    cc::Build::new().file("wrappers/target.c").compile("targetwrappers");
 }
