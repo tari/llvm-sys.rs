@@ -8,7 +8,7 @@ pipelines:
           - echo deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-5.0 main >> /etc/apt/sources.list
           - curl https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
           - apt-get update && apt-get install -y llvm-5.0 llvm-5.0-dev
-          - curl https://sh.rustup.rs -sSf | sh -s -- --prefix=$HOME/rust
+          - curl https://sh.rustup.rs -sSf | CARGO_HOME=$HOME/rust sh -s -- -y
           - PATH=$PATH:~/rust/bin LLVM_SYS_50_PREFIX=/usr/lib/llvm-5.0 LLVM_SYS_50_FFI_WORKAROUND=1 cargo test
           - ./target/debug/examples/jit-function
   branches:
