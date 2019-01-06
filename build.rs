@@ -294,10 +294,10 @@ fn get_llvm_cflags() -> String {
 
 fn main() {
     // Build the extra wrapper functions.
-    std::env::set_var("CFLAGS", get_llvm_cflags());
-    cc::Build::new()
-        .file("wrappers/target.c")
-        .compile("targetwrappers");
+    if !cfg!(feature = "disable-alltargets-init") {
+        std::env::set_var("CFLAGS", get_llvm_cflags());
+        cc::Build::new().file("wrappers/target.c").compile("targetwrappers");
+    }
 
     if cfg!(feature = "no-llvm-linking") {
         return;
