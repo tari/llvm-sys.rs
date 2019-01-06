@@ -19,8 +19,18 @@ build = "build.rs"
 appveyor = { service = "bitbucket", repository = "tari/llvm-sys.rs", branch = "default" }
 
 [features]
+# Require that the used version of LLVM exactly match that expected by this
+# crate.
 strict-versioning = []
+
+# Do not attempt to link against LLVM libraries (useful if a different crate
+# in your dependency tree provides them instead).
 no-llvm-linking = []
+
+# Do not attempt to build the LLVM_InitializeAllTarget* functions. Useful if
+# the build host doesn't have a copy of LLVM to compile/link against and you do
+# not use any of those functions.
+disable-alltargets-init = []
 
 [dependencies]
 libc = "0.2"
