@@ -59,7 +59,7 @@ may introduce new warnings).
 | 4.0.0        |    |    |    |    | ●  |    |    |    |
 | 5.0.x        |    |    |    |    |    | ●  |    |    |
 | 6.0.x        |    |    |    |    |    |    | ●  |    |
-| 7.0.0        |    |    |    |    |    |    |    | ●  |
+| 7.0.x        |    |    |    |    |    |    |    | ●  |
 
 The build scripts will not enforce this compatibility matrix strictly,
 permitting compilation against any version of LLVM that is at least as new as
