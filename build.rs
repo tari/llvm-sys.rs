@@ -1,4 +1,4 @@
-extern crate gcc;
+extern crate cc;
 #[macro_use] extern crate lazy_static;
 extern crate regex;
 extern crate semver;

@@ -7,7 +7,7 @@ license = "MIT"
 keywords = ["bindings", "llvm"]
 links = "llvm"
 name = "llvm-sys"
-version = "40.2.1"
+version = "40.3.0"
 authors = [
   "Peter Marheine <peter@taricorp.net>",
   "Scott Olson <scott@solson.me>",
@@ -32,7 +32,7 @@ disable-alltargets-init = []
 libc = "0.2"
 
 [build-dependencies]
-gcc = "0.3"
+cc = "1.0"
 lazy_static = "0.2.1"
 regex = "0.2"
 semver = "0.6"
