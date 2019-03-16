@@ -278,6 +278,11 @@ fn get_llvm_cflags() -> String {
         .join(" ")
 }
 
+fn is_llvm_debug() -> bool {
+    // Has to be either Debug or Release
+    llvm_config("--build-mode").contains("Debug")
+}
+
 fn main() {
     // Build the extra wrapper functions.
     if !cfg!(feature = "disable-alltargets-init") {
@@ -304,6 +309,10 @@ fn main() {
     // Link system libraries
     for name in get_system_libraries() {
         println!("cargo:rustc-link-lib=dylib={}", name);
+    }
+    
+    if is_llvm_debug() && cfg!(target_env = "msvc") {
+        println!("cargo:rustc-link-lib={}", "msvcrtd");
     }
 
     // Link libffi if the user requested this workaround.
