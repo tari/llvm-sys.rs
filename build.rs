@@ -327,7 +327,7 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib={}", name);
     }
     
-    let use_debug_msvcrt = env::var_os(format!("LLVM_SYS_{}_USE_DEBUG_MSCRT",
+    let use_debug_msvcrt = env::var_os(format!("LLVM_SYS_{}_USE_DEBUG_MSVCRT",
                                           env!("CARGO_PKG_VERSION_MAJOR")))
                                           .is_some();
     if use_debug_msvcrt && is_llvm_debug() && cfg!(target_env = "msvc") {
