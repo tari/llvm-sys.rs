@@ -4,7 +4,7 @@ Rust bindings to LLVM's C API.
 
 ```toml
 [dependencies]
-llvm-sys = "70"
+llvm-sys = "80"
 ```
 
 There must be a compatible version of LLVM available. By default `llvm-sys`
@@ -48,18 +48,19 @@ is a binary-compatible version but with elements deprecated (implying that
 movement to the next crate version in the same table row will still compile, but
 may introduce new warnings).
 
-| LLVM version | 36 | 37 | 38 | 39 | 40 | 50 | 60 | 70 |
-|--------------|----|----|----|----|----|----|----|----|
-| <3.6         |    |    |    |    |    |    |    |    |
-| 3.6.x        | ●  |    |    |    |    |    |    |    |
-| 3.7.0        |    |    |    |    |    |    |    |    |
-| 3.7.x        |    | ●  |    |    |    |    |    |    |
-| 3.8.x        |    | ◑  | ●  |    |    |    |    |    |
-| 3.9.x        |    |    |    | ●  |    |    |    |    |
-| 4.0.0        |    |    |    |    | ●  |    |    |    |
-| 5.0.x        |    |    |    |    |    | ●  |    |    |
-| 6.0.x        |    |    |    |    |    |    | ●  |    |
-| 7.0.x        |    |    |    |    |    |    |    | ●  |
+| LLVM version | 36 | 37 | 38 | 39 | 40 | 50 | 60 | 70 | 80 |
+|--------------|----|----|----|----|----|----|----|----|----|
+| <3.6         |    |    |    |    |    |    |    |    |    |
+| 3.6.x        | ●  |    |    |    |    |    |    |    |    |
+| 3.7.0        |    |    |    |    |    |    |    |    |    |
+| 3.7.x        |    | ●  |    |    |    |    |    |    |    |
+| 3.8.x        |    | ◑  | ●  |    |    |    |    |    |    |
+| 3.9.x        |    |    |    | ●  |    |    |    |    |    |
+| 4.0.0        |    |    |    |    | ●  |    |    |    |    |
+| 5.0.x        |    |    |    |    |    | ●  |    |    |    |
+| 6.0.x        |    |    |    |    |    |    | ●  |    |    |
+| 7.0.x        |    |    |    |    |    |    |    | ●  |    |
+| 8.0.0        |    |    |    |    |    |    |    |    | ●  |
 
 The build scripts will not enforce this compatibility matrix strictly,
 permitting compilation against any version of LLVM that is at least as new as
