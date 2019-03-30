@@ -25,6 +25,9 @@ pub enum LLVMRelocMode {
     LLVMRelocStatic = 1,
     LLVMRelocPIC = 2,
     LLVMRelocDynamicNoPic = 3,
+    LLVMRelocROPI = 4,
+    LLVMRelocRWPI = 5,
+    LLVMRelocROPI_RWPI = 6,
 }
 
 #[repr(C)]
@@ -32,10 +35,11 @@ pub enum LLVMRelocMode {
 pub enum LLVMCodeModel {
     LLVMCodeModelDefault = 0,
     LLVMCodeModelJITDefault = 1,
-    LLVMCodeModelSmall = 2,
-    LLVMCodeModelKernel = 3,
-    LLVMCodeModelMedium = 4,
-    LLVMCodeModelLarge = 5,
+    LLVMCodeModelTiny = 2,
+    LLVMCodeModelSmall = 3,
+    LLVMCodeModelKernel = 4,
+    LLVMCodeModelMedium = 5,
+    LLVMCodeModelLarge = 6,
 }
 
 #[repr(C)]

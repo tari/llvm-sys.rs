@@ -297,6 +297,10 @@ cg: thinlto_code_gen_t, percentage: ::libc::c_uint);
     /// will be ignored.
     pub fn thinlto_codegen_set_cache_size_bytes(cg: thinlto_code_gen_t,
                                                 max_size_bytes: ::libc::c_uint);
+    /// Same as thinlto_codegen_set_cache_size_bytes, except the maximum size is in
+    /// megabytes (2^20 bytes).
+    pub fn thinlto_codegen_set_cache_size_megabytes(cg: thinlto_code_gen_t,
+                                                    max_size_megabytes: ::libc::c_uint);
     /// Sets the maximum number of files in the cache directory. An unspecified default value will be applied. A value of 0 will be ignored.
     pub fn thinlto_codegen_set_cache_size_files(cg: thinlto_code_gen_t,
                                                 max_size_files: ::libc::c_uint);

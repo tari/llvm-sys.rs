@@ -17,6 +17,8 @@ pub enum LLVMType {}
 pub enum LLVMValue {}
 pub enum LLVMBasicBlock {}
 pub enum LLVMOpaqueMetadata {}
+pub enum LLVMOpaqueNamedMDNode {}
+pub enum LLVMOpaqueValueMetadataEntry {}
 pub enum LLVMBuilder {}
 pub enum LLVMOpaqueDIBuilder {}
 pub enum LLVMModuleProvider {}
@@ -41,6 +43,8 @@ pub mod prelude {
     pub type LLVMValueRef = *mut super::LLVMValue;
     pub type LLVMBasicBlockRef = *mut super::LLVMBasicBlock;
     pub type LLVMMetadataRef = *mut super::LLVMOpaqueMetadata;
+    pub type LLVMNamedMDNodeRef = *mut super::LLVMOpaqueNamedMDNode;
+    pub type LLVMValueMetadataEntry = *mut super::LLVMOpaqueValueMetadataEntry;
     pub type LLVMBuilderRef = *mut super::LLVMBuilder;
     pub type LLVMDIBuilderRef = *mut super::LLVMOpaqueDIBuilder;
     pub type LLVMModuleProviderRef = *mut super::LLVMModuleProvider;
@@ -61,6 +65,7 @@ pub mod comdat;
 pub mod core;
 pub mod debuginfo;
 pub mod disassembler;
+pub mod error;
 pub mod error_handling;
 pub mod execution_engine;
 pub mod initialization;
@@ -69,12 +74,15 @@ pub mod link_time_optimizer;
 pub mod linker;
 pub mod lto;
 pub mod object;
+pub mod opt_remarks;
 pub mod orc;
 pub mod target;
 pub mod support;
 pub mod target_machine;
 
 pub mod transforms {
+    pub mod aggressive_instcombine;
+    pub mod coroutines;
     pub mod instcombine;
     pub mod ipo;
     pub mod pass_manager_builder;
@@ -92,6 +100,7 @@ pub enum LLVMOpcode {
     LLVMIndirectBr = 4,
     LLVMInvoke = 5,
     LLVMUnreachable = 7,
+    LLVMFNeg = 66,
     LLVMAdd = 8,
     LLVMFAdd = 9,
     LLVMSub = 10,

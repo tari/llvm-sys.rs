@@ -23,6 +23,8 @@ extern "C" {
     pub fn LLVMContextSetYieldCallback(C: LLVMContextRef,
                                        Callback: LLVMYieldCallback,
                                        OpaqueHandle: *mut ::libc::c_void);
+    pub fn LLVMContextShouldDiscardValueNames(C: LLVMContextRef) -> LLVMBool;
+    pub fn LLVMContextSetDiscardValueNames(C: LLVMContextRef, Discard: LLVMBool);
     pub fn LLVMContextDispose(C: LLVMContextRef);
     pub fn LLVMGetDiagInfoDescription(DI: LLVMDiagnosticInfoRef) -> *mut ::libc::c_char;
     pub fn LLVMGetDiagInfoSeverity(DI: LLVMDiagnosticInfoRef) -> LLVMDiagnosticSeverity;
@@ -177,6 +179,13 @@ extern "C" {
 
     pub fn LLVMGetModuleContext(M: LLVMModuleRef) -> LLVMContextRef;
     pub fn LLVMGetTypeByName(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
+    pub fn LLVMGetFirstNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
+    pub fn LLVMGetLastNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
+    pub fn LLVMGetNextNamedMetadata(NamedMDNode: LLVMNamedMDNodeRef) -> LLVMNamedMDNodeRef;
+    pub fn LLVMGetPreviousNamedMetadata(NamedMDNode: LLVMNamedMDNodeRef) -> LLVMNamedMDNodeRef;
+    pub fn LLVMGetNamedMetadata(M: LLVMModuleRef, Name: *const ::libc::c_char, NameLen: ::libc::size_t) -> LLVMNamedMDNodeRef;
+    pub fn LLVMGetOrInsertNamedMetadata(M: LLVMModuleRef, Name: *const ::libc::c_char, NameLen: ::libc::size_t) -> LLVMNamedMDNodeRef;
+    pub fn LLVMGetNamedMetadataName(NamedMD: LLVMNamedMDNodeRef, NameLen: *const ::libc::size_t) -> *const ::libc::c_char;
     pub fn LLVMGetNamedMetadataNumOperands(M: LLVMModuleRef,
                                            name: *const ::libc::c_char)
                                            -> ::libc::c_uint;
@@ -186,6 +195,10 @@ extern "C" {
     pub fn LLVMAddNamedMetadataOperand(M: LLVMModuleRef,
                                        name: *const ::libc::c_char,
                                        Val: LLVMValueRef);
+    pub fn LLVMGetDebugLocDirectory(Val: LLVMValueRef, Length: *mut ::libc::c_uint) -> *const ::libc::c_char;
+    pub fn LLVMGetDebugLocFilename(Val: LLVMValueRef, Length: *mut ::libc::c_uint) -> *const ::libc::c_char;
+    pub fn LLVMGetDebugLocLine(Val: LLVMValueRef) -> ::libc::c_uint;
+    pub fn LLVMGetDebugLocColumn(Val: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMAddFunction(M: LLVMModuleRef,
                            Name: *const ::libc::c_char,
                            FunctionTy: LLVMTypeRef)
@@ -272,6 +285,7 @@ extern "C" {
     /// Determine whether a structure is packed.
     pub fn LLVMIsPackedStruct(StructTy: LLVMTypeRef) -> LLVMBool;
     pub fn LLVMIsOpaqueStruct(StructTy: LLVMTypeRef) -> LLVMBool;
+    pub fn LLVMIsLiteralStruct(StructTy: LLVMTypeRef) -> LLVMBool;
 
     // Core->Types->Sequential
     pub fn LLVMGetElementType(Ty: LLVMTypeRef) -> LLVMTypeRef;
@@ -458,10 +472,20 @@ extern "C" {
                         ConstantIndices: *mut LLVMValueRef,
                         NumIndices: ::libc::c_uint)
                         -> LLVMValueRef;
+    pub fn LLVMConstGEP2(Ty: LLVMTypeRef,
+                         ConstantVal: LLVMValueRef,
+                         ConstantIndices: *mut LLVMValueRef,
+                         NumIndices: ::libc::c_uint)
+                         -> LLVMValueRef;
     pub fn LLVMConstInBoundsGEP(ConstantVal: LLVMValueRef,
                                 ConstantIndices: *mut LLVMValueRef,
                                 NumIndices: ::libc::c_uint)
                                 -> LLVMValueRef;
+    pub fn LLVMConstInBoundsGEP2(Ty: LLVMTypeRef,
+                                 ConstantVal: LLVMValueRef,
+                                 ConstantIndices: *mut LLVMValueRef,
+                                 NumIndices: ::libc::c_uint)
+                                 -> LLVMValueRef;
     pub fn LLVMConstTrunc(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstSExt(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstZExt(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
@@ -531,6 +555,7 @@ extern "C" {
 
     pub fn LLVMGetUnnamedAddress(Global: LLVMValueRef) -> LLVMUnnamedAddr;
     pub fn LLVMSetUnnamedAddress(Global: LLVMValueRef, UnnamedAddr: LLVMUnnamedAddr);
+    pub fn LLVMGlobalGetValueType(Global: LLVMValueRef) -> LLVMTypeRef;
     #[deprecated(since="7.0", note="Use LLVMGetUnnamedAddress instead")]
     pub fn LLVMHasUnnamedAddr(Global: LLVMValueRef) -> LLVMBool;
     #[deprecated(since="7.0", note="Use LLVMSetUnnamedAddress instead")]
@@ -538,6 +563,17 @@ extern "C" {
 
     pub fn LLVMGetAlignment(V: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetAlignment(V: LLVMValueRef, Bytes: ::libc::c_uint);
+
+    pub fn LLVMGlobalSetMetadata(Global: LLVMValueRef, Kind: ::libc::c_uint,
+                                 MD: LLVMMetadataRef);
+    pub fn LLVMGlobalEraseMetadata(Global: LLVMValueRef, Kind: ::libc::c_uint);
+    pub fn LLVMGlobalClearMetadata(Global: LLVMValueRef);
+    pub fn LLVMGlobalCopyAllMetadata(Value: LLVMValueRef, NumEntries: *mut ::libc::size_t) -> LLVMValueMetadataEntry;
+    pub fn LLVMDisposeValueMetadataEntries(Entries: *mut LLVMValueMetadataEntry);
+    pub fn LLVMValueMetadataEntriesGetKind(Entries: *mut LLVMValueMetadataEntry,
+                                           Index: ::libc::c_uint) -> ::libc::c_uint;
+    pub fn LLVMValueMetadataEntriesGetMetadata(Entries: *mut LLVMValueMetadataEntry,
+                                               Index: ::libc::c_uint) -> LLVMMetadataRef;
 
     // Core->Values->Constants->Global Variables
     pub fn LLVMAddGlobal(M: LLVMModuleRef,
@@ -611,6 +647,20 @@ extern "C" {
     pub fn LLVMSetPersonalityFn(Fn: LLVMValueRef, PersonalityFn: LLVMValueRef);
     /// Obtain the ID number from a function instance.
     pub fn LLVMGetIntrinsicID(Fn: LLVMValueRef) -> ::libc::c_uint;
+    pub fn LLVMGetIntrinsicDeclaration(Mod: LLVMModuleRef,
+                                       ID: ::libc::c_uint,
+                                       ParamTypes: *mut LLVMTypeRef,
+                                       ParamCount: ::libc::size_t) -> LLVMValueRef;
+    pub fn LLVMIntrinsicGetType(Ctx: LLVMContextRef,
+                                ParamTypes: *mut LLVMTypeRef,
+                                ParamCount: ::libc::size_t) -> LLVMTypeRef;
+    pub fn LLVMIntrinsicGetName(ID: ::libc::c_uint,
+                                NameLength: *mut ::libc::size_t) -> *const ::libc::c_char;
+    pub fn LLVMIntrinsicCopyOverloadedName(ID: ::libc::c_uint,
+                                           ParamTypes: *mut LLVMTypeRef,
+                                           ParamCount: ::libc::size_t,
+                                           NameLength: *mut ::libc::size_t) -> *const ::libc::c_char;
+    pub fn LLVMIntrinsicIsOverloaded(ID: ::libc::c_uint) -> LLVMBool;
     pub fn LLVMGetFunctionCallConv(Fn: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetFunctionCallConv(Fn: LLVMValueRef, CC: ::libc::c_uint);
     pub fn LLVMGetGC(Fn: LLVMValueRef) -> *const ::libc::c_char;
@@ -694,6 +744,8 @@ extern "C" {
     pub fn LLVMGetNextBasicBlock(BB: LLVMBasicBlockRef) -> LLVMBasicBlockRef;
     pub fn LLVMGetPreviousBasicBlock(BB: LLVMBasicBlockRef) -> LLVMBasicBlockRef;
     pub fn LLVMGetEntryBasicBlock(Fn: LLVMValueRef) -> LLVMBasicBlockRef;
+    pub fn LLVMCreateBasicBlockInContext(C: LLVMContextRef,
+                                         Name: *const ::libc::c_char) -> LLVMBasicBlockRef;
     pub fn LLVMAppendBasicBlockInContext(C: LLVMContextRef,
                                          Fn: LLVMValueRef,
                                          Name: *const ::libc::c_char)
@@ -721,6 +773,8 @@ extern "C" {
     pub fn LLVMHasMetadata(Val: LLVMValueRef) -> ::libc::c_int;
     pub fn LLVMGetMetadata(Val: LLVMValueRef, KindID: ::libc::c_uint) -> LLVMValueRef;
     pub fn LLVMSetMetadata(Val: LLVMValueRef, KindID: ::libc::c_uint, Node: LLVMValueRef);
+    pub fn LLVMInstructionGetAllMetadataOtherThanDebugLoc(Instr: LLVMValueRef,
+                                                          NumEntries: *mut ::libc::size_t) -> *mut LLVMValueMetadataEntry;
     pub fn LLVMGetInstructionParent(Inst: LLVMValueRef) -> LLVMBasicBlockRef;
     pub fn LLVMGetNextInstruction(Inst: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMGetPreviousInstruction(Inst: LLVMValueRef) -> LLVMValueRef;
@@ -734,6 +788,7 @@ extern "C" {
     pub fn LLVMGetICmpPredicate(Inst: LLVMValueRef) -> LLVMIntPredicate;
     pub fn LLVMGetFCmpPredicate(Inst: LLVMValueRef) -> LLVMRealPredicate;
     pub fn LLVMInstructionClone(Inst: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsATerminatorInst(Inst: LLVMValueRef) -> LLVMValueRef;
 
     // Instructions->Call Sites and Invocations
     // Obtain the argument count for a call instruction.
@@ -770,6 +825,7 @@ extern "C" {
                                              Idx: LLVMAttributeIndex,
                                              K: *const ::libc::c_char,
                                              KLen: ::libc::c_uint);
+    pub fn LLVMGetCalledFunctionType(C: LLVMValueRef) -> LLVMTypeRef;
     /// Get a pointer to the function invoked by this instruction.
     ///
     /// The provided value should be a CallInst or InvokeInst.
@@ -838,6 +894,7 @@ extern "C" {
     pub fn LLVMIsAConstantVector(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalValue(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalAlias(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAGlobalIFunc(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalObject(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAFunction(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalVariable(Val: LLVMValueRef) -> LLVMValueRef;
@@ -847,7 +904,9 @@ extern "C" {
     pub fn LLVMIsACallInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAIntrinsicInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsADbgInfoIntrinsic(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsADbgVariableIntrinsic(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsADbgDeclareInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsADbgLabelInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAMemIntrinsic(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAMemCpyInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAMemMoveInst(Val: LLVMValueRef) -> LLVMValueRef;
@@ -864,7 +923,6 @@ extern "C" {
     pub fn LLVMIsASelectInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAShuffleVectorInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAStoreInst(Val: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMIsATerminatorInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsABranchInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAIndirectBrInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAInvokeInst(Val: LLVMValueRef) -> LLVMValueRef;
@@ -957,6 +1015,15 @@ extern "C" {
                            Catch: LLVMBasicBlockRef,
                            Name: *const ::libc::c_char)
                            -> LLVMValueRef;
+    pub fn LLVMBuildInvoke2(arg1: LLVMBuilderRef,
+                            Ty: LLVMTypeRef,
+                            Fn: LLVMValueRef,
+                            Args: *mut LLVMValueRef,
+                            NumArgs: ::libc::c_uint,
+                            Then: LLVMBasicBlockRef,
+                            Catch: LLVMBasicBlockRef,
+                            Name: *const ::libc::c_char)
+                            -> LLVMValueRef;
     pub fn LLVMBuildUnreachable(B: LLVMBuilderRef) -> LLVMValueRef;
 
     pub fn LLVMBuildResume(B: LLVMBuilderRef, Exn: LLVMValueRef) -> LLVMValueRef;
@@ -1209,6 +1276,19 @@ extern "C" {
                                 Val: LLVMValueRef,
                                 Name: *const ::libc::c_char)
                                 -> LLVMValueRef;
+    pub fn LLVMBuildMemSet(B: LLVMBuilderRef,
+                           Ptr: LLVMValueRef,
+                           Val: LLVMValueRef,
+                           Len: LLVMValueRef,
+                           Align: ::libc::c_uint) -> LLVMValueRef;
+    pub fn LLVMBuildMemCpy(B: LLVMBuilderRef,
+                           Dst: LLVMValueRef, DstAlign: ::libc::c_uint,
+                           Src: LLVMValueRef, SrcAlign: ::libc::c_uint,
+                           Size: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMBuildMemMove(B: LLVMBuilderRef,
+                            Dst: LLVMValueRef, DstAlign: ::libc::c_uint,
+                            Src: LLVMValueRef, SrcAlign: ::libc::c_uint,
+                            Size: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMBuildAlloca(arg1: LLVMBuilderRef,
                            Ty: LLVMTypeRef,
                            Name: *const ::libc::c_char)
@@ -1223,6 +1303,11 @@ extern "C" {
                          PointerVal: LLVMValueRef,
                          Name: *const ::libc::c_char)
                          -> LLVMValueRef;
+    pub fn LLVMBuildLoad2(arg1: LLVMBuilderRef,
+                          Ty: LLVMTypeRef,
+                          PointerVal: LLVMValueRef,
+                          Name: *const ::libc::c_char)
+                          -> LLVMValueRef;
     pub fn LLVMBuildStore(arg1: LLVMBuilderRef,
                           Val: LLVMValueRef,
                           Ptr: LLVMValueRef)
@@ -1244,6 +1329,26 @@ extern "C" {
                               Idx: ::libc::c_uint,
                               Name: *const ::libc::c_char)
                               -> LLVMValueRef;
+    pub fn LLVMBuildGEP2(B: LLVMBuilderRef,
+                         Ty: LLVMTypeRef,
+                         Pointer: LLVMValueRef,
+                         Indices: *mut LLVMValueRef,
+                         NumIndices: ::libc::c_uint,
+                         Name: *const ::libc::c_char)
+                         -> LLVMValueRef;
+    pub fn LLVMBuildInBoundsGEP2(B: LLVMBuilderRef,
+                                 Ty: LLVMTypeRef,
+                                 Pointer: LLVMValueRef,
+                                 Indices: *mut LLVMValueRef,
+                                 NumIndices: ::libc::c_uint,
+                                 Name: *const ::libc::c_char)
+                                 -> LLVMValueRef;
+    pub fn LLVMBuildStructGEP2(B: LLVMBuilderRef,
+                               Ty: LLVMTypeRef,
+                               Pointer: LLVMValueRef,
+                               Idx: ::libc::c_uint,
+                               Name: *const ::libc::c_char)
+                               -> LLVMValueRef;
     pub fn LLVMBuildGlobalString(B: LLVMBuilderRef,
                                  Str: *const ::libc::c_char,
                                  Name: *const ::libc::c_char)
@@ -1354,6 +1459,12 @@ extern "C" {
                             DestTy: LLVMTypeRef,
                             Name: *const ::libc::c_char)
                             -> LLVMValueRef;
+    pub fn LLVMBuildIntCast2(arg1: LLVMBuilderRef,
+                            Val: LLVMValueRef,
+                            DestTy: LLVMTypeRef,
+                            IsSigned: LLVMBool,
+                            Name: *const ::libc::c_char)
+                            -> LLVMValueRef;
     pub fn LLVMBuildFPCast(arg1: LLVMBuilderRef,
                            Val: LLVMValueRef,
                            DestTy: LLVMTypeRef,
@@ -1385,6 +1496,13 @@ extern "C" {
                          NumArgs: ::libc::c_uint,
                          Name: *const ::libc::c_char)
                          -> LLVMValueRef;
+    pub fn LLVMBuildCall2(arg1: LLVMBuilderRef,
+                          arg2: LLVMTypeRef,
+                          Fn: LLVMValueRef,
+                          Args: *mut LLVMValueRef,
+                          NumArgs: ::libc::c_uint,
+                          Name: *const ::libc::c_char)
+                          -> LLVMValueRef;
     pub fn LLVMBuildSelect(arg1: LLVMBuilderRef,
                            If: LLVMValueRef,
                            Then: LLVMValueRef,

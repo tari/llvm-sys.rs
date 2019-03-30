@@ -1,5 +1,6 @@
 //! The ORC JIT.
 
+use super::error::LLVMErrorRef;
 use super::prelude::*;
 use super::target_machine::LLVMTargetMachineRef;
 
@@ -13,13 +14,6 @@ pub type LLVMOrcSymbolResolverFn = Option<extern "C" fn(*const ::libc::c_char,
                                                         -> u64>;
 pub type LLVMOrcLazyCompileCallbackFn = Option<extern "C" fn(LLVMOrcJITStackRef,
                                                              *mut ::libc::c_void)>;
-#[repr(C)]
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum LLVMOrcErrorCode {
-    LLVMOrcErrSuccess = 0,
-    LLVMOrcErrGeneric,
-}
-
 extern "C" {
     /// Create an ORC JIT stack.
     ///
@@ -49,19 +43,19 @@ extern "C" {
                                             RetAddr: *mut LLVMOrcTargetAddress,
                                             Callback: LLVMOrcLazyCompileCallbackFn,
                                             CallbackCtx: *mut ::libc::c_void)
-                                            -> LLVMOrcErrorCode;
+                                            -> LLVMErrorRef;
 
     /// Create a named indirect call stub.
     pub fn LLVMOrcCreateIndirectStub(JITStack: LLVMOrcJITStackRef,
                                      StubName: *const ::libc::c_char,
                                      InitAddr: LLVMOrcTargetAddress)
-                                     -> LLVMOrcErrorCode;
+                                     -> LLVMErrorRef;
 
     /// Set the pointer for the given indirect stub.
     pub fn LLVMOrcSetIndirectStubPointer(JITStack: LLVMOrcJITStackRef,
                                          StubName: *const ::libc::c_char,
                                          NewAddr: LLVMOrcTargetAddress)
-                                         -> LLVMOrcErrorCode;
+                                         -> LLVMErrorRef;
 
     /// Add a module to be eagerly compiled.
     pub fn LLVMOrcAddEagerlyCompiledIR(JITStack: LLVMOrcJITStackRef,
@@ -69,7 +63,7 @@ extern "C" {
                                        Mod: LLVMModuleRef,
                                        SymbolResolver: LLVMOrcSymbolResolverFn,
                                        SymbolResolverCtx: *mut ::libc::c_void)
-                                       -> LLVMOrcErrorCode;
+                                       -> LLVMErrorRef;
 
     /// Add a module to be lazily compiled one function at a time.
     pub fn LLVMOrcAddLazilyCompiledIR(JITStack: LLVMOrcJITStackRef,
@@ -77,7 +71,7 @@ extern "C" {
                                       Mod: LLVMModuleRef,
                                       SymbolResolver: LLVMOrcSymbolResolverFn,
                                       SymbolResolverCtx: *mut ::libc::c_void)
-                                      -> LLVMOrcErrorCode;
+                                      -> LLVMErrorRef;
 
     /// Add an object file.
     pub fn LLVMOrcAddObjectFile(JITStack: LLVMOrcJITStackRef,
@@ -85,28 +79,28 @@ extern "C" {
                                 Obj: LLVMMemoryBufferRef,
                                 SymbolResolver: LLVMOrcSymbolResolverFn,
                                 SymbolResolverCtx: *mut ::libc::c_void)
-                                -> LLVMOrcErrorCode;
+                                -> LLVMErrorRef;
 
     /// Remove a module set from the JIT.
     pub fn LLVMOrcRemoveModule(JITStack: LLVMOrcJITStackRef,
                                H: LLVMOrcModuleHandle)
-                               -> LLVMOrcErrorCode;
+                               -> LLVMErrorRef;
 
     /// Get symbol address from JIT instance.
     pub fn LLVMOrcGetSymbolAddress(JITStack: LLVMOrcJITStackRef,
                                    RetAddr: *mut LLVMOrcTargetAddress,
                                    SymbolName: *const ::libc::c_char)
-                                   -> LLVMOrcErrorCode;
+                                   -> LLVMErrorRef;
 
     /// Get symbol address from JIT instance, searching only the specified handle.
     pub fn LLVMOrcGetSymbolAddressIn(JITStack: LLVMOrcJITStackRef,
                                      RetAddr: *mut LLVMOrcTargetAddress,
                                      H: LLVMOrcModuleHandle,
                                      SymbolName: *const ::libc::c_char)
-                                     -> LLVMOrcErrorCode;
+                                     -> LLVMErrorRef;
 
     /// Dispose of an ORC JIT stack.
-    pub fn LLVMOrcDisposeInstance(JITStack: LLVMOrcJITStackRef) -> LLVMOrcErrorCode;
+    pub fn LLVMOrcDisposeInstance(JITStack: LLVMOrcJITStackRef) -> LLVMErrorRef;
 
     /// Register a JIT Event Listener.
     ///

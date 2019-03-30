@@ -176,7 +176,7 @@ Destroy: LLVMMemoryManagerDestroyCallback) -> LLVMMCJITMemoryManagerRef;
     // JIT event listener functions
     pub fn LLVMCreateGDBRegistrationListener() -> LLVMJITEventListenerRef;
     pub fn LLVMCreateIntelJITEventListener() -> LLVMJITEventListenerRef;
-    pub fn LLVMCreateOprofileJITEventListener() -> LLVMJITEventListenerRef;
+    pub fn LLVMCreateOProfileJITEventListener() -> LLVMJITEventListenerRef;
     pub fn LLVMCreatePerfJITEventListener() -> LLVMJITEventListenerRef;
 
 }

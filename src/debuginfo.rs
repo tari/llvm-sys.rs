@@ -31,9 +31,11 @@ pub enum LLVMDIFlags {
     LLVMDIFlagMainSubprogram = 1 << 21,
     LLVMDIFlagTypePassByValue = 1 << 22,
     LLVMDIFlagTypePassByReference = 1 << 23,
-    LLVMDIFlagFixedEnum = 1 << 24,
+    LLVMDIFlagEnumClass = 1 << 24,
     LLVMDIFlagThunk = 1 << 25,
     LLVMDIFlagTrivial = 1 << 26,
+    LLVMDIFlagBigendian = 1 << 27,
+    LLVMDIFlagLittleEndian = 1 << 28,
     LLVMDIFlagIndirectVirtualBase = (1 << 2) | (1 << 5),
 }
 
@@ -95,6 +97,41 @@ pub enum LLVMDWARFEmissionKind {
     LLVMDWARFEmissionKindNone = 0,
     LLVMDWARFEmissionKindFull,
     LLVMDWARFEmissionKindLineTablesOnly,
+}
+
+#[repr(C)]
+pub enum LLVMMetadataKind {
+    LLVMMDStringMetadataKind,
+    LLVMConstantAsMetadataMetadataKind,
+    LLVMLocalAsMetadataMetadataKind,
+    LLVMDistinctMDOperandPlaceholderMetadataKind,
+    LLVMMDTupleMetadataKind,
+    LLVMDILocationMetadataKind,
+    LLVMDIExpressionMetadataKind,
+    LLVMDIGlobalVariableExpressionMetadataKind,
+    LLVMGenericDINodeMetadataKind,
+    LLVMDISubrangeMetadataKind,
+    LLVMDIEnumeratorMetadataKind,
+    LLVMDIBasicTypeMetadataKind,
+    LLVMDIDerivedTypeMetadataKind,
+    LLVMDICompositeTypeMetadataKind,
+    LLVMDISubroutineTypeMetadataKind,
+    LLVMDIFileMetadataKind,
+    LLVMDICompileUnitMetadataKind,
+    LLVMDISubprogramMetadataKind,
+    LLVMDILexicalBlockMetadataKind,
+    LLVMDILexicalBlockFileMetadataKind,
+    LLVMDINamespaceMetadataKind,
+    LLVMDIModuleMetadataKind,
+    LLVMDITemplateTypeParameterMetadataKind,
+    LLVMDITemplateValueParameterMetadataKind,
+    LLVMDIGlobalVariableMetadataKind,
+    LLVMDILocalVariableMetadataKind,
+    LLVMDILabelMetadataKind,
+    LLVMDIObjCPropertyMetadataKind,
+    LLVMDIImportedEntityMetadataKind,
+    LLVMDIMacroMetadataKind,
+    LLVMDIMacroFileMetadataKind
 }
 
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;
@@ -323,7 +360,8 @@ extern "C" {
                                         Name: *const ::libc::c_char,
                                         NameLen: ::libc::size_t,
                                         SizeInBits: u64,
-                                        Encoding: LLVMDWARFTypeEncoding)
+                                        Encoding: LLVMDWARFTypeEncoding,
+                                        Flags: LLVMDIFlags)
                                         -> LLVMMetadataRef;
 
     /// Create debugging information entry for a pointer.
@@ -682,4 +720,7 @@ extern "C" {
 
     /// Set the subprogram attached to a function.
     pub fn LLVMSetSubprogram(Func: LLVMValueRef, SP: LLVMMetadataRef);
+
+    /// Obtain the enumerated type of a metadata instance.
+    pub fn LLVMGetMetadataKind(Metadata: LLVMMetadataRef) -> LLVMMetadataKind;
 }
