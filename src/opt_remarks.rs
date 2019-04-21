@@ -3,12 +3,14 @@
 use super::prelude::*;
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct LLVMOptRemarkStringRef {
     Str: *const libc::c_char,
     Len: u32,
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct LLVMOptRemarkDebugLoc {
     SourceFile: LLVMOptRemarkStringRef,
     SourceLineNumber: u32,
@@ -17,6 +19,7 @@ pub struct LLVMOptRemarkDebugLoc {
 
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct LLVMOptRemarkArg {
     Key: LLVMOptRemarkStringRef,
     Value: LLVMOptRemarkStringRef,
@@ -24,6 +27,7 @@ pub struct LLVMOptRemarkArg {
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct LLVMOptRemarkEntry {
     RemarkType: LLVMOptRemarkStringRef,
     PassName: LLVMOptRemarkStringRef,
@@ -35,7 +39,9 @@ pub struct LLVMOptRemarkEntry {
     Args: *mut LLVMOptRemarkArg,
 }
 
+#[derive(Debug)]
 pub enum LLVMOptRemarkOpaqueParser {}
+
 pub type LLVMOptRemarkParserRef = *mut LLVMOptRemarkOpaqueParser;
 
 extern "C" {

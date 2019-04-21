@@ -9,10 +9,14 @@ pub enum LLVMByteOrdering {
     LLVMLittleEndian = 1,
 }
 
+#[derive(Debug)]
 pub enum LLVMOpaqueTargetData {}
+
 pub type LLVMTargetDataRef = *mut LLVMOpaqueTargetData;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueTargetLibraryInfotData {}
+
 pub type LLVMTargetLibraryInfoRef = *mut LLVMOpaqueTargetLibraryInfotData;
 
 extern "C" {

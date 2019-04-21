@@ -53,13 +53,19 @@ pub enum lto_codegen_model {
     LTO_CODEGEN_PIC_MODEL_DEFAULT = 3,
 }
 
+#[derive(Debug)]
 pub enum LLVMOpaqueLTOModule {}
+
 pub type lto_module_t = *mut LLVMOpaqueLTOModule;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueLTOCodeGenerator {}
+
 pub type lto_code_gen_t = *mut LLVMOpaqueLTOCodeGenerator;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueThinLTOCodeGenerator {}
+
 pub type thinlto_code_gen_t = *mut LLVMOpaqueThinLTOCodeGenerator;
 
 #[repr(C)]
@@ -213,6 +219,7 @@ extern "C" {
 
 /// Type to wrap a single object returned by ThinLTO.
 #[repr(C)]
+#[derive(Debug)]
 #[allow(non_snake_case)]
 pub struct LTOObjectBuffer {
     Buffer: *const ::libc::c_char,

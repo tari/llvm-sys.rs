@@ -3,6 +3,7 @@ use super::*;
 
 /// Debug info flags.
 #[repr(C)]
+#[derive(Debug)]
 pub enum LLVMDIFlags {
     LLVMDIFlagZero = 0,
     LLVMDIFlagPrivate = 1,
@@ -44,6 +45,7 @@ pub const LLVMDIFlagPtrToMemberRep: LLVMDIFlags = LLVMDIFlags::LLVMDIFlagVirtual
 
 /// Source languages known by DWARF.
 #[repr(C)]
+#[derive(Debug)]
 pub enum LLVMDWARFSourceLanguage {
     LLVMDWARFSourceLanguageC89,
     LLVMDWARFSourceLanguageC,
@@ -93,6 +95,7 @@ pub enum LLVMDWARFSourceLanguage {
 
 /// The amount of debug information to emit.
 #[repr(C)]
+#[derive(Debug)]
 pub enum LLVMDWARFEmissionKind {
     LLVMDWARFEmissionKindNone = 0,
     LLVMDWARFEmissionKindFull,
@@ -100,6 +103,7 @@ pub enum LLVMDWARFEmissionKind {
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub enum LLVMMetadataKind {
     LLVMMDStringMetadataKind,
     LLVMConstantAsMetadataMetadataKind,

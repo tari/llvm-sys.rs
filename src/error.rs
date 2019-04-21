@@ -1,6 +1,8 @@
 pub const LLVMErrorSuccess: ::libc::c_int = 0;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueError {}
+
 pub type LLVMErrorRef = *mut LLVMOpaqueError;
 
 pub type LLVMErrorTypeId = *const ::libc::c_void;

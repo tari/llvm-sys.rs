@@ -3,6 +3,7 @@
 use super::prelude::*;
 
 #[repr(C)]
+#[derive(Debug)]
 pub enum LLVMLinkerMode {
     LLVMLinkerDestroySource = 0,
     #[deprecated(since="3.7.0", note="LLVMLinkerPreserveSource has no effect")]

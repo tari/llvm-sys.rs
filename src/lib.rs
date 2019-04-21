@@ -10,25 +10,64 @@ extern crate libc;
 
 use self::prelude::*;
 
+#[derive(Debug)]
 pub enum LLVMMemoryBuffer {}
+
+#[derive(Debug)]
 pub enum LLVMContext {}
+
+#[derive(Debug)]
 pub enum LLVMModule {}
+
+#[derive(Debug)]
 pub enum LLVMType {}
+
+#[derive(Debug)]
 pub enum LLVMValue {}
+
+#[derive(Debug)]
 pub enum LLVMBasicBlock {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueMetadata {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueNamedMDNode {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueValueMetadataEntry {}
+
+#[derive(Debug)]
 pub enum LLVMBuilder {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueDIBuilder {}
+
+#[derive(Debug)]
 pub enum LLVMModuleProvider {}
+
+#[derive(Debug)]
 pub enum LLVMPassManager {}
+
+#[derive(Debug)]
 pub enum LLVMPassRegistry {}
+
+#[derive(Debug)]
 pub enum LLVMUse {}
+
+#[derive(Debug)]
 pub enum LLVMDiagnosticInfo {}
+
+#[derive(Debug)]
 pub enum LLVMComdat {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueModuleFlagEntry {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueJITEventListener {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueAttributeRef {}
 
 /// Core types used throughout LLVM.

@@ -2,16 +2,24 @@
 
 use super::prelude::*;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueObjectFile {}
+
 pub type LLVMObjectFileRef = *mut LLVMOpaqueObjectFile;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueSectionIterator {}
+
 pub type LLVMSectionIteratorRef = *mut LLVMOpaqueSectionIterator;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueSymbolIterator {}
+
 pub type LLVMSymbolIteratorRef = *mut LLVMOpaqueSymbolIterator;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueRelocationIterator {}
+
 pub type LLVMRelocationIteratorRef = *mut LLVMOpaqueRelocationIterator;
 
 extern "C" {

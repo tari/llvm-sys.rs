@@ -3,10 +3,14 @@
 use super::prelude::*;
 use super::target::LLVMTargetDataRef;
 
+#[derive(Debug)]
 pub enum LLVMOpaqueTargetMachine {}
+
 pub type LLVMTargetMachineRef = *mut LLVMOpaqueTargetMachine;
 
+#[derive(Debug)]
 pub enum LLVMTarget {}
+
 pub type LLVMTargetRef = *mut LLVMTarget;
 
 #[repr(C)]

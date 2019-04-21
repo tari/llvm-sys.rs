@@ -2,7 +2,9 @@
 
 #![allow(non_upper_case_globals, non_snake_case)]
 
+#[derive(Debug)]
 pub enum LLVMOpaqueDisasmContext {}
+
 pub type LLVMDisasmContextRef = *mut LLVMOpaqueDisasmContext;
 
 pub type LLVMOpInfoCallback = Option<extern "C" fn(DisInfo: *mut ::libc::c_void,
@@ -14,6 +16,7 @@ pub type LLVMOpInfoCallback = Option<extern "C" fn(DisInfo: *mut ::libc::c_void,
                                                    -> ::libc::c_int>;
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct LLVMOpInfoSymbol1 {
     /// 1 if this symbol is present.
     pub Present: u64,
@@ -24,6 +27,7 @@ pub struct LLVMOpInfoSymbol1 {
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct Struct_LLVMOpInfo1 {
     pub AddSymbol: LLVMOpInfoSymbol1,
     pub SubtractSymbol: LLVMOpInfoSymbol1,

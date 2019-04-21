@@ -4,7 +4,9 @@ use super::error::LLVMErrorRef;
 use super::prelude::*;
 use super::target_machine::LLVMTargetMachineRef;
 
+#[derive(Debug)]
 pub enum LLVMOrcOpaqueJITStack {}
+
 pub type LLVMOrcJITStackRef = *mut LLVMOrcOpaqueJITStack;
 pub type LLVMOrcModuleHandle = u64;
 pub type LLVMOrcTargetAddress = u64;

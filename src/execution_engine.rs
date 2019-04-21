@@ -4,8 +4,13 @@ use super::prelude::*;
 use super::target::LLVMTargetDataRef;
 use super::target_machine::{LLVMTargetMachineRef, LLVMCodeModel};
 
+#[derive(Debug)]
 pub enum LLVMOpaqueGenericValue {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueExecutionEngine {}
+
+#[derive(Debug)]
 pub enum LLVMOpaqueMCJITMemoryManager {}
 
 pub type LLVMGenericValueRef = *mut LLVMOpaqueGenericValue;
@@ -13,7 +18,7 @@ pub type LLVMExecutionEngineRef = *mut LLVMOpaqueExecutionEngine;
 pub type LLVMMCJITMemoryManagerRef = *mut LLVMOpaqueMCJITMemoryManager;
 
 #[repr(C)]
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 #[allow(non_snake_case)]
 pub struct LLVMMCJITCompilerOptions {
     pub OptLevel: ::libc::c_uint,
