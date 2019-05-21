@@ -7,9 +7,10 @@ extern "C" {
     ///
     /// Returns 0 on success, and an optional human-readable description of any
     /// errors that occurred.
-    pub fn LLVMParseIRInContext(ContextRef: LLVMContextRef,
-                                MemBuf: LLVMMemoryBufferRef,
-                                OutM: *mut LLVMModuleRef,
-                                OutMessage: *mut *mut ::libc::c_char)
-                                -> LLVMBool;
+    pub fn LLVMParseIRInContext(
+        ContextRef: LLVMContextRef,
+        MemBuf: LLVMMemoryBufferRef,
+        OutM: *mut LLVMModuleRef,
+        OutMessage: *mut *mut ::libc::c_char,
+    ) -> LLVMBool;
 }

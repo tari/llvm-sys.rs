@@ -115,8 +115,8 @@ pub mod lto;
 pub mod object;
 pub mod opt_remarks;
 pub mod orc;
-pub mod target;
 pub mod support;
+pub mod target;
 pub mod target_machine;
 
 pub mod transforms {
@@ -471,6 +471,6 @@ pub const LLVMAttributeFunctionIndex: ::libc::c_uint = !0; // -1
 /// number from 1 to N.
 pub type LLVMAttributeIndex = ::libc::c_uint;
 
-pub type LLVMDiagnosticHandler = Option<extern "C" fn(arg1: LLVMDiagnosticInfoRef,
-                                                      arg2: *mut ::libc::c_void)>;
+pub type LLVMDiagnosticHandler =
+    Option<extern "C" fn(arg1: LLVMDiagnosticInfoRef, arg2: *mut ::libc::c_void)>;
 pub type LLVMYieldCallback = Option<extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void)>;

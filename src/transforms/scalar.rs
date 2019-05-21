@@ -31,8 +31,10 @@ extern "C" {
     pub fn LLVMAddSCCPPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddScalarReplAggregatesPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddScalarReplAggregatesPassSSA(PM: LLVMPassManagerRef);
-    pub fn LLVMAddScalarReplAggregatesPassWithThreshold(PM: LLVMPassManagerRef,
-                                                        Threshold: ::libc::c_int);
+    pub fn LLVMAddScalarReplAggregatesPassWithThreshold(
+        PM: LLVMPassManagerRef,
+        Threshold: ::libc::c_int,
+    );
     pub fn LLVMAddSimplifyLibCallsPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddTailCallEliminationPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddConstantPropagationPass(PM: LLVMPassManagerRef);

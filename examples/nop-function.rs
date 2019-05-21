@@ -20,9 +20,11 @@ fn main() {
 
         // Create a basic block in the function and set our builder to generate
         // code in it.
-        let bb = llvm::core::LLVMAppendBasicBlockInContext(context,
-                                                           function,
-                                                           b"entry\0".as_ptr() as *const _);
+        let bb = llvm::core::LLVMAppendBasicBlockInContext(
+            context,
+            function,
+            b"entry\0".as_ptr() as *const _,
+        );
         llvm::core::LLVMPositionBuilderAtEnd(builder, bb);
 
         // Emit a `ret void` into the function

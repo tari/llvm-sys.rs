@@ -17,7 +17,6 @@ pub struct LLVMOptRemarkDebugLoc {
     SourceColumnNumber: u32,
 }
 
-
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOptRemarkArg {
@@ -45,10 +44,13 @@ pub enum LLVMOptRemarkOpaqueParser {}
 pub type LLVMOptRemarkParserRef = *mut LLVMOptRemarkOpaqueParser;
 
 extern "C" {
-    pub fn LLVMOptRemarkParserCreate(Buf: *const libc::c_void, Size: u64) -> LLVMOptRemarkParserRef;
+    pub fn LLVMOptRemarkParserCreate(Buf: *const libc::c_void, Size: u64)
+        -> LLVMOptRemarkParserRef;
     pub fn LLVMOptRemarkParserGetNext(Parser: LLVMOptRemarkParserRef) -> *mut LLVMOptRemarkEntry;
     pub fn LLVMOptRemarkParserHasError(Parser: LLVMOptRemarkParserRef) -> LLVMBool;
-    pub fn LLVMOptRemarkParserGetErrorMessage(Parser: LLVMOptRemarkParserRef) -> *const libc::c_char;
+    pub fn LLVMOptRemarkParserGetErrorMessage(
+        Parser: LLVMOptRemarkParserRef,
+    ) -> *const libc::c_char;
     pub fn LLVMOptRemarkParserDispose(Parser: LLVMOptRemarkParserRef);
     pub fn LLVMOptRemarkVersion() -> u32;
 }

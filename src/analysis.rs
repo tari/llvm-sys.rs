@@ -18,10 +18,11 @@ extern "C" {
     ///
     /// Optionally returns a human-readable description of any invalid constructs,
     /// which must be disposed with `LLVMDisposeMessage`.
-    pub fn LLVMVerifyModule(M: LLVMModuleRef,
-                            Action: LLVMVerifierFailureAction,
-                            OutMessage: *mut *mut ::libc::c_char)
-                            -> LLVMBool;
+    pub fn LLVMVerifyModule(
+        M: LLVMModuleRef,
+        Action: LLVMVerifierFailureAction,
+        OutMessage: *mut *mut ::libc::c_char,
+    ) -> LLVMBool;
     /// Verify that a single function is valid, taking the specified action.
     ///
     /// Useful for debugging.

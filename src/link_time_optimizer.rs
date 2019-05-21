@@ -22,10 +22,12 @@ pub enum llvm_lto_status_t {
 extern "C" {
     pub fn llvm_create_optimizer() -> llvm_lto_t;
     pub fn llvm_destroy_optimizer(lto: llvm_lto_t);
-    pub fn llvm_read_object_file(lto: llvm_lto_t,
-                                 input_filename: *const ::libc::c_char)
-                                 -> llvm_lto_status_t;
-    pub fn llvm_optimize_modules(lto: llvm_lto_t,
-                                 output_filename: *const ::libc::c_char)
-                                 -> llvm_lto_status_t;
+    pub fn llvm_read_object_file(
+        lto: llvm_lto_t,
+        input_filename: *const ::libc::c_char,
+    ) -> llvm_lto_status_t;
+    pub fn llvm_optimize_modules(
+        lto: llvm_lto_t,
+        output_filename: *const ::libc::c_char,
+    ) -> llvm_lto_status_t;
 }

@@ -10,11 +10,12 @@ extern "C" {
     /// Write a module to an open file descriptor.
     ///
     /// Returns 0 on success.
-    pub fn LLVMWriteBitcodeToFD(M: LLVMModuleRef,
-                                FD: ::libc::c_int,
-                                ShouldClose: ::libc::c_int,
-                                Unbuffered: ::libc::c_int)
-                                -> ::libc::c_int;
+    pub fn LLVMWriteBitcodeToFD(
+        M: LLVMModuleRef,
+        FD: ::libc::c_int,
+        ShouldClose: ::libc::c_int,
+        Unbuffered: ::libc::c_int,
+    ) -> ::libc::c_int;
     /// Deprecated: use LLVMWriteBitcodeToFD
     pub fn LLVMWriteBitcodeToFileHandle(M: LLVMModuleRef, Handle: ::libc::c_int) -> ::libc::c_int;
     /// Writes a module to a new memory buffer.

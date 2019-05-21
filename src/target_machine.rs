@@ -57,23 +57,25 @@ extern "C" {
     pub fn LLVMGetFirstTarget() -> LLVMTargetRef;
     pub fn LLVMGetNextTarget(T: LLVMTargetRef) -> LLVMTargetRef;
     pub fn LLVMGetTargetFromName(Name: *const ::libc::c_char) -> LLVMTargetRef;
-    pub fn LLVMGetTargetFromTriple(Triple: *const ::libc::c_char,
-                                   T: *mut LLVMTargetRef,
-                                   ErrorMessage: *mut *mut ::libc::c_char)
-                                   -> LLVMBool;
+    pub fn LLVMGetTargetFromTriple(
+        Triple: *const ::libc::c_char,
+        T: *mut LLVMTargetRef,
+        ErrorMessage: *mut *mut ::libc::c_char,
+    ) -> LLVMBool;
     pub fn LLVMGetTargetName(T: LLVMTargetRef) -> *const ::libc::c_char;
     pub fn LLVMGetTargetDescription(T: LLVMTargetRef) -> *const ::libc::c_char;
     pub fn LLVMTargetHasJIT(T: LLVMTargetRef) -> LLVMBool;
     pub fn LLVMTargetHasTargetMachine(T: LLVMTargetRef) -> LLVMBool;
     pub fn LLVMTargetHasAsmBackend(T: LLVMTargetRef) -> LLVMBool;
-    pub fn LLVMCreateTargetMachine(T: LLVMTargetRef,
-                                   Triple: *const ::libc::c_char,
-                                   CPU: *const ::libc::c_char,
-                                   Features: *const ::libc::c_char,
-                                   Level: LLVMCodeGenOptLevel,
-                                   Reloc: LLVMRelocMode,
-                                   CodeModel: LLVMCodeModel)
-                                   -> LLVMTargetMachineRef;
+    pub fn LLVMCreateTargetMachine(
+        T: LLVMTargetRef,
+        Triple: *const ::libc::c_char,
+        CPU: *const ::libc::c_char,
+        Features: *const ::libc::c_char,
+        Level: LLVMCodeGenOptLevel,
+        Reloc: LLVMRelocMode,
+        CodeModel: LLVMCodeModel,
+    ) -> LLVMTargetMachineRef;
     pub fn LLVMDisposeTargetMachine(T: LLVMTargetMachineRef);
     pub fn LLVMGetTargetMachineTarget(T: LLVMTargetMachineRef) -> LLVMTargetRef;
     pub fn LLVMGetTargetMachineTriple(T: LLVMTargetMachineRef) -> *mut ::libc::c_char;
@@ -82,18 +84,20 @@ extern "C" {
     /// Create a DataLayout based on the target machine.
     pub fn LLVMCreateTargetDataLayout(T: LLVMTargetMachineRef) -> LLVMTargetDataRef;
     pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef, VerboseAsm: LLVMBool);
-    pub fn LLVMTargetMachineEmitToFile(T: LLVMTargetMachineRef,
-                                       M: LLVMModuleRef,
-                                       Filename: *mut ::libc::c_char,
-                                       codegen: LLVMCodeGenFileType,
-                                       ErrorMessage: *mut *mut ::libc::c_char)
-                                       -> LLVMBool;
-    pub fn LLVMTargetMachineEmitToMemoryBuffer(T: LLVMTargetMachineRef,
-                                               M: LLVMModuleRef,
-                                               codegen: LLVMCodeGenFileType,
-                                               ErrorMessage: *mut *mut ::libc::c_char,
-                                               OutMemBuf: *mut LLVMMemoryBufferRef)
-                                               -> LLVMBool;
+    pub fn LLVMTargetMachineEmitToFile(
+        T: LLVMTargetMachineRef,
+        M: LLVMModuleRef,
+        Filename: *mut ::libc::c_char,
+        codegen: LLVMCodeGenFileType,
+        ErrorMessage: *mut *mut ::libc::c_char,
+    ) -> LLVMBool;
+    pub fn LLVMTargetMachineEmitToMemoryBuffer(
+        T: LLVMTargetMachineRef,
+        M: LLVMModuleRef,
+        codegen: LLVMCodeGenFileType,
+        ErrorMessage: *mut *mut ::libc::c_char,
+        OutMemBuf: *mut LLVMMemoryBufferRef,
+    ) -> LLVMBool;
 
     pub fn LLVMGetDefaultTargetTriple() -> *mut ::libc::c_char;
     /// Normalize a target triple. The result needs to be disposed with LLVMDisposeMessage.

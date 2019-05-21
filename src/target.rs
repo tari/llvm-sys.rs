@@ -146,27 +146,31 @@ extern "C" {
     pub fn LLVMIntPtrType(TD: LLVMTargetDataRef) -> LLVMTypeRef;
     pub fn LLVMIntPtrTypeForAS(TD: LLVMTargetDataRef, AS: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMIntPtrTypeInContext(C: LLVMContextRef, TD: LLVMTargetDataRef) -> LLVMTypeRef;
-    pub fn LLVMIntPtrTypeForASInContext(C: LLVMContextRef,
-                                        TD: LLVMTargetDataRef,
-                                        AS: ::libc::c_uint)
-                                        -> LLVMTypeRef;
+    pub fn LLVMIntPtrTypeForASInContext(
+        C: LLVMContextRef,
+        TD: LLVMTargetDataRef,
+        AS: ::libc::c_uint,
+    ) -> LLVMTypeRef;
     pub fn LLVMSizeOfTypeInBits(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_ulonglong;
     pub fn LLVMStoreSizeOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_ulonglong;
     pub fn LLVMABISizeOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_ulonglong;
     pub fn LLVMABIAlignmentOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMCallFrameAlignmentOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMPreferredAlignmentOfType(TD: LLVMTargetDataRef, Ty: LLVMTypeRef) -> ::libc::c_uint;
-    pub fn LLVMPreferredAlignmentOfGlobal(TD: LLVMTargetDataRef,
-                                          GlobalVar: LLVMValueRef)
-                                          -> ::libc::c_uint;
-    pub fn LLVMElementAtOffset(TD: LLVMTargetDataRef,
-                               StructTy: LLVMTypeRef,
-                               Offset: ::libc::c_ulonglong)
-                               -> ::libc::c_uint;
-    pub fn LLVMOffsetOfElement(TD: LLVMTargetDataRef,
-                               StructTy: LLVMTypeRef,
-                               Element: ::libc::c_uint)
-                               -> ::libc::c_ulonglong;
+    pub fn LLVMPreferredAlignmentOfGlobal(
+        TD: LLVMTargetDataRef,
+        GlobalVar: LLVMValueRef,
+    ) -> ::libc::c_uint;
+    pub fn LLVMElementAtOffset(
+        TD: LLVMTargetDataRef,
+        StructTy: LLVMTypeRef,
+        Offset: ::libc::c_ulonglong,
+    ) -> ::libc::c_uint;
+    pub fn LLVMOffsetOfElement(
+        TD: LLVMTargetDataRef,
+        StructTy: LLVMTypeRef,
+        Element: ::libc::c_uint,
+    ) -> ::libc::c_ulonglong;
     pub fn LLVMDisposeTargetData(TD: LLVMTargetDataRef);
 }
 
