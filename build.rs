@@ -12,7 +12,34 @@ use std::io::{self, ErrorKind};
 use std::path::PathBuf;
 use std::process::Command;
 
-lazy_static!{
+/// Environment variables that can guide compilation
+lazy_static! {
+    /// A single path to search for LLVM in (containing bin/llvm-config)
+    static ref ENV_LLVM_PREFIX: String =
+        format!("LLVM_SYS_{}_PREFIX", env!("CARGO_PKG_VERSION_MAJOR"));
+
+    /// If exactly "YES", ignore the version blacklist
+    static ref ENV_IGNORE_BLACKLIST: String =
+        format!("LLVM_SYS_{}_IGNORE_BLACKLIST", env!("CARGO_PKG_VERSION_MAJOR"));
+
+    /// If set, enforce precise correspondence between crate and binary versions.
+    static ref ENV_STRICT_VERSIONING: String =
+        format!("LLVM_SYS_{}_STRICT_VERSIONING", env!("CARGO_PKG_VERSION_MAJOR"));
+
+    /// If set, do not attempt to strip irrelevant options for llvm-config --cflags
+    static ref ENV_NO_CLEAN_CFLAGS: String =
+        format!("LLVM_SYS_{}_NO_CLEAN_CFLAGS", env!("CARGO_PKG_VERSION_MAJOR"));
+
+    /// If set and targeting MSVC, force the debug runtime library
+    static ref ENV_USE_DEBUG_MSVCRT: String =
+        format!("LLVM_SYS_{}_USE_DEBUG_MSVCRT", env!("CARGO_PKG_VERSION_MAJOR"));
+
+    /// If set, always link against libffi
+    static ref ENV_FORCE_FFI: String =
+        format!("LLVM_SYS_{}_FFI_WORKAROUND", env!("CARGO_PKG_VERSION_MAJOR"));
+}
+
+lazy_static! {
     /// LLVM version used by this version of the crate.
     static ref CRATE_VERSION: Version = {
         let crate_version = Version::parse(env!("CARGO_PKG_VERSION"))
@@ -43,9 +70,7 @@ lazy_static!{
 
         // Did the user give us a binary path to use? If yes, try
         // to use that and fail if it doesn't work.
-        let binary_prefix_var = format!("LLVM_SYS_{}_PREFIX",
-                                        env!("CARGO_PKG_VERSION_MAJOR"));
-        if let Some(path) = env::var_os(&binary_prefix_var) {
+        if let Some(path) = env::var_os(&*ENV_LLVM_PREFIX) {
             for binary_name in LLVM_CONFIG_BINARY_NAMES.iter() {
                 let mut pb: PathBuf = path.clone().into();
                 pb.push("bin");
@@ -57,7 +82,7 @@ lazy_static!{
                     return pb;
                 } else {
                     println!("LLVM binaries specified by {} are the wrong version.
-                              (Found {}, need {}.)", binary_prefix_var, ver, *CRATE_VERSION);
+                              (Found {}, need {}.)", *ENV_LLVM_PREFIX, ver, *CRATE_VERSION);
                 }
             }
         }
@@ -69,7 +94,7 @@ lazy_static!{
                   refer to the llvm-sys documentation for more information.
                   
                   llvm-sys: https://crates.io/crates/llvm-sys
-                  llvmenv: https://crates.io/crates/llvmenv", binary_prefix_var);
+                  llvmenv: https://crates.io/crates/llvmenv", *ENV_LLVM_PREFIX);
         panic!("Could not find a compatible version of LLVM");
     };
 }
@@ -88,9 +113,10 @@ fn locate_system_llvm_config() -> Option<&'static str> {
             Ok(version) => {
                 // Version mismatch. Will try further searches, but warn that
                 // we're not using the system one.
-                println!("Found LLVM version {} on PATH, but need {}.",
-                         version,
-                         *CRATE_VERSION);
+                println!(
+                    "Found LLVM version {} on PATH, but need {}.",
+                    version, *CRATE_VERSION
+                );
             }
             Err(ref e) if e.kind() == ErrorKind::NotFound => {
                 // Looks like we failed to execute any llvm-config. Keep
@@ -109,16 +135,18 @@ fn locate_system_llvm_config() -> Option<&'static str> {
 fn is_blacklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
     static BLACKLIST: &'static [(u64, u64, u64, &'static str)] = &[];
 
-    let blacklist_var = format!("LLVM_SYS_{}_IGNORE_BLACKLIST",
-                                env!("CARGO_PKG_VERSION_MAJOR"));
-    if let Some(x) = env::var_os(&blacklist_var) {
+    if let Some(x) = env::var_os(&*ENV_IGNORE_BLACKLIST) {
         if &x == "YES" {
-            println!("cargo:warning=Ignoring blacklist entry for LLVM {}",
-                     llvm_version);
+            println!(
+                "cargo:warning=Ignoring blacklist entry for LLVM {}",
+                llvm_version
+            );
             return None;
         } else {
-            println!("cargo:warning={} is set but not exactly \"YES\"; blacklist is still honored.",
-                     &blacklist_var);
+            println!(
+                "cargo:warning={} is set but not exactly \"YES\"; blacklist is still honored.",
+                *ENV_IGNORE_BLACKLIST
+            );
         }
     }
 
@@ -142,20 +170,21 @@ fn is_blacklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
 /// the crate.
 fn is_compatible_llvm(llvm_version: &Version) -> bool {
     if let Some(reason) = is_blacklisted_llvm(llvm_version) {
-        println!("Found LLVM {}, which is blacklisted: {}",
-                 llvm_version,
-                 reason);
+        println!(
+            "Found LLVM {}, which is blacklisted: {}",
+            llvm_version, reason
+        );
         return false;
     }
 
-    let strict = env::var_os(format!("LLVM_SYS_{}_STRICT_VERSIONING",
-                                     env!("CARGO_PKG_VERSION_MAJOR")))
-            .is_some() || cfg!(feature = "strict-versioning");
+    let strict =
+        env::var_os(&*ENV_STRICT_VERSIONING).is_some() || cfg!(feature = "strict-versioning");
     if strict {
         llvm_version.major == CRATE_VERSION.major && llvm_version.minor == CRATE_VERSION.minor
     } else {
-        llvm_version.major >= CRATE_VERSION.major ||
-        (llvm_version.major == CRATE_VERSION.major && llvm_version.minor >= CRATE_VERSION.minor)
+        llvm_version.major >= CRATE_VERSION.major
+            || (llvm_version.major == CRATE_VERSION.major
+                && llvm_version.minor >= CRATE_VERSION.minor)
     }
 }
 
@@ -174,10 +203,11 @@ fn llvm_config(arg: &str) -> String {
 fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str) -> io::Result<String> {
     Command::new(binary)
         .arg(arg)
-        .arg("--link-static")   // Don't use dylib for >= 3.9
+        .arg("--link-static") // Don't use dylib for >= 3.9
         .output()
-        .map(|output| String::from_utf8(output.stdout)
-            .expect("Output from llvm-config was not valid UTF-8"))
+        .map(|output| {
+            String::from_utf8(output.stdout).expect("Output from llvm-config was not valid UTF-8")
+        })
 }
 
 /// Get the LLVM version using llvm-config.
@@ -188,7 +218,9 @@ fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
     // version strings like '3.8.0svn', so limit what we try to parse
     // to only the numeric bits.
     let re = Regex::new(r"^(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))??").unwrap();
-    let c = re.captures(&version_str).expect("Could not determine LLVM version from llvm-config.");
+    let c = re
+        .captures(&version_str)
+        .expect("Could not determine LLVM version from llvm-config.");
 
     // some systems don't have a patch number but Version wants it so we just append .0 if it isn't
     // there
@@ -277,9 +309,7 @@ fn get_llvm_cflags() -> String {
     // include flags that aren't understood by the default compiler we're
     // using. Unless requested otherwise, clean CFLAGS of options that are
     // known to be possibly-harmful.
-    let no_clean = env::var_os(format!("LLVM_SYS_{}_NO_CLEAN_CFLAGS",
-                                       env!("CARGO_PKG_VERSION_MAJOR")))
-            .is_some();
+    let no_clean = env::var_os(&*ENV_NO_CLEAN_CFLAGS).is_some();
     if no_clean || cfg!(target_env = "msvc") {
         // MSVC doesn't accept -W... options, so don't try to strip them and
         // possibly strip something that should be retained. Also do nothing if
@@ -303,7 +333,9 @@ fn main() {
     // Build the extra wrapper functions.
     if !cfg!(feature = "disable-alltargets-init") {
         std::env::set_var("CFLAGS", get_llvm_cflags());
-        cc::Build::new().file("wrappers/target.c").compile("targetwrappers");
+        cc::Build::new()
+            .file("wrappers/target.c")
+            .compile("targetwrappers");
     }
 
     if cfg!(feature = "no-llvm-linking") {
@@ -326,19 +358,15 @@ fn main() {
     for name in get_system_libraries() {
         println!("cargo:rustc-link-lib=dylib={}", name);
     }
-    
-    let use_debug_msvcrt = env::var_os(format!("LLVM_SYS_{}_USE_DEBUG_MSVCRT",
-                                          env!("CARGO_PKG_VERSION_MAJOR")))
-                                          .is_some();
+
+    let use_debug_msvcrt = env::var_os(&*ENV_USE_DEBUG_MSVCRT).is_some();
     if cfg!(target_env = "msvc") && (use_debug_msvcrt || is_llvm_debug()) {
         println!("cargo:rustc-link-lib={}", "msvcrtd");
     }
 
     // Link libffi if the user requested this workaround.
     // See https://bitbucket.org/tari/llvm-sys.rs/issues/12/
-    let force_ffi = env::var_os(format!("LLVM_SYS_{}_FFI_WORKAROUND",
-                                        env!("CARGO_PKG_VERSION_MAJOR")))
-            .is_some();
+    let force_ffi = env::var_os(&*ENV_FORCE_FFI).is_some();
     if force_ffi {
         println!("cargo:rustc-link-lib=dylib={}", "ffi");
     }
