@@ -13,6 +13,9 @@ use std::path::PathBuf;
 use std::process::Command;
 
 /// Environment variables that can guide compilation
+///
+/// When adding new ones, they should also be added to main() to force a
+/// rebuild if they are changed.
 lazy_static! {
     /// A single path to search for LLVM in (containing bin/llvm-config)
     static ref ENV_LLVM_PREFIX: String =
@@ -330,6 +333,14 @@ fn is_llvm_debug() -> bool {
 }
 
 fn main() {
+    // Behavior can be significantly affected by these vars.
+    println!("cargo:rerun-if-env-changed={}", &*ENV_LLVM_PREFIX);
+    println!("cargo:rerun-if-env-changed={}", &*ENV_IGNORE_BLACKLIST);
+    println!("cargo:rerun-if-env-changed={}", &*ENV_STRICT_VERSIONING);
+    println!("cargo:rerun-if-env-changed={}", &*ENV_NO_CLEAN_CFLAGS);
+    println!("cargo:rerun-if-env-changed={}", &*ENV_USE_DEBUG_MSVCRT);
+    println!("cargo:rerun-if-env-changed={}", &*ENV_FORCE_FFI);
+
     // Build the extra wrapper functions.
     if !cfg!(feature = "disable-alltargets-init") {
         std::env::set_var("CFLAGS", get_llvm_cflags());
