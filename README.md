@@ -19,6 +19,8 @@ See the `examples` directory in this repository for API examples. There also
 exist some other projects using these bindings which may be
 informative:
 
+ * [Inkwell](https://github.com/TheDan64/inkwell) provides a safe, more
+   ergonomic Rust API for LLVM.
  * [Tari's merthc](https://bitbucket.org/tari/merthc)
  * [Wilfred's BF compiler](https://crates.io/crates/bfc)
  * Jay Phelps wrote about [building a minimal compiler targeting
