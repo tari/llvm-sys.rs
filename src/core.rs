@@ -1820,7 +1820,7 @@ extern "C" {
         FailureOrdering: LLVMAtomicOrdering,
         SingleThread: LLVMBool,
     ) -> LLVMValueRef;
-    pub fn LLVMIsAtomicSinglethread(AtomicInst: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMIsAtomicSingleThread(AtomicInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetAtomicSingleThread(AtomicInst: LLVMValueRef, SingleThread: LLVMBool);
     pub fn LLVMGetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef) -> LLVMAtomicOrdering;
     pub fn LLVMSetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef, Ordering: LLVMAtomicOrdering);
