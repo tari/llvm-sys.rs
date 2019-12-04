@@ -657,7 +657,7 @@ extern "C" {
     pub fn LLVMGlobalCopyAllMetadata(
         Value: LLVMValueRef,
         NumEntries: *mut ::libc::size_t,
-    ) -> LLVMValueMetadataEntry;
+    ) -> *mut LLVMValueMetadataEntry;
     pub fn LLVMDisposeValueMetadataEntries(Entries: *mut LLVMValueMetadataEntry);
     pub fn LLVMValueMetadataEntriesGetKind(
         Entries: *mut LLVMValueMetadataEntry,
