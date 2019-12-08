@@ -17,10 +17,11 @@ on your system can be specified via environment variables. See
 
 See the `examples` directory in this repository for API examples. There also
 exist some other projects using these bindings which may be
-informative:
+informative or useful:
 
- * [Inkwell](https://github.com/TheDan64/inkwell) provides a safe, more
-   ergonomic Rust API for LLVM.
+ * Safe, "Rusty" APIs for using LLVM:
+   * [Inkwell](https://github.com/TheDan64/inkwell)
+   * [llvm-ir](https://github.com/cdisselkoen/llvm-ir)
  * [Tari's merthc](https://bitbucket.org/tari/merthc)
  * [Wilfred's BF compiler](https://crates.io/crates/bfc)
  * Jay Phelps wrote about [building a minimal compiler targeting
