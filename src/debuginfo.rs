@@ -29,12 +29,11 @@ pub enum LLVMDIFlags {
     LLVMDIFlagIntroducedVirtual = 1 << 18,
     LLVMDIFlagBitField = 1 << 19,
     LLVMDIFlagNoReturn = 1 << 20,
-    LLVMDIFlagMainSubprogram = 1 << 21,
     LLVMDIFlagTypePassByValue = 1 << 22,
     LLVMDIFlagTypePassByReference = 1 << 23,
     LLVMDIFlagEnumClass = 1 << 24,
     LLVMDIFlagThunk = 1 << 25,
-    LLVMDIFlagTrivial = 1 << 26,
+    LLVMDIFlagNonTrivial = 1 << 26,
     LLVMDIFlagBigendian = 1 << 27,
     LLVMDIFlagLittleEndian = 1 << 28,
     LLVMDIFlagIndirectVirtualBase = (1 << 2) | (1 << 5),
@@ -136,6 +135,7 @@ pub enum LLVMMetadataKind {
     LLVMDIImportedEntityMetadataKind,
     LLVMDIMacroMetadataKind,
     LLVMDIMacroFileMetadataKind,
+    LLVMDICommonBlockMetadataKind,
 }
 
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;
@@ -299,6 +299,30 @@ extern "C" {
     /// Get the local scope associated with this debug location.
     pub fn LLVMDILocationGetScope(Location: LLVMMetadataRef) -> LLVMMetadataRef;
 
+    /// Get the "inline at" location associated with this debug location.
+    pub fn LLVMDILocationGetInlinedAt(Location: LLVMMetadataRef) -> LLVMMetadataRef;
+
+    /// Get the metadata of the file associated with a given scope.
+    pub fn LLVMDIScopeGetFile(Scope: LLVMMetadataRef) -> LLVMMetadataRef;
+
+    /// Get the directory of a given file.
+    pub fn LLVMDIFileGetDirectory(
+        File: LLVMMetadataRef,
+        Len: *mut ::libc::c_uint,
+    ) -> *const ::libc::c_char;
+
+    /// Get the name of a given file.
+    pub fn LLVMDIFileGetFilename(
+        File: LLVMMetadataRef,
+        Len: *mut ::libc::c_uint,
+    ) -> *const ::libc::c_char;
+
+    /// Get the source of a given file.
+    pub fn LLVMDIFileGetSource(
+        File: LLVMMetadataRef,
+        Len: *mut ::libc::c_uint,
+    ) -> *const ::libc::c_char;
+
     /// Create a type array.
     pub fn LLVMDIBuilderGetOrCreateTypeArray(
         Builder: LLVMDIBuilderRef,
@@ -313,6 +337,15 @@ extern "C" {
         ParameterTypes: *mut LLVMMetadataRef,
         NumParameterTypes: ::libc::c_uint,
         Flags: LLVMDIFlags,
+    ) -> LLVMMetadataRef;
+
+    /// Create debugging information entry for an enumerator.
+    pub fn LLVMDIBuilderCreateEnumerator(
+        Builder: LLVMDIBuilderRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        Value: i64,
+        IsUnsigned: LLVMBool,
     ) -> LLVMMetadataRef;
 
     /// Create debugging information entry for an enumeration.
@@ -669,6 +702,21 @@ extern "C" {
         AlignInBits: u32,
     ) -> LLVMMetadataRef;
 
+    /// Retrieves the DIVariable associated with this global variable expression.
+    pub fn LLVMDIGlobalVariableExpressionGetVariable(GVE: LLVMMetadataRef) -> LLVMMetadataRef;
+
+    /// Retrieves the DIExpression associated with this global variable expression.
+    pub fn LLVMDIGlobalVariableExpressionGetExpression(GVE: LLVMMetadataRef) -> LLVMMetadataRef;
+
+    ///Get the metadata of the file associated with a given variable.
+    pub fn LLVMDIVariableGetFile(Var: LLVMMetadataRef) -> LLVMMetadataRef;
+
+    /// Get the metadata of the scope associated with a given variable.
+    pub fn LLVMDIVariableGetScope(Var: LLVMMetadataRef) -> LLVMMetadataRef;
+
+    /// Get the source line where this \c DIVariable is declared.
+    pub fn LLVMDIVariableGetLine(Var: LLVMMetadataRef) -> ::libc::c_uint;
+
     /// Create a new temporary \c MDNode.  Suitable for use in constructing cyclic
     pub fn LLVMTemporaryMDNode(
         Ctx: LLVMContextRef,
@@ -774,6 +822,15 @@ extern "C" {
 
     /// Set the subprogram attached to a function.
     pub fn LLVMSetSubprogram(Func: LLVMValueRef, SP: LLVMMetadataRef);
+
+    /// Get the line associated with a given subprogram.
+    pub fn LLVMDISubprogramGetLine(Subprogram: LLVMMetadataRef) -> ::libc::c_uint;
+
+    /// Get the debug location for the given instruction.
+    pub fn LLVMInstructionGetDebugLoc(Inst: LLVMValueRef) -> LLVMMetadataRef;
+
+    /// Set the debug location for the given instruction.
+    pub fn LLVMInstructionSetDebugLoc(Inst: LLVMValueRef, Loc: LLVMMetadataRef);
 
     /// Obtain the enumerated type of a metadata instance.
     pub fn LLVMGetMetadataKind(Metadata: LLVMMetadataRef) -> LLVMMetadataKind;

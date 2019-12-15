@@ -113,8 +113,8 @@ pub mod link_time_optimizer;
 pub mod linker;
 pub mod lto;
 pub mod object;
-pub mod opt_remarks;
 pub mod orc;
+pub mod remarks;
 pub mod support;
 pub mod target;
 pub mod target_machine;
@@ -139,6 +139,7 @@ pub enum LLVMOpcode {
     LLVMIndirectBr = 4,
     LLVMInvoke = 5,
     LLVMUnreachable = 7,
+    LLVMCallBr = 67,
     LLVMFNeg = 66,
     LLVMAdd = 8,
     LLVMFAdd = 9,

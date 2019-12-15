@@ -68,6 +68,11 @@ pub enum LLVMOpaqueThinLTOCodeGenerator {}
 
 pub type thinlto_code_gen_t = *mut LLVMOpaqueThinLTOCodeGenerator;
 
+#[derive(Debug)]
+pub enum LLVMOpaqueLTOInput {}
+
+pub type lto_input_t = *mut LLVMOpaqueLTOInput;
+
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum lto_codegen_diagnostic_severity_t {
@@ -349,6 +354,25 @@ extern "C" {
         cg: thinlto_code_gen_t,
         max_size_files: ::libc::c_uint,
     );
+
+    /// Create an LTO input file from a buffer.
+    pub fn lto_input_create(
+        buffer: *const ::libc::c_void,
+        buffer_size: ::libc::size_t,
+        path: *const ::libc::c_char,
+    ) -> lto_input_t;
+    /// Free all memory allocated by the input file.
+    pub fn lto_input_dispose(input: lto_input_t);
+    /// Get the number of dependent library specifiers for the given input.
+    pub fn lto_input_get_num_dependent_libraries(input: lto_input_t) -> ::libc::c_uint;
+    /// Get the `i`th dependent library specifier for the given input file.
+    ///
+    /// The returned string is not null-terminated.
+    pub fn lto_input_get_dependent_library(
+        input: lto_input_t,
+        index: ::libc::size_t,
+        size: *mut ::libc::size_t,
+    ) -> *const ::libc::c_char;
 
     /// Set the path to a directory to use as temporary bitcode storage.
     ///

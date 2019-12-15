@@ -742,6 +742,11 @@ extern "C" {
     ///
     /// Added in LLVM 3.7.
     pub fn LLVMSetPersonalityFn(Fn: LLVMValueRef, PersonalityFn: LLVMValueRef);
+    /// Obtain the intrinsic ID number which matches the given function name.
+    pub fn LLVMLookupIntrinsicID(
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+    ) -> ::libc::c_uint;
     /// Obtain the ID number from a function instance.
     pub fn LLVMGetIntrinsicID(Fn: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetIntrinsicDeclaration(
@@ -820,18 +825,79 @@ extern "C" {
 
 // Core->Metadata
 extern "C" {
+    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDStringInContext2 instead.")]
     pub fn LLVMMDStringInContext(
         C: LLVMContextRef,
         Str: *const ::libc::c_char,
         SLen: ::libc::c_uint,
     ) -> LLVMValueRef;
+    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDStringInContext2 instead.")]
     pub fn LLVMMDString(Str: *const ::libc::c_char, SLen: ::libc::c_uint) -> LLVMValueRef;
+    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDNodeInContext2 instead.")]
     pub fn LLVMMDNodeInContext(
         C: LLVMContextRef,
         Vals: *mut LLVMValueRef,
         Count: ::libc::c_uint,
     ) -> LLVMValueRef;
+    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDNodeInContext2 instead.")]
     pub fn LLVMMDNode(Vals: *mut LLVMValueRef, Count: ::libc::c_uint) -> LLVMValueRef;
+
+    /// Add a global indirect function to a module under a specified name.
+    pub fn LLVMAddGlobalIFunc(
+        M: LLVMModuleRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        Ty: LLVMTypeRef,
+        AddrSpace: ::libc::c_uint,
+        Resolver: LLVMValueRef,
+    ) -> LLVMValueRef;
+
+    /// Obtain a GlobalIFunc value from a Module by its name.
+    pub fn LLVMGetNamedGlobalIFunc(
+        M: LLVMModuleRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+    ) -> LLVMValueRef;
+
+    /// Obtain an iterator to the first GlobalIFunc in a Module.
+    pub fn LLVMGetFirstGlobalIFunc(M: LLVMModuleRef) -> LLVMValueRef;
+
+    /// Obtain an iterator to the last GlobalIFunc in a Module.
+    pub fn LLVMGetLastGlobalIFunc(M: LLVMModuleRef) -> LLVMValueRef;
+
+    /// Advance a GlobalIFunc iterator to the next GlobalIFunc.
+    pub fn LLVMGetNextGlobalIFunc(IFunc: LLVMValueRef) -> LLVMValueRef;
+
+    /// Decrement a GlobalIFunc iterator to the previous GlobalIFunc.
+    pub fn LLVMGetPreviousGlobalIFunc(IFunc: LLVMValueRef) -> LLVMValueRef;
+
+    /// Retrieves the resolver function associated with this indirect function, or
+    /// NULL if it doesn't not exist.
+    pub fn LLVMGetGlobalIFuncResolver(IFunc: LLVMValueRef) -> LLVMValueRef;
+
+    /// Sets the resolver function associated with this indirect function.
+    pub fn LLVMSetGlobalIFuncResolver(IFunc: LLVMValueRef, Resolver: LLVMValueRef);
+
+    /// Remove a global indirect function from its parent module and delete it.
+    pub fn LLVMEraseGlobalIFunc(IFunc: LLVMValueRef);
+
+    /// Remove a global indirect function from its parent module.
+    pub fn LLVMRemoveGlobalIFunc(IFunc: LLVMValueRef);
+
+    /// Create an MDString value from a given string value.
+    pub fn LLVMMDStringInContext2(
+        C: LLVMContextRef,
+        Str: *const ::libc::c_char,
+        SLen: ::libc::size_t,
+    ) -> LLVMMetadataRef;
+
+    /// Create an MDNode value with the given array of operands.
+    pub fn LLVMMDNodeInContext2(
+        C: LLVMContextRef,
+        MDs: *mut LLVMMetadataRef,
+        Count: ::libc::size_t,
+    ) -> LLVMMetadataRef;
+
     /// Obtain Metadata as a Value.
     pub fn LLVMMetadataAsValue(C: LLVMContextRef, MD: LLVMMetadataRef) -> LLVMValueRef;
     /// Obtain a Value as Metadata.
@@ -860,6 +926,13 @@ extern "C" {
     pub fn LLVMGetNextBasicBlock(BB: LLVMBasicBlockRef) -> LLVMBasicBlockRef;
     pub fn LLVMGetPreviousBasicBlock(BB: LLVMBasicBlockRef) -> LLVMBasicBlockRef;
     pub fn LLVMGetEntryBasicBlock(Fn: LLVMValueRef) -> LLVMBasicBlockRef;
+    /// Insert the given basic block after the insertion point of the given builder.
+    pub fn LLVMInsertExistingBasicBlockAfterInsertBlock(
+        Builder: LLVMBuilderRef,
+        BB: LLVMBasicBlockRef,
+    );
+    /// Append the given basic block to the basic block list of the given function.
+    pub fn LLVMAppendExistingBasicBlock(Fn: LLVMValueRef, BB: LLVMBasicBlockRef);
     pub fn LLVMCreateBasicBlockInContext(
         C: LLVMContextRef,
         Name: *const ::libc::c_char,
@@ -1118,9 +1191,21 @@ extern "C" {
     pub fn LLVMDisposeBuilder(Builder: LLVMBuilderRef);
 
     // Metadata
+    /// Get location information used by debugging information.
+    pub fn LLVMGetCurrentDebugLocation2(Builder: LLVMBuilderRef) -> LLVMMetadataRef;
+    /// Set location information used by debugging information.
+    pub fn LLVMSetCurrentDebugLocation2(Builder: LLVMBuilderRef, Loc: LLVMMetadataRef);
+    /// Attempts to set the debug location for the given instruction using the
+    /// current debug location for the given builder.  If the builder has no current
+    /// debug location, this function is a no-op.
+    pub fn LLVMSetInstDebugLocation(Builder: LLVMBuilderRef, Inst: LLVMValueRef);
+    /// Get the dafult floating-point math metadata for a given builder.
+    pub fn LLVMBuilderGetDefaultFPMathTag(Builder: LLVMBuilderRef) -> LLVMMetadataRef;
+    /// Set the default floating-point math metadata for the given builder.
+    pub fn LLVMBuilderSetDefaultFPMathTag(Builder: LLVMBuilderRef, FPMathTag: LLVMMetadataRef);
+    #[deprecated(since = "LLVM 9.0", note = "Use LLVMGetCurrentDebugLocation2 instead.")]
     pub fn LLVMSetCurrentDebugLocation(Builder: LLVMBuilderRef, L: LLVMValueRef);
     pub fn LLVMGetCurrentDebugLocation(Builder: LLVMBuilderRef) -> LLVMValueRef;
-    pub fn LLVMSetInstDebugLocation(Builder: LLVMBuilderRef, Inst: LLVMValueRef);
 
     // Terminators
     pub fn LLVMBuildRetVoid(arg1: LLVMBuilderRef) -> LLVMValueRef;
