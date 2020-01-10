@@ -59,6 +59,7 @@ lazy_static! {
             "llvm-config".into(),
             format!("llvm-config-{}", CRATE_VERSION.major),
             format!("llvm-config-{}.{}", CRATE_VERSION.major, CRATE_VERSION.minor),
+            format!("llvm-config{}{}", CRATE_VERSION.major, CRATE_VERSION.minor),
         ]
     };
 
