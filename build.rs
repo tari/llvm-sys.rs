@@ -64,10 +64,10 @@ lazy_static! {
     };
 
     /// Filesystem path to an llvm-config binary for the correct version.
-    static ref LLVM_CONFIG_PATH: PathBuf = {
+    static ref LLVM_CONFIG_PATH: Option<PathBuf> = {
         // Try llvm-config via PATH first.
         if let Some(name) = locate_system_llvm_config() {
-            return name.into();
+            return Some(name.into());
         } else {
             println!("Didn't find usable system-wide LLVM.");
         }
@@ -83,23 +83,14 @@ lazy_static! {
                 let ver = llvm_version(&pb)
                     .expect(&format!("Failed to execute {:?}", &pb));
                 if is_compatible_llvm(&ver) {
-                    return pb;
+                    return Some(pb);
                 } else {
                     println!("LLVM binaries specified by {} are the wrong version.
                               (Found {}, need {}.)", *ENV_LLVM_PREFIX, ver, *CRATE_VERSION);
                 }
             }
         }
-
-        println!("No suitable version of LLVM was found system-wide or pointed
-                  to by {}.
-                  
-                  Consider using `llvmenv` to compile an appropriate copy of LLVM, and
-                  refer to the llvm-sys documentation for more information.
-                  
-                  llvm-sys: https://crates.io/crates/llvm-sys
-                  llvmenv: https://crates.io/crates/llvmenv", *ENV_LLVM_PREFIX);
-        panic!("Could not find a compatible version of LLVM");
+        None
     };
 }
 
@@ -197,7 +188,7 @@ fn is_compatible_llvm(llvm_version: &Version) -> bool {
 /// Lazily searches for or compiles LLVM as configured by the environment
 /// variables.
 fn llvm_config(arg: &str) -> String {
-    llvm_config_ex(&*LLVM_CONFIG_PATH, arg).expect("Surprising failure from llvm-config")
+    llvm_config_ex(&*LLVM_CONFIG_PATH.clone().unwrap(), arg).expect("Surprising failure from llvm-config")
 }
 
 /// Invoke the specified binary as llvm-config.
@@ -342,6 +333,11 @@ fn main() {
     println!("cargo:rerun-if-env-changed={}", &*ENV_USE_DEBUG_MSVCRT);
     println!("cargo:rerun-if-env-changed={}", &*ENV_FORCE_FFI);
 
+    if LLVM_CONFIG_PATH.is_none() {
+        println!("cargo:rustc-cfg=LLVM_SYS_NOT_FOUND");
+        return;
+    }
+
     // Build the extra wrapper functions.
     if !cfg!(feature = "disable-alltargets-init") {
         std::env::set_var("CFLAGS", get_llvm_cflags());
@@ -350,6 +346,7 @@ fn main() {
             .compile("targetwrappers");
     }
 
+
     if cfg!(feature = "no-llvm-linking") {
         return;
     }
@@ -357,7 +354,7 @@ fn main() {
     let libdir = llvm_config("--libdir");
 
     // Export information to other crates
-    println!("cargo:config_path={}", LLVM_CONFIG_PATH.display()); // will be DEP_LLVM_CONFIG_PATH
+    println!("cargo:config_path={}", LLVM_CONFIG_PATH.clone().unwrap().display()); // will be DEP_LLVM_CONFIG_PATH
     println!("cargo:libdir={}", libdir); // DEP_LLVM_LIBDIR
 
     // Link LLVM libraries
