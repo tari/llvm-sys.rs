@@ -4,7 +4,7 @@ use super::super::prelude::*;
 
 extern "C" {
     pub fn LLVMAddAggressiveDCEPass(PM: LLVMPassManagerRef);
-    /// Added in LLVM 3.7.
+    pub fn LLVMAddDCEPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddBitTrackingDCEPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddAlignmentFromAssumptionsPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddCFGSimplificationPass(PM: LLVMPassManagerRef);
@@ -44,6 +44,7 @@ extern "C" {
     pub fn LLVMAddEarlyCSEPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddEarlyCSEMemSSAPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLowerExpectIntrinsicPass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddLowerConstantIntrinsicsPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddTypeBasedAliasAnalysisPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddScopedNoAliasAAPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddBasicAliasAnalysisPass(PM: LLVMPassManagerRef);

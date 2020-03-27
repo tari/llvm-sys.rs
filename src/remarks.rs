@@ -109,6 +109,11 @@ extern "C" {
     pub fn LLVMRemarkParserCreateYAML(Buf: *const ::libc::c_void, Size: u64)
         -> LLVMRemarkParserRef;
 
+    pub fn LLVMRemarkParserCreateBitstream(
+        Buf: *const ::libc::c_void,
+        Size: u64
+    ) -> LLVMRemarkParserRef;
+
     /// Returns the next remark in the file.
     pub fn LLVMRemarkParserGetNext(Parser: LLVMRemarkParserRef) -> LLVMRemarkEntryRef;
 
@@ -121,7 +126,7 @@ extern "C" {
     pub fn LLVMRemarkParserDispose(Parser: LLVMRemarkParserRef);
 }
 
-pub const REMARKS_API_VERSION: u32 = 0;
+pub const REMARKS_API_VERSION: u32 = 1;
 
 extern "C" {
     /// Returns the version of the remarks library.

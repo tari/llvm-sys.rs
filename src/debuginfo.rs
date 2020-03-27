@@ -11,7 +11,7 @@ pub enum LLVMDIFlags {
     LLVMDIFlagPublic = 3,
     LLVMDIFlagFwdDecl = 1 << 2,
     LLVMDIFlagAppleBlock = 1 << 3,
-    LLVMDIFlagBlockByrefStruct = 1 << 4,
+    LLVMDIFlagReservedBit4 = 1 << 4,
     LLVMDIFlagVirtual = 1 << 5,
     LLVMDIFlagArtificial = 1 << 6,
     LLVMDIFlagExplicit = 1 << 7,
@@ -140,6 +140,16 @@ pub enum LLVMMetadataKind {
 
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;
 
+#[repr(C)]
+#[derive(Debug)]
+pub enum LLVMDWARFMacinfoRecordType {
+    LLVMDWARFMacinfoRecordTypeDefine = 0x01,
+    LLVMDWARFMacinfoRecordTypeMacro = 0x02,
+    LLVMDWARFMacinfoRecordTypeStartFile = 0x03,
+    LLVMDWARFMacinfoRecordTypeEndFile = 0x04,
+    LLVMDWARFMacinfoRecordTypeVendorExt = 0xff,
+}
+
 extern "C" {
     /// The current debug metadata version number.
     pub fn LLVMDebugMetadataVersion() -> ::libc::c_uint;
@@ -193,8 +203,8 @@ extern "C" {
         ConfigMacrosLen: ::libc::size_t,
         IncludePath: *const ::libc::c_char,
         IncludePathLen: ::libc::size_t,
-        ISysRoot: *const ::libc::c_char,
-        ISysRootLen: ::libc::size_t,
+        SysRoot: *const ::libc::c_char,
+        SysRootLen: ::libc::size_t,
     ) -> LLVMMetadataRef;
 
     /// Creates a new descriptor for a namespace with the specified parent scope.
@@ -337,6 +347,24 @@ extern "C" {
         ParameterTypes: *mut LLVMMetadataRef,
         NumParameterTypes: ::libc::c_uint,
         Flags: LLVMDIFlags,
+    ) -> LLVMMetadataRef;
+
+    pub fn LLVMDIBuilderCreateMacro(
+        Builder: LLVMDIBuilderRef,
+        ParentMacroFile: LLVMMetadataRef,
+        Line: ::libc::c_uint,
+        RecordType: LLVMDWARFMacinfoRecordType,
+        Name: *const ::libc::c_char,
+        NameLen: usize,
+        Value: *const ::libc::c_char,
+        ValueLen: usize
+    ) -> LLVMMetadataRef;
+
+    pub fn LLVMDIBuilderCreateTempMacroFile(
+        Builder: LLVMDIBuilderRef,
+        ParentMacroFile: LLVMMetadataRef,
+        Line: ::libc::c_uint,
+        File: LLVMMetadataRef
     ) -> LLVMMetadataRef;
 
     /// Create debugging information entry for an enumerator.
@@ -550,6 +578,7 @@ extern "C" {
         File: LLVMMetadataRef,
         LineNo: ::libc::c_uint,
         Scope: LLVMMetadataRef,
+        AlignInBits: u32,
     ) -> LLVMMetadataRef;
 
     /// Create debugging information entry to establish inheritance relationship between two types.

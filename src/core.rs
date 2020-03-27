@@ -1106,6 +1106,7 @@ extern "C" {
     pub fn LLVMIsAGlobalVariable(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAUndefValue(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAInstruction(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAUnaryOperator(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsABinaryOperator(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsACallInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAIntrinsicInst(Val: LLVMValueRef) -> LLVMValueRef;
@@ -1138,6 +1139,8 @@ extern "C" {
     pub fn LLVMIsAResumeInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsACleanupReturnInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsACatchReturnInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsACatchSwitchInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsACallBrInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAFuncletPadInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsACatchPadInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsACleanupPadInst(Val: LLVMValueRef) -> LLVMValueRef;
@@ -1160,6 +1163,10 @@ extern "C" {
     pub fn LLVMIsAExtractValueInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsALoadInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAVAArgInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAFreezeInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAAtomicCmpXchgInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAAtomicRMWInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAFenceInst(Val: LLVMValueRef) -> LLVMValueRef;
 }
 
 // Core->Extract/Insert Value
@@ -1650,8 +1657,12 @@ extern "C" {
     ) -> LLVMValueRef;
     pub fn LLVMGetVolatile(MemoryAccessInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetVolatile(MemoryAccessInst: LLVMValueRef, IsVolatile: LLVMBool);
+    pub fn LLVMGetWeak(CmpXchgInst: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMSetWeak(CmpXchgInst: LLVMValueRef, IsWeak: LLVMBool);
     pub fn LLVMGetOrdering(MemoryAccessInst: LLVMValueRef) -> LLVMAtomicOrdering;
     pub fn LLVMSetOrdering(MemoryAccessInst: LLVMValueRef, Ordering: LLVMAtomicOrdering);
+    pub fn LLVMGetAtomicRMWBinOp(AtomicRMWInst: LLVMValueRef) -> LLVMAtomicRMWBinOp;
+    pub fn LLVMSetAtomicRMWBinOp(AtomicRMWInst: LLVMValueRef, BinOp: LLVMAtomicRMWBinOp);
 
     // Casts
     pub fn LLVMBuildTrunc(
@@ -1864,6 +1875,11 @@ extern "C" {
         AggVal: LLVMValueRef,
         EltVal: LLVMValueRef,
         Index: ::libc::c_uint,
+        Name: *const ::libc::c_char,
+    ) -> LLVMValueRef;
+    pub fn LLVMBuildFreeze(
+        arg1: LLVMBuilderRef,
+        Val: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildIsNull(

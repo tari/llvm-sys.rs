@@ -189,6 +189,7 @@ pub enum LLVMOpcode {
     LLVMShuffleVector = 52,
     LLVMExtractValue = 53,
     LLVMInsertValue = 54,
+    LLVMFreeze = 68,
     LLVMFence = 55,
     LLVMAtomicCmpXchg = 56,
     LLVMAtomicRMW = 57,
@@ -431,6 +432,8 @@ pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpMin = 8,
     LLVMAtomicRMWBinOpUMax = 9,
     LLVMAtomicRMWBinOpUMin = 10,
+    LLVMAtomicRMWBinOPFAdd = 11,
+    LLVMAtomicRMWBinOpFSub = 12,
 }
 
 #[repr(C)]
