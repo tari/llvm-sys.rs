@@ -1,6 +1,5 @@
 [package]
 description = "Bindings to LLVM's C API"
-documentation = "http://rustdoc.taricorp.net/llvm-sys/llvm_sys/"
 repository = "https://gitlab.com/taricorp/llvm-sys.rs"
 readme = "README.md"
 license = "MIT"
@@ -8,15 +7,15 @@ keywords = ["bindings", "llvm"]
 categories = ["external-ffi-bindings"]
 links = "llvm"
 name = "llvm-sys"
-version = "90.0.0"
+version = "100.0.0"
 authors = [
   "Peter Marheine <peter@taricorp.net>",
-  "Scott Olson <scott@solson.me>",
 ]
 build = "build.rs"
 
 [badges]
-appveyor = { service = "bitbucket", repository = "tari/llvm-sys.rs", branch = "default" }
+gitlab = { repository = "taricorp/llvm-sys.rs" }
+maintenance = { status = "passively-maintained" }
 
 [features]
 # Require that the used version of LLVM exactly match that expected by this
