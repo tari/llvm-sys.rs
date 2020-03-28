@@ -1,0 +1,16 @@
+image: rust:buster
+
+variables:
+  LLVM_SYS_90_FFI_WORKAROUND: "YES"
+
+before_script:
+  - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
+  - bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+
+test:
+  script:
+    - cargo build
+    - cargo test
+    - cargo run --example nop-function
+    - cargo run --example jit-function
+    - echo "Hello, world!" | cargo run --example disassembler
