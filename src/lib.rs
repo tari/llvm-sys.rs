@@ -432,7 +432,7 @@ pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpMin = 8,
     LLVMAtomicRMWBinOpUMax = 9,
     LLVMAtomicRMWBinOpUMin = 10,
-    LLVMAtomicRMWBinOPFAdd = 11,
+    LLVMAtomicRMWBinOpFAdd = 11,
     LLVMAtomicRMWBinOpFSub = 12,
 }
 
