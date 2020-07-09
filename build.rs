@@ -198,7 +198,6 @@ fn llvm_config(arg: &str) -> String {
 fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str) -> io::Result<String> {
     Command::new(binary)
         .arg(arg)
-        .arg("--link-static") // Don't use dylib for >= 3.9
         .output()
         .map(|output| {
             String::from_utf8(output.stdout).expect("Output from llvm-config was not valid UTF-8")
@@ -271,8 +270,13 @@ fn get_system_libcpp() -> Option<&'static str> {
     }
 }
 
+enum Library {
+    Static(String),
+    Dynamic(String),
+}
+
 /// Get the names of libraries to link against.
-fn get_link_libraries() -> Vec<String> {
+fn get_link_libraries() -> Vec<Library> {
     // Using --libnames in conjunction with --libdir is particularly important
     // for MSVC when LLVM is in a path with spaces, but it is generally less of
     // a hack than parsing linker flags output from --libs and --ldflags.
@@ -285,15 +289,22 @@ fn get_link_libraries() -> Vec<String> {
             if cfg!(target_env = "msvc") {
                 // LLVMfoo.lib
                 assert!(name.ends_with(".lib"));
-                &name[..name.len() - 4]
+                Library::Static(name[..name.len() - 4].to_string())
             } else {
-                // libLLVMfoo.a
-                assert!(name.starts_with("lib") && name.ends_with(".a"));
-                &name[3..name.len() - 2]
+                // libLLVMfoo.a or libLLVMfoo.so
+                assert!(name.starts_with("lib"));
+                if name.ends_with(".a") {
+                    // libLLVMfoo.a
+                    Library::Static(name[3..name.len()-2].to_string())
+                } else if name.ends_with(".so") {
+                    // libLLVMfoo.so
+                    Library::Dynamic(name[3..name.len()-3].to_string())
+                } else {
+                    panic!("Expected static or shared library!")
+                }
             }
         })
-        .map(str::to_owned)
-        .collect::<Vec<String>>()
+        .collect::<Vec<Library>>()
 }
 
 fn get_llvm_cflags() -> String {
@@ -360,7 +371,10 @@ fn main() {
     // Link LLVM libraries
     println!("cargo:rustc-link-search=native={}", libdir);
     for name in get_link_libraries() {
-        println!("cargo:rustc-link-lib=static={}", name);
+        match name {
+            Library::Static(libname) => println!("cargo:rustc-link-lib=static={}", libname),
+            Library::Dynamic(libname) => println!("cargo:rustc-link-lib=dylib={}", libname),
+        }
     }
 
     // Link system libraries
