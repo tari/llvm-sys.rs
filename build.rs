@@ -237,6 +237,14 @@ fn get_system_libraries() -> Vec<String> {
                 // Same as --libnames, foo.lib
                 assert!(flag.ends_with(".lib"));
                 &flag[..flag.len() - 4]
+            } else if cfg!(target_os = "macos") {
+                // Linker flags style, -lfoo
+                assert!(flag.starts_with("-l"));
+				if flag.ends_with(".tbd") {
+					&flag[5..flag.len() - 4]
+				} else {
+					&flag[2..]
+				}
             } else {
                 // Linker flags style, -lfoo
                 assert!(flag.starts_with("-l"));
