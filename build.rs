@@ -188,7 +188,8 @@ fn is_compatible_llvm(llvm_version: &Version) -> bool {
 /// Lazily searches for or compiles LLVM as configured by the environment
 /// variables.
 fn llvm_config(arg: &str) -> String {
-    llvm_config_ex(&*LLVM_CONFIG_PATH.clone().unwrap(), arg).expect("Surprising failure from llvm-config")
+    llvm_config_ex(&*LLVM_CONFIG_PATH.clone().unwrap(), arg)
+        .expect("Surprising failure from llvm-config")
 }
 
 /// Invoke the specified binary as llvm-config.
@@ -237,6 +238,14 @@ fn get_system_libraries() -> Vec<String> {
                 // Same as --libnames, foo.lib
                 assert!(flag.ends_with(".lib"));
                 &flag[..flag.len() - 4]
+            } else if cfg!(target_os = "macos") {
+                // Linker flags style, -lfoo
+                assert!(flag.starts_with("-l"));
+                if flag.ends_with(".tbd") && flag.starts_with("-llib") {
+                    &flag[5..flag.len() - 4]
+                } else {
+                    &flag[2..]
+                }
             } else {
                 // Linker flags style, -lfoo
                 assert!(flag.starts_with("-l"));
@@ -346,7 +355,6 @@ fn main() {
             .compile("targetwrappers");
     }
 
-
     if cfg!(feature = "no-llvm-linking") {
         return;
     }
@@ -354,7 +362,10 @@ fn main() {
     let libdir = llvm_config("--libdir");
 
     // Export information to other crates
-    println!("cargo:config_path={}", LLVM_CONFIG_PATH.clone().unwrap().display()); // will be DEP_LLVM_CONFIG_PATH
+    println!(
+        "cargo:config_path={}",
+        LLVM_CONFIG_PATH.clone().unwrap().display()
+    ); // will be DEP_LLVM_CONFIG_PATH
     println!("cargo:libdir={}", libdir); // DEP_LLVM_LIBDIR
 
     // Link LLVM libraries
