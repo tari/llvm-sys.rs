@@ -79,6 +79,24 @@ blacklisted library versions (which may cause vexing bugs).
 
 ---
 
+This crate declares that it links to `llvm-<MAJOR VERSION>`, not just `llvm`.
+This makes it possible to declare a crate that depends on multiple
+versions of `llvm-sys` (corresponding to different versions of LLVM) as long as
+only one of them is actually used:
+
+```toml
+llvm-sys-90 = { package = "llvm-sys", version = "90", optional = true }
+llvm-sys-100 = { package = "llvm-sys", version = "100", optional = true }
+```
+
+This requires that the target LLVM version (`llvm-10` for instance) be declared
+as the linking target rather than just `llvm` because Cargo requires that all
+linked libraries be unique regardless of what is actually enabled. Note that
+although Cargo will not prevent you from enabling multiple versions of LLVM at
+once as a result, doing so will likely cause errors at link time.
+
+---
+
 It may be difficult or even impossible to provide a compatible LLVM version
 system-wide for a given project (consider a program using two libraries that
 internally use different versions of LLVM!) so environment variables can be set
