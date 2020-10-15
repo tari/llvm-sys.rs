@@ -6,5 +6,7 @@ extern "C" {
     pub fn LLVMAddCoroSplitPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddCoroElidePass(PM: LLVMPassManagerRef);
     pub fn LLVMAddCoroCleanupPass(PM: LLVMPassManagerRef);
-    pub fn LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints(PMB: LLVMPassManagerBuilderRef);
+    pub fn LLVMPassManagerBuilderAddCoroutinePassesToExtensionPoints(
+        PMB: LLVMPassManagerBuilderRef,
+    );
 }

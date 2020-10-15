@@ -359,14 +359,14 @@ extern "C" {
         Name: *const ::libc::c_char,
         NameLen: usize,
         Value: *const ::libc::c_char,
-        ValueLen: usize
+        ValueLen: usize,
     ) -> LLVMMetadataRef;
 
     pub fn LLVMDIBuilderCreateTempMacroFile(
         Builder: LLVMDIBuilderRef,
         ParentMacroFile: LLVMMetadataRef,
         Line: ::libc::c_uint,
-        File: LLVMMetadataRef
+        File: LLVMMetadataRef,
     ) -> LLVMMetadataRef;
 
     /// Create debugging information entry for an enumerator.

@@ -166,9 +166,11 @@ extern "C" {
     ///
     /// Added in LLVM 3.7.
     pub fn lto_module_get_linkeropts(_mod: lto_module_t) -> *const ::libc::c_char;
-    pub fn lto_module_get_macho_cputype(_mod: lto_module_t,
-                                        out_cputype: *mut ::libc::c_uint,
-                                        out_cpusubtype: *mut ::libc::c_uint) -> lto_bool_t;
+    pub fn lto_module_get_macho_cputype(
+        _mod: lto_module_t,
+        out_cputype: *mut ::libc::c_uint,
+        out_cpusubtype: *mut ::libc::c_uint,
+    ) -> lto_bool_t;
     pub fn lto_codegen_set_diagnostic_handler(
         arg1: lto_code_gen_t,
         arg2: lto_diagnostic_handler_t,
@@ -233,7 +235,7 @@ extern "C" {
     pub fn lto_codegen_debug_options_array(
         cg: lto_code_gen_t,
         arg2: *const *const ::libc::c_char,
-        number: ::libc::c_int
+        number: ::libc::c_int,
     );
     pub fn lto_initialize_disassembler();
     /// Sets if we should run the itnernalize pass during optimization and code generation.
