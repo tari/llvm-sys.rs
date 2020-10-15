@@ -12,10 +12,10 @@ use std::io::{self, ErrorKind};
 use std::path::PathBuf;
 use std::process::Command;
 
-/// Environment variables that can guide compilation
-///
-/// When adding new ones, they should also be added to main() to force a
-/// rebuild if they are changed.
+// Environment variables that can guide compilation
+//
+// When adding new ones, they should also be added to main() to force a
+// rebuild if they are changed.
 lazy_static! {
     /// A single path to search for LLVM in (containing bin/llvm-config)
     static ref ENV_LLVM_PREFIX: String =
@@ -208,7 +208,7 @@ fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str) -> io::Result<String> {
 
 /// Get the LLVM version using llvm-config.
 fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
-    let version_str = try!(llvm_config_ex(binary.as_ref(), "--version"));
+    let version_str = llvm_config_ex(binary.as_ref(), "--version")?;
 
     // LLVM isn't really semver and uses version suffixes to build
     // version strings like '3.8.0svn', so limit what we try to parse
