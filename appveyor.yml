@@ -11,8 +11,8 @@ test_script:
   - sh: |
       export PATH=/usr/local/bin:$PATH
       source ~/.cargo/env
-      export LLVM_SYS_100_PREFIX=/usr/local/opt/llvm
-      export LLVM_CONFIG_PATH=${LLVM_SYS_100_PREFIX}/bin/llvm-config
+      export LLVM_SYS_110_PREFIX=/usr/local/opt/llvm
+      export LLVM_CONFIG_PATH=${LLVM_SYS_110_PREFIX}/bin/llvm-config
 
       cargo test
       cargo run --example nop-function
