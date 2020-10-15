@@ -114,6 +114,7 @@ pub mod linker;
 pub mod lto;
 pub mod object;
 pub mod orc;
+pub mod orc2;
 pub mod remarks;
 pub mod support;
 pub mod target;
@@ -222,6 +223,8 @@ pub enum LLVMTypeKind {
     LLVMMetadataTypeKind = 14,
     LLVMX86_MMXTypeKind = 15,
     LLVMTokenTypeKind = 16,
+    LLVMScalableVectorTypeKind = 17,
+    LLVMBFloatTypeKind = 18,
 }
 
 #[repr(C)]

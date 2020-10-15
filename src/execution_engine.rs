@@ -177,6 +177,8 @@ extern "C" {
     ) -> u64;
     pub fn LLVMGetFunctionAddress(EE: LLVMExecutionEngineRef, Name: *const ::libc::c_char) -> u64;
 
+    pub fn LLVMExecutionEngineGetErrMsg(EE: LLVMExecutionEngineRef, OutError: *mut *mut ::libc::c_char) -> LLVMBool;
+
     // Operations on memory managers
     // Create a simple custom MCJIT memory manager.
     //

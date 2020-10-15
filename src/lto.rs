@@ -166,6 +166,9 @@ extern "C" {
     ///
     /// Added in LLVM 3.7.
     pub fn lto_module_get_linkeropts(_mod: lto_module_t) -> *const ::libc::c_char;
+    pub fn lto_module_get_macho_cputype(_mod: lto_module_t,
+                                        out_cputype: *mut ::libc::c_uint,
+                                        out_cpusubtype: *mut ::libc::c_uint) -> lto_bool_t;
     pub fn lto_codegen_set_diagnostic_handler(
         arg1: lto_code_gen_t,
         arg2: lto_diagnostic_handler_t,

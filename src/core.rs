@@ -291,12 +291,14 @@ extern "C" {
 
     // Core->Types->Floating-Point
     pub fn LLVMHalfTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    pub fn LLVMBFloatTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMFloatTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMDoubleTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMX86FP80TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMFP128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMPPCFP128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMHalfType() -> LLVMTypeRef;
+    pub fn LLVMBFloatType() -> LLVMTypeRef;
     pub fn LLVMFloatType() -> LLVMTypeRef;
     pub fn LLVMDoubleType() -> LLVMTypeRef;
     pub fn LLVMX86FP80Type() -> LLVMTypeRef;
@@ -1921,6 +1923,9 @@ extern "C" {
         FailureOrdering: LLVMAtomicOrdering,
         SingleThread: LLVMBool,
     ) -> LLVMValueRef;
+    pub fn LLVMGetNumMaskElements(ShuffleVectorInst: LLVMValueRef) -> ::libc::c_uint;
+    pub fn LLVMGetUndefMaskElem() -> ::libc::c_int;
+    pub fn LLVMGetMaskValue(ShuffleVectorInst: LLVMValueRef, Elt: ::libc::c_uint) -> ::libc::c_int;
     pub fn LLVMIsAtomicSingleThread(AtomicInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetAtomicSingleThread(AtomicInst: LLVMValueRef, SingleThread: LLVMBool);
     pub fn LLVMGetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef) -> LLVMAtomicOrdering;

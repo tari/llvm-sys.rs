@@ -181,6 +181,10 @@ extern "C" {
         DWOId: ::libc::c_uint,
         SplitDebugInlining: LLVMBool,
         DebugInfoForProfiling: LLVMBool,
+        SysRoot: *const ::libc::c_char,
+        SysRootLen: ::libc::size_t,
+        SDK: *const ::libc::c_char,
+        SDKLen: ::libc::size_t,
     ) -> LLVMMetadataRef;
     /// Create a file descriptor to hold debugging information for a file.
     pub fn LLVMDIBuilderCreateFile(
@@ -201,8 +205,8 @@ extern "C" {
         ConfigMacrosLen: ::libc::size_t,
         IncludePath: *const ::libc::c_char,
         IncludePathLen: ::libc::size_t,
-        SysRoot: *const ::libc::c_char,
-        SysRootLen: ::libc::size_t,
+        APINotesFile: *const ::libc::c_char,
+        APINotesFileLen: ::libc::size_t,
     ) -> LLVMMetadataRef;
 
     /// Creates a new descriptor for a namespace with the specified parent scope.
