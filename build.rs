@@ -64,43 +64,24 @@ lazy_static! {
     };
 
     /// Filesystem path to an llvm-config binary for the correct version.
-    static ref LLVM_CONFIG_PATH: Option<PathBuf> = {
-        // Try llvm-config via PATH first.
-        if let Some(name) = locate_system_llvm_config() {
-            return Some(name.into());
-        } else {
-            println!("Didn't find usable system-wide LLVM.");
-        }
-
-        // Did the user give us a binary path to use? If yes, try
-        // to use that and fail if it doesn't work.
-        if let Some(path) = env::var_os(&*ENV_LLVM_PREFIX) {
-            for binary_name in LLVM_CONFIG_BINARY_NAMES.iter() {
-                let mut pb: PathBuf = path.clone().into();
-                pb.push("bin");
-                pb.push(binary_name);
-
-                let ver = llvm_version(&pb)
-                    .expect(&format!("Failed to execute {:?}", &pb));
-                if is_compatible_llvm(&ver) {
-                    return Some(pb);
-                } else {
-                    println!("LLVM binaries specified by {} are the wrong version.
-                              (Found {}, need {}.)", *ENV_LLVM_PREFIX, ver, *CRATE_VERSION);
-                }
-            }
-        }
-        None
-    };
+    static ref LLVM_CONFIG_PATH: Option<PathBuf> = locate_llvm_config();
 }
 
-/// Try to find a system-wide version of llvm-config that is compatible with
-/// this crate.
+/// Try to find a version of llvm-config that is compatible with this crate.
+///
+/// If $LLVM_SYS_<VERSION>_PREFIX is set, look for llvm-config ONLY in there. The assumption is
+/// that the user know best, and they want to link to a specific build or fork of LLVM.
+///
+/// If $LLVM_SYS_<VERSION>_PREFIX is NOT set, then look for llvm-config in $PATH.
 ///
 /// Returns None on failure.
-fn locate_system_llvm_config() -> Option<&'static str> {
-    for binary_name in LLVM_CONFIG_BINARY_NAMES.iter() {
-        match llvm_version(binary_name) {
+fn locate_llvm_config() -> Option<PathBuf> {
+    let prefix = env::var_os(&*ENV_LLVM_PREFIX)
+        .map(|p| PathBuf::from(p).join("bin"))
+        .unwrap_or_else(PathBuf::new);
+    for binary_name in &*LLVM_CONFIG_BINARY_NAMES {
+        let binary_name = prefix.join(binary_name);
+        match llvm_version(&binary_name) {
             Ok(ref version) if is_compatible_llvm(version) => {
                 // Compatible version found. Nice.
                 return Some(binary_name);
@@ -207,7 +188,7 @@ fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str) -> io::Result<String> {
 }
 
 /// Get the LLVM version using llvm-config.
-fn llvm_version<S: AsRef<OsStr>>(binary: S) -> io::Result<Version> {
+fn llvm_version<S: AsRef<OsStr>>(binary: &S) -> io::Result<Version> {
     let version_str = llvm_config_ex(binary.as_ref(), "--version")?;
 
     // LLVM isn't really semver and uses version suffixes to build
