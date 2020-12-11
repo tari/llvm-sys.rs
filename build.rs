@@ -323,6 +323,11 @@ fn main() {
     println!("cargo:rerun-if-env-changed={}", &*ENV_USE_DEBUG_MSVCRT);
     println!("cargo:rerun-if-env-changed={}", &*ENV_FORCE_FFI);
 
+    if cfg!(feature = "no-llvm-linking") && cfg!(feature = "disable-alltargets-init") {
+        // exit early as we don't need to do anything and llvm-config isn't needed at all
+        return;
+    }
+
     if LLVM_CONFIG_PATH.is_none() {
         println!("cargo:rustc-cfg=LLVM_SYS_NOT_FOUND");
         return;
