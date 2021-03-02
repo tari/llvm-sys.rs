@@ -21,9 +21,9 @@ lazy_static! {
     static ref ENV_LLVM_PREFIX: String =
         format!("LLVM_SYS_{}_PREFIX", env!("CARGO_PKG_VERSION_MAJOR"));
 
-    /// If exactly "YES", ignore the version blacklist
-    static ref ENV_IGNORE_BLACKLIST: String =
-        format!("LLVM_SYS_{}_IGNORE_BLACKLIST", env!("CARGO_PKG_VERSION_MAJOR"));
+    /// If exactly "YES", ignore the version blocklist
+    static ref ENV_IGNORE_BLOCKLIST: String =
+        format!("LLVM_SYS_{}_IGNORE_BLOCKLIST", env!("CARGO_PKG_VERSION_MAJOR"));
 
     /// If set, enforce precise correspondence between crate and binary versions.
     static ref ENV_STRICT_VERSIONING: String =
@@ -121,27 +121,27 @@ fn llvm_config_binary_names() -> std::vec::IntoIter<String> {
     base_names.into_iter()
 }
 
-/// Check whether the given version of LLVM is blacklisted,
+/// Check whether the given version of LLVM is blocklisted,
 /// returning `Some(reason)` if it is.
-fn is_blacklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
-    static BLACKLIST: &'static [(u64, u64, u64, &'static str)] = &[];
+fn is_blocklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
+    static BLOCKLIST: &'static [(u64, u64, u64, &'static str)] = &[];
 
-    if let Some(x) = env::var_os(&*ENV_IGNORE_BLACKLIST) {
+    if let Some(x) = env::var_os(&*ENV_IGNORE_BLOCKLIST) {
         if &x == "YES" {
             println!(
-                "cargo:warning=Ignoring blacklist entry for LLVM {}",
+                "cargo:warning=Ignoring blocklist entry for LLVM {}",
                 llvm_version
             );
             return None;
         } else {
             println!(
-                "cargo:warning={} is set but not exactly \"YES\"; blacklist is still honored.",
-                *ENV_IGNORE_BLACKLIST
+                "cargo:warning={} is set but not exactly \"YES\"; blocklist is still honored.",
+                *ENV_IGNORE_BLOCKLIST
             );
         }
     }
 
-    for &(major, minor, patch, reason) in BLACKLIST.iter() {
+    for &(major, minor, patch, reason) in BLOCKLIST.iter() {
         let bad_version = Version {
             major: major,
             minor: minor,
@@ -160,9 +160,9 @@ fn is_blacklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
 /// Check whether the given LLVM version is compatible with this version of
 /// the crate.
 fn is_compatible_llvm(llvm_version: &Version) -> bool {
-    if let Some(reason) = is_blacklisted_llvm(llvm_version) {
+    if let Some(reason) = is_blocklisted_llvm(llvm_version) {
         println!(
-            "Found LLVM {}, which is blacklisted: {}",
+            "Found LLVM {}, which is blocklisted: {}",
             llvm_version, reason
         );
         return false;
@@ -332,7 +332,7 @@ fn is_llvm_debug() -> bool {
 fn main() {
     // Behavior can be significantly affected by these vars.
     println!("cargo:rerun-if-env-changed={}", &*ENV_LLVM_PREFIX);
-    println!("cargo:rerun-if-env-changed={}", &*ENV_IGNORE_BLACKLIST);
+    println!("cargo:rerun-if-env-changed={}", &*ENV_IGNORE_BLOCKLIST);
     println!("cargo:rerun-if-env-changed={}", &*ENV_STRICT_VERSIONING);
     println!("cargo:rerun-if-env-changed={}", &*ENV_NO_CLEAN_CFLAGS);
     println!("cargo:rerun-if-env-changed={}", &*ENV_USE_DEBUG_MSVCRT);

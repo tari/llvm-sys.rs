@@ -60,10 +60,10 @@ with the cargo feature flag `strict-versioning` or by setting the environment
 variable `LLVM_SYS_<version>_STRICT_VERSIONING` (where `<version>` is the target
 crate version) to any value.
 
-llvm-sys blacklists some versions of LLVM that are known to be
+llvm-sys blocklists some versions of LLVM that are known to be
 binary-incompatible. If you're feeling lucky, setting
-`LLVM_SYS_<version>_IGNORE_BLACKLIST` to "YES" will permit the use of
-blacklisted library versions (which may cause vexing bugs).
+`LLVM_SYS_<version>_IGNORE_BLOCKLIST` to "YES" will permit the use of
+blocklisted library versions (which may cause vexing bugs).
 
 ---
 
