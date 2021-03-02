@@ -54,15 +54,6 @@ lazy_static! {
         }
     };
 
-    static ref LLVM_CONFIG_BINARY_NAMES: Vec<String> = {
-        vec![
-            "llvm-config".into(),
-            format!("llvm-config-{}", CRATE_VERSION.major),
-            format!("llvm-config-{}.{}", CRATE_VERSION.major, CRATE_VERSION.minor),
-            format!("llvm-config{}{}", CRATE_VERSION.major, CRATE_VERSION.minor),
-        ]
-    };
-
     /// Filesystem path to an llvm-config binary for the correct version.
     static ref LLVM_CONFIG_PATH: Option<PathBuf> = {
         // Try llvm-config via PATH first.
@@ -75,7 +66,7 @@ lazy_static! {
         // Did the user give us a binary path to use? If yes, try
         // to use that and fail if it doesn't work.
         if let Some(path) = env::var_os(&*ENV_LLVM_PREFIX) {
-            for binary_name in LLVM_CONFIG_BINARY_NAMES.iter() {
+            for binary_name in llvm_config_binary_names() {
                 let mut pb: PathBuf = path.clone().into();
                 pb.push("bin");
                 pb.push(binary_name);
@@ -98,9 +89,9 @@ lazy_static! {
 /// this crate.
 ///
 /// Returns None on failure.
-fn locate_system_llvm_config() -> Option<&'static str> {
-    for binary_name in LLVM_CONFIG_BINARY_NAMES.iter() {
-        match llvm_version(binary_name) {
+fn locate_system_llvm_config() -> Option<String> {
+    for binary_name in llvm_config_binary_names() {
+        match llvm_version(&binary_name) {
             Ok(ref version) if is_compatible_llvm(version) => {
                 // Compatible version found. Nice.
                 return Some(binary_name);
@@ -123,6 +114,30 @@ fn locate_system_llvm_config() -> Option<&'static str> {
     }
 
     None
+}
+
+/// Return an iterator over possible names for the llvm-config binary.
+fn llvm_config_binary_names() -> std::vec::IntoIter<String> {
+    let mut base_names = vec![
+        "llvm-config".into(),
+        format!("llvm-config-{}", CRATE_VERSION.major),
+        format!(
+            "llvm-config-{}.{}",
+            CRATE_VERSION.major, CRATE_VERSION.minor
+        ),
+        format!("llvm-config{}{}", CRATE_VERSION.major, CRATE_VERSION.minor),
+    ];
+
+    // On Windows, also search for llvm-config.exe
+    if cfg!(target_os = "windows") {
+        let mut exe_names = base_names.clone();
+        for name in exe_names.iter_mut() {
+            name.push_str(".exe");
+        }
+        base_names.extend(exe_names);
+    }
+
+    base_names.into_iter()
 }
 
 /// Check whether the given version of LLVM is blacklisted,
