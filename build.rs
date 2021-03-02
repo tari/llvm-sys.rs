@@ -54,15 +54,6 @@ lazy_static! {
         }
     };
 
-    static ref LLVM_CONFIG_BINARY_NAMES: Vec<String> = {
-        vec![
-            "llvm-config".into(),
-            format!("llvm-config-{}", CRATE_VERSION.major),
-            format!("llvm-config-{}.{}", CRATE_VERSION.major, CRATE_VERSION.minor),
-            format!("llvm-config{}{}", CRATE_VERSION.major, CRATE_VERSION.minor),
-        ]
-    };
-
     /// Filesystem path to an llvm-config binary for the correct version.
     static ref LLVM_CONFIG_PATH: Option<PathBuf> = locate_llvm_config();
 }
@@ -79,7 +70,7 @@ fn locate_llvm_config() -> Option<PathBuf> {
     let prefix = env::var_os(&*ENV_LLVM_PREFIX)
         .map(|p| PathBuf::from(p).join("bin"))
         .unwrap_or_else(PathBuf::new);
-    for binary_name in &*LLVM_CONFIG_BINARY_NAMES {
+    for binary_name in llvm_config_binary_names() {
         let binary_name = prefix.join(binary_name);
         match llvm_version(&binary_name) {
             Ok(ref version) if is_compatible_llvm(version) => {
@@ -104,6 +95,30 @@ fn locate_llvm_config() -> Option<PathBuf> {
     }
 
     None
+}
+
+/// Return an iterator over possible names for the llvm-config binary.
+fn llvm_config_binary_names() -> std::vec::IntoIter<String> {
+    let mut base_names = vec![
+        "llvm-config".into(),
+        format!("llvm-config-{}", CRATE_VERSION.major),
+        format!(
+            "llvm-config-{}.{}",
+            CRATE_VERSION.major, CRATE_VERSION.minor
+        ),
+        format!("llvm-config{}{}", CRATE_VERSION.major, CRATE_VERSION.minor),
+    ];
+
+    // On Windows, also search for llvm-config.exe
+    if cfg!(target_os = "windows") {
+        let mut exe_names = base_names.clone();
+        for name in exe_names.iter_mut() {
+            name.push_str(".exe");
+        }
+        base_names.extend(exe_names);
+    }
+
+    base_names.into_iter()
 }
 
 /// Check whether the given version of LLVM is blacklisted,
