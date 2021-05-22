@@ -109,11 +109,9 @@ pub mod error_handling;
 pub mod execution_engine;
 pub mod initialization;
 pub mod ir_reader;
-pub mod link_time_optimizer;
 pub mod linker;
 pub mod lto;
 pub mod object;
-pub mod orc;
 pub mod orc2;
 pub mod remarks;
 pub mod support;
@@ -225,6 +223,7 @@ pub enum LLVMTypeKind {
     LLVMTokenTypeKind = 16,
     LLVMScalableVectorTypeKind = 17,
     LLVMBFloatTypeKind = 18,
+    LLVMX86_AMXTypeKind = 19,
 }
 
 #[repr(C)]
@@ -354,6 +353,7 @@ pub enum LLVMValueKind {
     LLVMInlineAsmValueKind,
 
     LLVMInstructionValueKind,
+    LLVMPoisonValueKind,
 }
 
 #[repr(C)]
@@ -482,7 +482,7 @@ pub type LLVMDiagnosticHandler =
     Option<extern "C" fn(arg1: LLVMDiagnosticInfoRef, arg2: *mut ::libc::c_void)>;
 pub type LLVMYieldCallback = Option<extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void)>;
 
-#[cfg(all(not(doc), not(feature="no-llvm-linking"), LLVM_SYS_NOT_FOUND))]
+#[cfg(all(not(doc), not(feature = "no-llvm-linking"), LLVM_SYS_NOT_FOUND))]
 std::compile_error!(concat!(
     "No suitable version of LLVM was found system-wide or pointed
        to by LLVM_SYS_",

@@ -13,4 +13,6 @@ extern "C" {
     pub fn LLVMGetErrorMessage(Err: LLVMErrorRef) -> *mut ::libc::c_char;
     pub fn LLVMDisposeErrorMessage(ErrMsg: *mut ::libc::c_char);
     pub fn LLVMGetStringErrorTypeId() -> LLVMErrorTypeId;
+    /// Create a StringError.
+    pub fn LLVMCreateStringError(ErrMst: *const ::libc::c_char) -> LLVMErrorRef;
 }

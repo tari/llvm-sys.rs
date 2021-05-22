@@ -86,6 +86,9 @@ extern "C" {
     ) -> *const ::libc::c_char;
     pub fn LLVMIsEnumAttribute(A: LLVMAttributeRef) -> LLVMBool;
     pub fn LLVMIsStringAttribute(A: LLVMAttributeRef) -> LLVMBool;
+
+    /// Obtain a Type from a context by its registered name.
+    pub fn LLVMGetTypeByName2(C: LLVMContextRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
 }
 
 // Core->Modules
@@ -209,6 +212,7 @@ extern "C" {
     ) -> LLVMValueRef;
 
     pub fn LLVMGetModuleContext(M: LLVMModuleRef) -> LLVMContextRef;
+    #[deprecated(since = "12.0.0", note = "Use LLVMGetTypeByName2 instead")]
     pub fn LLVMGetTypeByName(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
     pub fn LLVMGetFirstNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
     pub fn LLVMGetLastNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
@@ -359,17 +363,29 @@ extern "C" {
     pub fn LLVMPointerType(ElementType: LLVMTypeRef, AddressSpace: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMGetPointerAddressSpace(PointerTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMVectorType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
+    /// Create a vector type that contains a defined type and has a scalable
+    /// number of elements.
+    ///
+    /// The created type will exist in the context that its element type
+    /// exists in.
+    pub fn LLVMScalableVectorType(
+        ElementType: LLVMTypeRef,
+        ElementCount: ::libc::c_uint,
+    ) -> LLVMTypeRef;
+    /// Obtain the (possibly scalable) number of elements in a vector type.
     pub fn LLVMGetVectorSize(VectorTy: LLVMTypeRef) -> ::libc::c_uint;
 
     // Core->Types->Other
     pub fn LLVMVoidTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMLabelTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMX86MMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    pub fn LLVMX86AMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMTokenTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMMetadataTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMVoidType() -> LLVMTypeRef;
     pub fn LLVMLabelType() -> LLVMTypeRef;
     pub fn LLVMX86MMXType() -> LLVMTypeRef;
+    pub fn LLVMX86AMXType() -> LLVMTypeRef;
 }
 
 // Core->Values
@@ -399,6 +415,8 @@ extern "C" {
     /// Determine whether the specified value instance is constant.
     pub fn LLVMIsConstant(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMIsUndef(Val: LLVMValueRef) -> LLVMBool;
+    /// Determine whether a value instance is poisonous.
+    pub fn LLVMIsPoison(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMIsAMDNode(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAMDString(Val: LLVMValueRef) -> LLVMValueRef;
 
@@ -418,6 +436,8 @@ extern "C" {
     pub fn LLVMConstNull(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstAllOnes(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMGetUndef(Ty: LLVMTypeRef) -> LLVMValueRef;
+    /// Obtain a constant value referring to a poison value of a type.
+    pub fn LLVMGetPoison(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMIsNull(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMConstPointerNull(Ty: LLVMTypeRef) -> LLVMValueRef;
 
@@ -1107,6 +1127,7 @@ extern "C" {
     pub fn LLVMIsAFunction(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalVariable(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAUndefValue(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAPoisonValue(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAInstruction(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAUnaryOperator(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsABinaryOperator(Val: LLVMValueRef) -> LLVMValueRef;
