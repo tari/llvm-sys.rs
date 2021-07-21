@@ -139,8 +139,9 @@ pub type LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction = extern "C" fn(
     LookupSetSize: usize,
 ) -> LLVMErrorRef;
 
-pub type LLVMOrcSymbolPredicate =
-    extern "C" fn(Ctx: *mut ::libc::c_void, Sym: LLVMOrcSymbolStringPoolEntryRef) -> ::libc::c_int;
+pub type LLVMOrcSymbolPredicate = Option<
+    extern "C" fn(Ctx: *mut ::libc::c_void, Sym: LLVMOrcSymbolStringPoolEntryRef) -> ::libc::c_int,
+>;
 
 #[derive(Debug)]
 pub enum LLVMOrcOpaqueThreadSafeContext {}
