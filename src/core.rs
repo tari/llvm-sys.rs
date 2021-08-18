@@ -66,6 +66,16 @@ extern "C" {
     ///
     /// Returns 0 if none exists.
     pub fn LLVMGetEnumAttributeValue(A: LLVMAttributeRef) -> u64;
+
+    /// Create a type attribute.
+    pub fn LLVMCreateTypeAttribute(
+        C: LLVMContextRef,
+        KindID: ::libc::c_uint,
+        type_ref: LLVMTypeRef,
+    ) -> LLVMAttributeRef;
+    /// Get the type attribute's value.
+    pub fn LLVMGetTypeAttributeValue(A: LLVMAttributeRef) -> LLVMTypeRef;
+
     /// Create a string attribute.
     pub fn LLVMCreateStringAttribute(
         C: LLVMContextRef,
@@ -86,6 +96,7 @@ extern "C" {
     ) -> *const ::libc::c_char;
     pub fn LLVMIsEnumAttribute(A: LLVMAttributeRef) -> LLVMBool;
     pub fn LLVMIsStringAttribute(A: LLVMAttributeRef) -> LLVMBool;
+    pub fn LLVMIsTypeAttribute(A: LLVMAttributeRef) -> LLVMBool;
 
     /// Obtain a Type from a context by its registered name.
     pub fn LLVMGetTypeByName2(C: LLVMContextRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
