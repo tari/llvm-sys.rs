@@ -9,7 +9,7 @@ use semver::Version;
 use std::env;
 use std::ffi::OsStr;
 use std::io::{self, ErrorKind};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 /// Environment variables that can guide compilation
@@ -262,13 +262,25 @@ fn get_system_libraries() -> Vec<String> {
                     &flag[2..]
                 }
             } else {
-                // Linker flags style, -lfoo
-                assert!(flag.starts_with("-l"));
-                &flag[2..]
+                if flag.starts_with("-l") {
+                    // Linker flags style, -lfoo
+                    return flag[2..].to_owned();
+                }
+
+                let maybe_lib = Path::new(&flag);
+                if maybe_lib.is_file() {
+                    // Library on disk, likely an absolute path to a .so
+                    maybe_lib
+                        .parent()
+                        .map(|p| println!("cargo:rustc-link-search={}", p.display()));
+                    &maybe_lib.file_stem().unwrap().to_str().unwrap()[3..]
+                } else {
+                    panic!("Unable to parse result of llvm-config --system-libs")
+                }
             }
+            .to_owned()
         })
-        .chain(get_system_libcpp())
-        .map(str::to_owned)
+        .chain(get_system_libcpp().map(str::to_owned))
         .collect::<Vec<String>>()
 }
 
