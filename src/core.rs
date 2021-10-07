@@ -220,6 +220,7 @@ extern "C" {
         HasSideEffects: LLVMBool,
         IsAlignStack: LLVMBool,
         Dialect: LLVMInlineAsmDialect,
+        CanThrow: LLVMBool,
     ) -> LLVMValueRef;
 
     pub fn LLVMGetModuleContext(M: LLVMModuleRef) -> LLVMContextRef;
@@ -797,7 +798,15 @@ extern "C" {
         ID: ::libc::c_uint,
         NameLength: *mut ::libc::size_t,
     ) -> *const ::libc::c_char;
+    #[deprecated = "Use LLVMIntrinsicCopyOverloadedName2 instead."]
     pub fn LLVMIntrinsicCopyOverloadedName(
+        ID: ::libc::c_uint,
+        ParamTypes: *mut LLVMTypeRef,
+        ParamCount: ::libc::size_t,
+        NameLength: *mut ::libc::size_t,
+    ) -> *const ::libc::c_char;
+    pub fn LLVMIntrinsicCopyOverloadedName2(
+        Mod: LLVMModuleRef,
         ID: ::libc::c_uint,
         ParamTypes: *mut LLVMTypeRef,
         ParamCount: ::libc::size_t,

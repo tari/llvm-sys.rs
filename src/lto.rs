@@ -231,6 +231,7 @@ extern "C" {
     ///
     /// Added in LLVM 3.7.
     pub fn lto_api_version() -> ::libc::c_uint;
+    pub fn lto_set_debug_options(options: *mut *const ::libc::c_char, number: ::libc::c_int);
     pub fn lto_codegen_debug_options(cg: lto_code_gen_t, arg1: *const ::libc::c_char);
     pub fn lto_codegen_debug_options_array(
         cg: lto_code_gen_t,
@@ -238,7 +239,7 @@ extern "C" {
         number: ::libc::c_int,
     );
     pub fn lto_initialize_disassembler();
-    /// Sets if we should run the itnernalize pass during optimization and code generation.
+    /// Sets if we should run the internalize pass during optimization and code generation.
     ///
     /// Added in LLVM 3.7.
     pub fn lto_codegen_set_should_internalize(cg: lto_code_gen_t, ShouldInternalize: lto_bool_t);

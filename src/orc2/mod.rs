@@ -8,7 +8,11 @@ use error::LLVMErrorRef;
 use prelude::*;
 use target_machine::LLVMTargetMachineRef;
 
+/// Represents an address in the executor process.
 pub type LLVMOrcJITTargetAddress = u64;
+
+/// Represents an address in the executor process
+pub type LLVMOrcExecutorAddress = u64;
 
 /// Generic linkage flags for a symbol definition.
 #[repr(C)]
@@ -16,10 +20,12 @@ pub type LLVMOrcJITTargetAddress = u64;
 pub enum LLVMJITSymbolGenericFlags {
     LLVMJITSymbolGenericFlagsExported = 1,
     LLVMJITSymbolGenericFlagsWeak = 2,
+    LLVMJITSymbolGenericFlagsCallable = 4,
+    LLVMJITSymbolGenericFlagsMaterializationSideEffectsOnly = 8,
 }
 
 /// Target specific flags for a symbol definition.
-pub type LLVMJITTargetSymbolFlags = u8;
+pub type LLVMJITSymbolTargetFlags = u8;
 
 /// Linkage flags for a symbol definition.
 #[repr(C)]
@@ -33,7 +39,7 @@ pub struct LLVMJITSymbolFlags {
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMJITEvaluatedSymbol {
-    Address: LLVMOrcJITTargetAddress,
+    Address: LLVMOrcExecutorAddress,
     Flags: LLVMJITSymbolFlags,
 }
 
@@ -50,8 +56,18 @@ pub enum LLVMOrcOpaqueSymbolStringPool {}
 pub type LLVMOrcSymbolStringPoolRef = *mut LLVMOrcOpaqueSymbolStringPool;
 
 #[derive(Debug)]
-pub enum LLVMOrcQuaqueSymbolStringPoolEntry {}
-pub type LLVMOrcSymbolStringPoolEntryRef = *mut LLVMOrcQuaqueSymbolStringPoolEntry;
+pub enum LLVMOrcOpaqueSymbolStringPoolEntry {}
+pub type LLVMOrcSymbolStringPoolEntryRef = *mut LLVMOrcOpaqueSymbolStringPoolEntry;
+
+/// A pair of a symbol name and LLVMJITSymbolFlags.
+#[repr(C)]
+#[derive(Debug)]
+pub struct LLVMOrcCSymbolFlagsMapPair {
+    Name: LLVMOrcSymbolStringPoolEntryRef,
+    Flags: LLVMJITSymbolFlags,
+}
+
+pub type LLVMOrcCSymbolFlagsMapPairs = *mut LLVMOrcCSymbolFlagsMapPair;
 
 /// A pair of a symbol name and an evaluated symbol.
 #[repr(C)]
@@ -64,6 +80,42 @@ pub struct LLVMJITCSymbolMapPair {
 /// A list of (SymbolStringPtr, JITEvaluatedSymbol) pairs that can be
 /// used to construct a SymbolMap.
 pub type LLVMOrcCSymbolMapPairs = *mut LLVMJITCSymbolMapPair;
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct LLVMOrcCSymbolAliasMapEntry {
+    Name: LLVMOrcSymbolStringPoolEntryRef,
+    Flags: LLVMJITSymbolFlags,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct LLVMOrcCSymbolAliasMapPair {
+    Name: LLVMOrcSymbolStringPoolEntryRef,
+    Entry: LLVMOrcCSymbolAliasMapEntry,
+}
+
+pub type LLVMOrcCSymbolAliasMapPairs = *mut LLVMOrcCSymbolAliasMapPair;
+
+#[derive(Debug)]
+pub enum LLVMOrcOpaqueJITDylib {}
+pub type LLVMOrcJITDylibRef = *mut LLVMOrcOpaqueJITDylib;
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct LLVMOrcCSymbolsList {
+    Symbols: *mut LLVMOrcSymbolStringPoolEntryRef,
+    Length: ::libc::size_t,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct LLVMOrcCDependenceMapPair {
+    JD: LLVMOrcJITDylibRef,
+    Names: LLVMOrcCSymbolsList,
+}
+
+pub type LLVMOrcCDependenceMapPairs = *mut LLVMOrcCDependenceMapPair;
 
 /// Lookup kind. This can be used by definition generators when deciding whether
 /// to produce a definition for a requested symbol.
@@ -113,8 +165,19 @@ pub enum LLVMOrcOpaqueMaterializationUnit {}
 pub type LLVMOrcMaterializationUnitRef = *mut LLVMOrcOpaqueMaterializationUnit;
 
 #[derive(Debug)]
-pub enum LLVMOrcOpaqueJITDylib {}
-pub type LLVMOrcJITDylibRef = *mut LLVMOrcOpaqueJITDylib;
+pub enum LLVMOrcOpaqueMaterializationResponsibility {}
+pub type LLVMOrcMaterializationResponsibilityRef = *mut LLVMOrcOpaqueMaterializationResponsibility;
+
+pub type LLVMOrcMaterializationUnitMaterializeFunction =
+    extern "C" fn(Ctx: *mut ::libc::c_void, MR: LLVMOrcMaterializationResponsibilityRef);
+
+pub type LLVMOrcMaterializationUnitDiscardFunction = extern "C" fn(
+    Ctx: *mut ::libc::c_void,
+    JD: LLVMOrcJITDylibRef,
+    Symbol: LLVMOrcSymbolStringPoolEntryRef,
+);
+
+pub type LLVMOrcMaterializationUnitDestroyFunction = extern "C" fn(Ctx: *mut ::libc::c_void);
 
 #[derive(Debug)]
 pub enum LLVMOrcOpaqueResourceTracker {}
@@ -151,6 +214,9 @@ pub type LLVMOrcThreadSafeContextRef = *mut LLVMOrcOpaqueThreadSafeContext;
 pub enum LLVMOrcOpaqueThreadSafeModule {}
 pub type LLVMOrcThreadSafeModuleRef = *mut LLVMOrcOpaqueThreadSafeModule;
 
+pub type LLVMOrcGenericIRModuleOperationFunction =
+    extern "C" fn(M: LLVMModuleRef, Ctx: *mut ::libc::c_void) -> LLVMErrorRef;
+
 #[derive(Debug)]
 pub enum LLVMOrcOpaqueJITTargetMachineBuilder {}
 pub type LLVMOrcJITTargetMachineBuilderRef = *mut LLVMOrcOpaqueJITTargetMachineBuilder;
@@ -158,6 +224,39 @@ pub type LLVMOrcJITTargetMachineBuilderRef = *mut LLVMOrcOpaqueJITTargetMachineB
 #[derive(Debug)]
 pub enum LLVMOrcOpaqueObjectLayer {}
 pub type LLVMOrcObjectLayerRef = *mut LLVMOrcOpaqueObjectLayer;
+
+#[derive(Debug)]
+pub enum LLVMOrcOpaqueObjectLinkingLayer {}
+pub type LLVMOrcObjectLinkingLayerRef = *mut LLVMOrcOpaqueObjectLayer;
+
+#[derive(Debug)]
+pub enum LLVMOrcOpaqueIRTransformLayer {}
+pub type LLVMOrcIRTransformLayerRef = *mut LLVMOrcOpaqueIRTransformLayer;
+
+pub type LLVMOrcIRTransformLayerTransformFunction = extern "C" fn(
+    Ctx: *mut ::libc::c_void,
+    ModInOut: *mut LLVMOrcThreadSafeModuleRef,
+    MR: LLVMOrcMaterializationResponsibilityRef,
+) -> LLVMErrorRef;
+
+#[derive(Debug)]
+pub enum LLVMOrcOpaqueObjectTransformLayer {}
+pub type LLVMOrcObjectTransformLayerRef = *mut LLVMOrcOpaqueObjectTransformLayer;
+
+pub type LLVMOrcObjectTransformLayerTransformFunction =
+    extern "C" fn(Ctx: *mut ::libc::c_void, ObjInOut: *mut LLVMMemoryBufferRef) -> LLVMErrorRef;
+
+#[derive(Debug)]
+pub enum LLVMOrcOpaqueIndirectStubsManager {}
+pub type LLVMOrcIndirectStubsManagerRef = *mut LLVMOrcOpaqueIndirectStubsManager;
+
+#[derive(Debug)]
+pub enum LLVMOrcOpaqueLazyCallThroughManager {}
+pub type LLVMOrcLazyCallThroughManagerRef = *mut LLVMOrcOpaqueLazyCallThroughManager;
+
+#[derive(Debug)]
+pub enum LLVMOrcOpaqueDumpObjects {}
+pub type LLVMOrcDumpObjectsRef = *mut LLVMOrcOpaqueDumpObjects;
 
 extern "C" {
     pub fn LLVMOrcExecutionSessionSetErrorReporter(
@@ -186,10 +285,84 @@ extern "C" {
     pub fn LLVMOrcResourceTrackerRemove(RT: LLVMOrcResourceTrackerRef) -> LLVMErrorRef;
     pub fn LLVMOrcDisposeDefinitionGenerator(DG: LLVMOrcDefinitionGeneratorRef);
     pub fn LLVMOrcDisposeMaterializationUnit(MU: LLVMOrcMaterializationUnitRef);
+    pub fn LLVMOrcCreateCustomMaterializationUnit(
+        Name: *const ::libc::c_char,
+        Ctx: *mut ::libc::c_void,
+        Syms: LLVMOrcCSymbolFlagsMapPairs,
+        NumSyms: ::libc::size_t,
+        InitSym: LLVMOrcSymbolStringPoolEntryRef,
+        Materialize: LLVMOrcMaterializationUnitMaterializeFunction,
+        Discard: LLVMOrcMaterializationUnitDiscardFunction,
+        Destroy: LLVMOrcMaterializationUnitDestroyFunction,
+    ) -> LLVMOrcMaterializationUnitRef;
     pub fn LLVMOrcAbsoluteSymbols(
         Syms: LLVMOrcCSymbolMapPairs,
         NumPairs: usize,
     ) -> LLVMOrcMaterializationUnitRef;
+    pub fn LLVMOrcLazyReexports(
+        LCTM: LLVMOrcLazyCallThroughManagerRef,
+        ISM: LLVMOrcIndirectStubsManagerRef,
+        SourceRef: LLVMOrcJITDylibRef,
+        CallableAliases: LLVMOrcCSymbolAliasMapPairs,
+        NumPairs: ::libc::size_t,
+    ) -> LLVMOrcMaterializationUnitRef;
+    pub fn LLVMOrcDisposeMaterializationResponsibility(MR: LLVMOrcMaterializationResponsibilityRef);
+    pub fn LLVMOrcMaterializationResponsibilityGetTargetDylib(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+    ) -> LLVMOrcJITDylibRef;
+    pub fn LLVMOrcMaterializationResponsibilityGetExecutionSession(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+    ) -> LLVMOrcExecutionSessionRef;
+    pub fn LLVMOrcMaterializationResponsibilityGetSymbols(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        NumPairs: *mut ::libc::size_t,
+    ) -> LLVMOrcCSymbolFlagsMapPairs;
+    pub fn LLVMOrcDisposeCSymbolFlagsMap(Pairs: LLVMOrcCSymbolFlagsMapPairs);
+    pub fn LLVMOrcMaterializationResponsibilityGetInitializerSymbol(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+    ) -> LLVMOrcSymbolStringPoolEntryRef;
+    pub fn LLVMOrcMaterializationResponsibilityGetRequestedSymbols(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        NumSymbols: *mut ::libc::size_t,
+    ) -> *mut LLVMOrcSymbolStringPoolEntryRef;
+    pub fn LLVMOrcDisposeSymbols(Symbols: *mut LLVMOrcSymbolStringPoolEntryRef);
+    pub fn LLVMOrcMaterializationResponsibilityNotifyResolved(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        Symbols: LLVMOrcCSymbolMapPairs,
+        NumPairs: ::libc::size_t,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcMaterializationResponsibilityNotifyEmitted(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcMaterializationResponsibilityDefineMaterializing(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        Pairs: LLVMOrcCSymbolFlagsMapPairs,
+        NumPairs: ::libc::size_t,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcMaterializationResponsibilityFailMaterialization(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+    );
+    pub fn LLVMOrcMaterializationResponsibilityReplace(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        MU: LLVMOrcMaterializationUnitRef,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcMaterializationResponsibilityDelegate(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        Symbols: *mut LLVMOrcSymbolStringPoolEntryRef,
+        NumSymbols: ::libc::size_t,
+        Result: *mut LLVMOrcMaterializationResponsibilityRef,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcMaterializationResponsibilityAddDependencies(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        Name: LLVMOrcSymbolStringPoolEntryRef,
+        Dependencies: LLVMOrcCDependenceMapPairs,
+        NumPairs: ::libc::size_t,
+    );
+    pub fn LLVMOrcMaterializationResponsibilityAddDependenciesForAll(
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        Dependencies: LLVMOrcCDependenceMapPairs,
+        NumPairs: ::libc::size_t,
+    );
     pub fn LLVMOrcExecutionSessionCreateBareJITDylib(
         ES: LLVMOrcExecutionSessionRef,
         Name: *const ::libc::c_char,
@@ -234,6 +407,11 @@ extern "C" {
         TSCtx: LLVMOrcThreadSafeContextRef,
     ) -> LLVMOrcThreadSafeModuleRef;
     pub fn LLVMOrcDisposeThreadSafeModule(TSM: LLVMOrcThreadSafeModuleRef);
+    pub fn LLVMOrcThreadSafeModuleWithModuleDo(
+        TSM: LLVMOrcThreadSafeModuleRef,
+        F: LLVMOrcGenericIRModuleOperationFunction,
+        Ctx: *mut ::libc::c_void,
+    ) -> LLVMErrorRef;
     pub fn LLVMOrcJITTargetMachineBuilderDetectHost(
         Result: *mut LLVMOrcJITTargetMachineBuilderRef,
     ) -> LLVMErrorRef;
@@ -241,5 +419,62 @@ extern "C" {
         TM: LLVMTargetMachineRef,
     ) -> LLVMOrcJITTargetMachineBuilderRef;
     pub fn LLVMOrcDisposeJITTargetMachineBuilder(JTMB: LLVMOrcJITTargetMachineBuilderRef);
+    pub fn LLVMOrcJITTargetMachineBuilderGetTargetTriple(
+        JTMB: LLVMOrcJITTargetMachineBuilderRef,
+    ) -> *mut ::libc::c_char;
+    pub fn LLVMOrcJITTargetMachineBuilderSetTargetTriple(
+        JTMB: LLVMOrcJITTargetMachineBuilderRef,
+        TargetTriple: *const ::libc::c_char,
+    );
+    pub fn LLVMOrcObjectLayerAddObjectFile(
+        ObjLayer: LLVMOrcObjectLayerRef,
+        JD: LLVMOrcJITDylibRef,
+        ObjBuffer: LLVMMemoryBufferRef,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcObjectLayerAddObjectFileWithRT(
+        ObjLayer: LLVMOrcObjectLayerRef,
+        RT: LLVMOrcResourceTrackerRef,
+        ObjBuffer: LLVMMemoryBufferRef,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcObjectLayerEmit(
+        ObjLayer: LLVMOrcObjectLayerRef,
+        R: LLVMOrcMaterializationResponsibilityRef,
+        ObjBuffer: LLVMMemoryBufferRef,
+    );
     pub fn LLVMOrcDisposeObjectLayer(ObjLayer: LLVMOrcObjectLayerRef);
+    pub fn LLVMOrcIRTransformLayerEmit(
+        IRTransformLayer: LLVMOrcIRTransformLayerRef,
+        MR: LLVMOrcMaterializationResponsibilityRef,
+        TSM: LLVMOrcThreadSafeModuleRef,
+    );
+    pub fn LLVMOrcIRTransformLayerSetTransform(
+        IRTransformLayer: LLVMOrcIRTransformLayerRef,
+        TransformFunction: LLVMOrcIRTransformLayerTransformFunction,
+        Ctx: *mut ::libc::c_void,
+    );
+    pub fn LLVMOrcObjectTransformLayerSetTransform(
+        ObjTransformLayer: LLVMOrcObjectTransformLayerRef,
+        TransformFunction: LLVMOrcObjectTransformLayerTransformFunction,
+        Ctx: *mut ::libc::c_void,
+    );
+    pub fn LLVMOrcCreateLocalIndirectStubsManager(
+        TargetTriple: *const ::libc::c_char,
+    ) -> LLVMOrcIndirectStubsManagerRef;
+    pub fn LLVMOrcDisposeIndirectStubsManager(ISM: LLVMOrcIndirectStubsManagerRef);
+    pub fn LLVMOrcCreateLocalLazyCallThroughManager(
+        TargetTriple: *const ::libc::c_char,
+        ES: LLVMOrcExecutionSessionRef,
+        ErrorHandlerAddr: LLVMOrcJITTargetAddress,
+        LCTM: *mut LLVMOrcLazyCallThroughManagerRef,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcDisposeLazyCallThroughManager(LCTM: LLVMOrcLazyCallThroughManagerRef);
+    pub fn LLVMOrcCreateDumpObjects(
+        DumpDir: *const ::libc::c_char,
+        IdentifierOverride: *const ::libc::c_char,
+    ) -> LLVMOrcDumpObjectsRef;
+    pub fn LLVMOrcDisposeDumpObjects(DumpObjects: LLVMOrcDumpObjectsRef);
+    pub fn LLVMOrcDumpObjects_CallOperator(
+        DumpObjects: LLVMOrcDumpObjectsRef,
+        ObjBuffer: *mut LLVMMemoryBufferRef,
+    ) -> LLVMErrorRef;
 }

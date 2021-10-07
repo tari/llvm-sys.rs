@@ -123,6 +123,7 @@ pub mod transforms {
     pub mod coroutines;
     pub mod instcombine;
     pub mod ipo;
+    pub mod pass_builder;
     pub mod pass_manager_builder;
     pub mod scalar;
     pub mod util;

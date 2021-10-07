@@ -136,6 +136,7 @@ pub enum LLVMMetadataKind {
     LLVMDICommonBlockMetadataKind,
     LLVMDIStringTypeMetadataKind,
     LLVMDIGenericSubrangeMetadataKind,
+    LLVMDIArgListMetadataKind,
 }
 
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;

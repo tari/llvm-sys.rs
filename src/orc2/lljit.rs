@@ -64,7 +64,11 @@ extern "C" {
     ) -> LLVMErrorRef;
     pub fn LLVMOrcLLJITLookup(
         J: LLVMOrcLLJITRef,
-        Result: *mut LLVMOrcJITTargetAddress,
+        Result: *mut LLVMOrcExecutorAddress,
         Name: *const ::libc::c_char,
     ) -> LLVMErrorRef;
+    pub fn LLVMOrcLLJITGetObjLinkingLayer(J: LLVMOrcLLJITRef) -> LLVMOrcObjectLayerRef;
+    pub fn LLVMOrcLLJITGetObjTransformLayer(J: LLVMOrcLLJITRef) -> LLVMOrcObjectTransformLayerRef;
+    pub fn LLVMOrcLLJITGetIRTransformLayer(J: LLVMOrcLLJITRef) -> LLVMOrcIRTransformLayerRef;
+    pub fn LLVMOrcLLJITGetDataLayoutStr(J: LLVMOrcLLJITRef) -> *const ::libc::c_char;
 }
