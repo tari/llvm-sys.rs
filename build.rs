@@ -58,6 +58,20 @@ lazy_static! {
     static ref LLVM_CONFIG_PATH: Option<PathBuf> = locate_llvm_config();
 }
 
+fn target_env_is(name: &str) -> bool {
+    match env::var_os("CARGO_CFG_TARGET_ENV") {
+        Some(s) => s == name,
+        None => false
+    }
+}
+
+fn target_os_is(name: &str) -> bool {
+    match env::var_os("CARGO_CFG_TARGET_OS") {
+        Some(s) => s == name,
+        None => false
+    }
+}
+
 /// Try to find a version of llvm-config that is compatible with this crate.
 ///
 /// If $LLVM_SYS_<VERSION>_PREFIX is set, look for llvm-config ONLY in there. The assumption is
@@ -110,7 +124,7 @@ fn llvm_config_binary_names() -> std::vec::IntoIter<String> {
     ];
 
     // On Windows, also search for llvm-config.exe
-    if cfg!(target_os = "windows") {
+    if target_os_is("windows") {
         let mut exe_names = base_names.clone();
         for name in exe_names.iter_mut() {
             name.push_str(".exe");
@@ -230,11 +244,11 @@ fn get_system_libraries() -> Vec<String> {
         .split(&[' ', '\n'] as &[char])
         .filter(|s| !s.is_empty())
         .map(|flag| {
-            if cfg!(target_env = "msvc") {
+            if target_env_is("msvc") {
                 // Same as --libnames, foo.lib
                 assert!(flag.ends_with(".lib"));
                 &flag[..flag.len() - 4]
-            } else if cfg!(target_os = "macos") {
+            } else if target_os_is("macos") {
                 // Linker flags style, -lfoo
                 assert!(flag.starts_with("-l"));
                 if flag.ends_with(".tbd") && flag.starts_with("-llib") {
@@ -267,10 +281,10 @@ fn get_system_libraries() -> Vec<String> {
 
 /// Get the library that must be linked for C++, if any.
 fn get_system_libcpp() -> Option<&'static str> {
-    if cfg!(target_env = "msvc") {
+    if target_env_is("msvc") {
         // MSVC doesn't need an explicit one.
         None
-    } else if cfg!(target_os = "macos") {
+    } else if target_os_is("macos") {
         // On OS X 10.9 and later, LLVM's libc++ is the default. On earlier
         // releases GCC's libstdc++ is default. Unfortunately we can't
         // reasonably detect which one we need (on older ones libc++ is
@@ -278,7 +292,7 @@ fn get_system_libcpp() -> Option<&'static str> {
         // latest, at the cost of breaking the build on older OS releases
         // when LLVM was built against libstdc++.
         Some("c++")
-    } else if cfg!(target_os = "freebsd") {
+    } else if target_os_is("freebsd") {
         Some("c++")
     } else {
         // Otherwise assume GCC's libstdc++.
@@ -299,7 +313,7 @@ fn get_link_libraries() -> Vec<String> {
         .map(|name| {
             // --libnames gives library filenames. Extract only the name that
             // we need to pass to the linker.
-            if cfg!(target_env = "msvc") {
+            if target_env_is("msvc") {
                 // LLVMfoo.lib
                 assert!(name.ends_with(".lib"));
                 &name[..name.len() - 4]
@@ -322,7 +336,7 @@ fn get_llvm_cflags() -> String {
     // using. Unless requested otherwise, clean CFLAGS of options that are
     // known to be possibly-harmful.
     let no_clean = env::var_os(&*ENV_NO_CLEAN_CFLAGS).is_some();
-    if no_clean || cfg!(target_env = "msvc") {
+    if no_clean || target_env_is("msvc") {
         // MSVC doesn't accept -W... options, so don't try to strip them and
         // possibly strip something that should be retained. Also do nothing if
         // the user requests it.
@@ -393,7 +407,7 @@ fn main() {
     }
 
     let use_debug_msvcrt = env::var_os(&*ENV_USE_DEBUG_MSVCRT).is_some();
-    if cfg!(target_env = "msvc") && (use_debug_msvcrt || is_llvm_debug()) {
+    if target_env_is("msvc") && (use_debug_msvcrt || is_llvm_debug()) {
         println!("cargo:rustc-link-lib={}", "msvcrtd");
     }
 
