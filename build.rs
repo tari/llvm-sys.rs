@@ -61,14 +61,14 @@ lazy_static! {
 fn target_env_is(name: &str) -> bool {
     match env::var_os("CARGO_CFG_TARGET_ENV") {
         Some(s) => s == name,
-        None => false
+        None => false,
     }
 }
 
 fn target_os_is(name: &str) -> bool {
     match env::var_os("CARGO_CFG_TARGET_OS") {
         Some(s) => s == name,
-        None => false
+        None => false,
     }
 }
 
@@ -246,11 +246,19 @@ fn get_system_libraries() -> Vec<String> {
         .map(|flag| {
             if target_env_is("msvc") {
                 // Same as --libnames, foo.lib
-                assert!(flag.ends_with(".lib"));
+                assert!(
+                    flag.ends_with(".lib"),
+                    "system library {:?} does not appear to be a MSVC library file",
+                    flag
+                );
                 &flag[..flag.len() - 4]
             } else if target_os_is("macos") {
                 // Linker flags style, -lfoo
-                assert!(flag.starts_with("-l"));
+                assert!(
+                    flag.starts_with("-l"),
+                    "system library flag {:?} does not look like a link library",
+                    flag
+                );
                 if flag.ends_with(".tbd") && flag.starts_with("-llib") {
                     &flag[5..flag.len() - 4]
                 } else {
@@ -270,7 +278,10 @@ fn get_system_libraries() -> Vec<String> {
                         .map(|p| println!("cargo:rustc-link-search={}", p.display()));
                     &maybe_lib.file_stem().unwrap().to_str().unwrap()[3..]
                 } else {
-                    panic!("Unable to parse result of llvm-config --system-libs")
+                    panic!(
+                        "Unable to parse result of llvm-config --system-libs: was {:?}",
+                        flag
+                    )
                 }
             }
             .to_owned()
@@ -315,11 +326,19 @@ fn get_link_libraries() -> Vec<String> {
             // we need to pass to the linker.
             if target_env_is("msvc") {
                 // LLVMfoo.lib
-                assert!(name.ends_with(".lib"));
+                assert!(
+                    name.ends_with(".lib"),
+                    "library name {:?} does not appear to be a MSVC library file",
+                    name
+                );
                 &name[..name.len() - 4]
             } else {
                 // libLLVMfoo.a
-                assert!(name.starts_with("lib") && name.ends_with(".a"));
+                assert!(
+                    name.starts_with("lib") && name.ends_with(".a"),
+                    "library name {:?} does not appear to be a static library",
+                    name
+                );
                 &name[3..name.len() - 2]
             }
         })
