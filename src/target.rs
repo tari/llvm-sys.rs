@@ -119,9 +119,9 @@ extern "C" {
     pub fn LLVMInitializeRISCVTargetInfo();
     pub fn LLVMInitializeRISCVTarget();
     pub fn LLVMInitializeRISCVTargetMC();
-    // No AsmPrinter
-    // No AsmParser
-    // No Disassembler
+    pub fn LLVMInitializeRISCVAsmPrinter();
+    pub fn LLVMInitializeRISCVAsmParser();
+    pub fn LLVMInitializeRISCVDisassembler();
 
     pub fn LLVMInitializeWebAssemblyTargetInfo();
     pub fn LLVMInitializeWebAssemblyTarget();
