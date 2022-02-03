@@ -31,16 +31,16 @@ pub type LLVMJITSymbolTargetFlags = u8;
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMJITSymbolFlags {
-    GenericFlags: u8,
-    TargetFlags: u8,
+    pub GenericFlags: u8,
+    pub TargetFlags: u8,
 }
 
 /// An evaluated symbol address and flags.
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMJITEvaluatedSymbol {
-    Address: LLVMOrcExecutorAddress,
-    Flags: LLVMJITSymbolFlags,
+    pub Address: LLVMOrcExecutorAddress,
+    pub Flags: LLVMJITSymbolFlags,
 }
 
 #[derive(Debug)]
@@ -63,8 +63,8 @@ pub type LLVMOrcSymbolStringPoolEntryRef = *mut LLVMOrcOpaqueSymbolStringPoolEnt
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOrcCSymbolFlagsMapPair {
-    Name: LLVMOrcSymbolStringPoolEntryRef,
-    Flags: LLVMJITSymbolFlags,
+    pub Name: LLVMOrcSymbolStringPoolEntryRef,
+    pub Flags: LLVMJITSymbolFlags,
 }
 
 pub type LLVMOrcCSymbolFlagsMapPairs = *mut LLVMOrcCSymbolFlagsMapPair;
@@ -73,8 +73,8 @@ pub type LLVMOrcCSymbolFlagsMapPairs = *mut LLVMOrcCSymbolFlagsMapPair;
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMJITCSymbolMapPair {
-    Name: LLVMOrcSymbolStringPoolEntryRef,
-    Sym: LLVMJITEvaluatedSymbol,
+    pub Name: LLVMOrcSymbolStringPoolEntryRef,
+    pub Sym: LLVMJITEvaluatedSymbol,
 }
 
 /// A list of (SymbolStringPtr, JITEvaluatedSymbol) pairs that can be
@@ -84,15 +84,15 @@ pub type LLVMOrcCSymbolMapPairs = *mut LLVMJITCSymbolMapPair;
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOrcCSymbolAliasMapEntry {
-    Name: LLVMOrcSymbolStringPoolEntryRef,
-    Flags: LLVMJITSymbolFlags,
+    pub Name: LLVMOrcSymbolStringPoolEntryRef,
+    pub Flags: LLVMJITSymbolFlags,
 }
 
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOrcCSymbolAliasMapPair {
-    Name: LLVMOrcSymbolStringPoolEntryRef,
-    Entry: LLVMOrcCSymbolAliasMapEntry,
+    pub Name: LLVMOrcSymbolStringPoolEntryRef,
+    pub Entry: LLVMOrcCSymbolAliasMapEntry,
 }
 
 pub type LLVMOrcCSymbolAliasMapPairs = *mut LLVMOrcCSymbolAliasMapPair;
@@ -104,15 +104,15 @@ pub type LLVMOrcJITDylibRef = *mut LLVMOrcOpaqueJITDylib;
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOrcCSymbolsList {
-    Symbols: *mut LLVMOrcSymbolStringPoolEntryRef,
-    Length: ::libc::size_t,
+    pub Symbols: *mut LLVMOrcSymbolStringPoolEntryRef,
+    pub Length: ::libc::size_t,
 }
 
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOrcCDependenceMapPair {
-    JD: LLVMOrcJITDylibRef,
-    Names: LLVMOrcCSymbolsList,
+    pub JD: LLVMOrcJITDylibRef,
+    pub Names: LLVMOrcCSymbolsList,
 }
 
 pub type LLVMOrcCDependenceMapPairs = *mut LLVMOrcCDependenceMapPair;
@@ -147,8 +147,8 @@ pub enum LLVMOrcSymbolLookupFlags {
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOrcCLookupSetElement {
-    Name: LLVMOrcSymbolStringPoolEntryRef,
-    LookupFlags: LLVMOrcSymbolLookupFlags,
+    pub Name: LLVMOrcSymbolStringPoolEntryRef,
+    pub LookupFlags: LLVMOrcSymbolLookupFlags,
 }
 
 /// A set of symbols to look up / generate.
