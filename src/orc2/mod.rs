@@ -25,16 +25,16 @@ pub type LLVMJITTargetSymbolFlags = u8;
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMJITSymbolFlags {
-    GenericFlags: u8,
-    TargetFlags: u8,
+    pub GenericFlags: u8,
+    pub TargetFlags: u8,
 }
 
 /// An evaluated symbol address and flags.
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMJITEvaluatedSymbol {
-    Address: LLVMOrcJITTargetAddress,
-    Flags: LLVMJITSymbolFlags,
+    pub Address: LLVMOrcJITTargetAddress,
+    pub Flags: LLVMJITSymbolFlags,
 }
 
 #[derive(Debug)]
@@ -57,8 +57,8 @@ pub type LLVMOrcSymbolStringPoolEntryRef = *mut LLVMOrcQuaqueSymbolStringPoolEnt
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMJITCSymbolMapPair {
-    Name: LLVMOrcSymbolStringPoolEntryRef,
-    Sym: LLVMJITEvaluatedSymbol,
+    pub Name: LLVMOrcSymbolStringPoolEntryRef,
+    pub Sym: LLVMJITEvaluatedSymbol,
 }
 
 /// A list of (SymbolStringPtr, JITEvaluatedSymbol) pairs that can be
@@ -95,8 +95,8 @@ pub enum LLVMOrcSymbolLookupFlags {
 #[repr(C)]
 #[derive(Debug)]
 pub struct LLVMOrcCLookupSetElement {
-    Name: LLVMOrcSymbolStringPoolEntryRef,
-    LookupFlags: LLVMOrcSymbolLookupFlags,
+    pub Name: LLVMOrcSymbolStringPoolEntryRef,
+    pub LookupFlags: LLVMOrcSymbolLookupFlags,
 }
 
 /// A set of symbols to look up / generate.
