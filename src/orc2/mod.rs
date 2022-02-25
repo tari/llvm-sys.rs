@@ -16,7 +16,7 @@ pub type LLVMOrcExecutorAddress = u64;
 
 /// Generic linkage flags for a symbol definition.
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMJITSymbolGenericFlags {
     LLVMJITSymbolGenericFlagsExported = 1,
     LLVMJITSymbolGenericFlagsWeak = 2,
@@ -120,7 +120,7 @@ pub type LLVMOrcCDependenceMapPairs = *mut LLVMOrcCDependenceMapPair;
 /// Lookup kind. This can be used by definition generators when deciding whether
 /// to produce a definition for a requested symbol.
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMOrcLookupKind {
     LLVMOrcLookupKindStatic,
     LLVMOrcLookupKindDLSym,
@@ -129,7 +129,7 @@ pub enum LLVMOrcLookupKind {
 /// JITDylib lookup flags. This can be used by definition generators when
 /// deciding whether to produce a definition for a requested symbol.
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMOrcJITDylibLookupFlags {
     LLVMOrcJITDylibLookupFlagsMatchExportedSymbolsOnly,
     LLVMOrcJITDylibLookupFlagsMatchAllSymbols,
@@ -137,7 +137,7 @@ pub enum LLVMOrcJITDylibLookupFlags {
 
 /// Symbol lookup flags for lookup sets.
 #[repr(C)]
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMOrcSymbolLookupFlags {
     LLVMOrcSymbolLookupFlagsRequiredSymbol,
     LLVMOrcSymbolLookupFlagsWeaklyReferencedSymbol,
