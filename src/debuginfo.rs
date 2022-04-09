@@ -168,6 +168,9 @@ extern "C" {
     pub fn LLVMDisposeDIBuilder(Builder: LLVMDIBuilderRef);
     /// Construct any deferred debug info descriptors.
     pub fn LLVMDIBuilderFinalize(Builder: LLVMDIBuilderRef);
+    /// Finalize a specific subprogram.
+    /// No new variables may be added to this subprogram afterwards.
+    pub fn LLVMDIBuilderFinalizeSubprogram(Builder: LLVMDIBuilderRef, Subprogram: LLVMMetadataRef);
     pub fn LLVMDIBuilderCreateCompileUnit(
         Builder: LLVMDIBuilderRef,
         Lang: LLVMDWARFSourceLanguage,
@@ -272,6 +275,8 @@ extern "C" {
         ImportedEntity: LLVMMetadataRef,
         File: LLVMMetadataRef,
         Line: ::libc::c_uint,
+        Elements: *mut LLVMMetadataRef,
+        NumElements: ::libc::c_uint,
     ) -> LLVMMetadataRef;
 
     /// Create a descriptor for an imported module.
@@ -281,6 +286,8 @@ extern "C" {
         M: LLVMMetadataRef,
         File: LLVMMetadataRef,
         Line: ::libc::c_uint,
+        Elements: *mut LLVMMetadataRef,
+        NumElements: ::libc::c_uint,
     ) -> LLVMMetadataRef;
 
     /// Create a descriptor for an imported function, type, or variable.
@@ -294,6 +301,8 @@ extern "C" {
         Line: ::libc::c_uint,
         Name: *const ::libc::c_char,
         NameLen: ::libc::size_t,
+        Elements: *mut LLVMMetadataRef,
+        NumElements: ::libc::c_uint,
     ) -> LLVMMetadataRef;
 
     /// Creates a new DebugLocation that describes a source location.
@@ -709,14 +718,14 @@ extern "C" {
     /// Create a new descriptor for the specified variable which has a complex
     pub fn LLVMDIBuilderCreateExpression(
         Builder: LLVMDIBuilderRef,
-        Addr: *mut i64,
+        Addr: *mut u64,
         Length: ::libc::size_t,
     ) -> LLVMMetadataRef;
 
     /// Create a new descriptor for the specified variable that does not have an
     pub fn LLVMDIBuilderCreateConstantValueExpression(
         Builder: LLVMDIBuilderRef,
-        Value: i64,
+        Value: u64,
     ) -> LLVMMetadataRef;
 
     /// Create a new descriptor for the specified variable.
