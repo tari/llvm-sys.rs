@@ -398,6 +398,19 @@ extern "C" {
         Filter: LLVMOrcSymbolPredicate,
         FilterCtx: *mut ::libc::c_void,
     ) -> LLVMErrorRef;
+    pub fn LLVMOrcCreateDynamicLibrarySearchGeneratorForPath(
+        Result: *mut LLVMOrcDefinitionGeneratorRef,
+        FileName: *const ::libc::c_char,
+        GlobalPrefix: ::libc::c_char,
+        Filter: LLVMOrcSymbolPredicate,
+        FilterCtx: *mut ::libc::c_void,
+    ) -> LLVMErrorRef;
+    pub fn LLVMOrcCreateStaticLibrarySearchGeneratorForPath(
+        Result: *mut LLVMOrcDefinitionGeneratorRef,
+        ObjLayer: LLVMOrcObjectLayerRef,
+        FileName: *const ::libc::c_char,
+        TargetTriple: *const ::libc::c_char,
+    ) -> LLVMErrorRef;
     pub fn LLVMOrcCreateNewThreadSafeContext() -> LLVMOrcThreadSafeContextRef;
     pub fn LLVMOrcThreadSafeContextGetContext(TSCtx: LLVMOrcThreadSafeContextRef)
         -> LLVMContextRef;

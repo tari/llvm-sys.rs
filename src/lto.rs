@@ -171,6 +171,11 @@ extern "C" {
         out_cputype: *mut ::libc::c_uint,
         out_cpusubtype: *mut ::libc::c_uint,
     ) -> lto_bool_t;
+    /// Return true if the module has either the `@llvm.global_ctors` or the `@llvm.global_dtors`
+    /// symbol.
+    ///
+    /// Added in API version 29 (LLVM 14).
+    pub fn lto_module_has_ctor_dtor(mod_: lto_module_t) -> lto_bool_t;
     pub fn lto_codegen_set_diagnostic_handler(
         arg1: lto_code_gen_t,
         arg2: lto_diagnostic_handler_t,
