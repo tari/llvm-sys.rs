@@ -160,8 +160,8 @@ fn is_blocklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
             major: major,
             minor: minor,
             patch: patch,
-            pre: vec![],
-            build: vec![],
+            pre: semver::Prerelease::EMPTY,
+            build: semver::BuildMetadata::EMPTY,
         };
 
         if &bad_version == llvm_version {
