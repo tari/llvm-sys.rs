@@ -215,7 +215,7 @@ pub enum LLVMOrcOpaqueThreadSafeModule {}
 pub type LLVMOrcThreadSafeModuleRef = *mut LLVMOrcOpaqueThreadSafeModule;
 
 pub type LLVMOrcGenericIRModuleOperationFunction =
-    extern "C" fn(M: LLVMModuleRef, Ctx: *mut ::libc::c_void) -> LLVMErrorRef;
+    extern "C" fn(Ctx: *mut ::libc::c_void, M: LLVMModuleRef) -> LLVMErrorRef;
 
 #[derive(Debug)]
 pub enum LLVMOrcOpaqueJITTargetMachineBuilder {}
