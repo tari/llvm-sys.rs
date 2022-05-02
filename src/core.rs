@@ -1998,6 +1998,13 @@ extern "C" {
         RHS: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
+    pub fn LLVMBuildPtrDiff2(
+        arg1: LLVMBuilderRef,
+        ElemTy: LLVMTypeRef,
+        LHS: LLVMValueRef,
+        RHS: LLVMValueRef,
+        Name: *const ::libc::c_char,
+    ) -> LLVMValueRef;
     pub fn LLVMBuildFence(
         B: LLVMBuilderRef,
         ordering: LLVMAtomicOrdering,
