@@ -211,8 +211,16 @@ fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str) -> io::Result<String> {
         .arg(arg)
         .arg("--link-static") // Don't use dylib for >= 3.9
         .output()
-        .map(|output| {
-            String::from_utf8(output.stdout).expect("Output from llvm-config was not valid UTF-8")
+        .and_then(|output| {
+            if output.stdout.is_empty() {
+                Err(io::Error::new(
+                    io::ErrorKind::NotFound,
+                    "llvm-config returned empty output",
+                ))
+            } else {
+                Ok(String::from_utf8(output.stdout)
+                    .expect("Output from llvm-config was not valid UTF-8"))
+            }
         })
 }
 
@@ -224,9 +232,15 @@ fn llvm_version<S: AsRef<OsStr>>(binary: &S) -> io::Result<Version> {
     // version strings like '3.8.0svn', so limit what we try to parse
     // to only the numeric bits.
     let re = Regex::new(r"^(?P<major>\d+)\.(?P<minor>\d+)(?:\.(?P<patch>\d+))??").unwrap();
-    let c = re
-        .captures(&version_str)
-        .expect("Could not determine LLVM version from llvm-config.");
+    let c = match re.captures(&version_str) {
+        Some(c) => c,
+        None => {
+            panic!(
+                "Could not determine LLVM version from llvm-config. Version string: {}",
+                version_str
+            );
+        }
+    };
 
     // some systems don't have a patch number but Version wants it so we just append .0 if it isn't
     // there
