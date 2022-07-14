@@ -411,6 +411,10 @@ fn is_llvm_debug() -> bool {
 fn main() {
     // Behavior can be significantly affected by these vars.
     println!("cargo:rerun-if-env-changed={}", &*ENV_LLVM_PREFIX);
+    if let Ok(path) = env::var(&*ENV_LLVM_PREFIX) {
+        println!("cargo:rerun-if-changed={}", path);
+    }
+
     println!("cargo:rerun-if-env-changed={}", &*ENV_IGNORE_BLOCKLIST);
     println!("cargo:rerun-if-env-changed={}", &*ENV_STRICT_VERSIONING);
     println!("cargo:rerun-if-env-changed={}", &*ENV_NO_CLEAN_CFLAGS);
