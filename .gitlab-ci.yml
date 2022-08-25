@@ -1,7 +1,7 @@
 image: rust:buster
 
 variables:
-  LLVM_SYS_140_FFI_WORKAROUND: "YES"
+  LLVM_SYS_150_FFI_WORKAROUND: "YES"
 
 before_script:
   - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common

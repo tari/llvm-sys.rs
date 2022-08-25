@@ -24,7 +24,6 @@ extern "C" {
     pub fn LLVMAddLoopRerollPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopUnrollPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopUnrollAndJamPass(PM: LLVMPassManagerRef);
-    pub fn LLVMAddLoopUnswitchPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLowerAtomicPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddMemCpyOptPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddPartiallyInlineLibCallsPass(PM: LLVMPassManagerRef);

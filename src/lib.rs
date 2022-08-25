@@ -100,6 +100,7 @@ pub mod prelude {
 pub mod analysis;
 pub mod bit_reader;
 pub mod bit_writer;
+pub mod blake3;
 pub mod comdat;
 pub mod core;
 pub mod debuginfo;
@@ -120,7 +121,6 @@ pub mod target_machine;
 
 pub mod transforms {
     pub mod aggressive_instcombine;
-    pub mod coroutines;
     pub mod instcombine;
     pub mod ipo;
     pub mod pass_builder;
@@ -438,6 +438,8 @@ pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpUMin = 10,
     LLVMAtomicRMWBinOpFAdd = 11,
     LLVMAtomicRMWBinOpFSub = 12,
+    LLVMAtomicRMWBinOpFMax = 13,
+    LLVMAtomicRMWBinOpFMin = 14,
 }
 
 #[repr(C)]

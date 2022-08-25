@@ -3,7 +3,6 @@
 use super::super::prelude::*;
 
 extern "C" {
-    pub fn LLVMAddArgumentPromotionPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddConstantMergePass(PM: LLVMPassManagerRef);
     pub fn LLVMAddMergeFunctionsPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddCalledValuePropagationPass(PM: LLVMPassManagerRef);

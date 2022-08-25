@@ -29,6 +29,8 @@ extern "C" {
     );
     pub fn LLVMContextShouldDiscardValueNames(C: LLVMContextRef) -> LLVMBool;
     pub fn LLVMContextSetDiscardValueNames(C: LLVMContextRef, Discard: LLVMBool);
+    /// Set whether the given context is in opaque pointer mode.
+    pub fn LLVMContextSetOpaquePointers(C: LLVMContextRef, OpaquePointers: LLVMBool);
     pub fn LLVMContextDispose(C: LLVMContextRef);
     pub fn LLVMGetDiagInfoDescription(DI: LLVMDiagnosticInfoRef) -> *mut ::libc::c_char;
     pub fn LLVMGetDiagInfoSeverity(DI: LLVMDiagnosticInfoRef) -> LLVMDiagnosticSeverity;
@@ -373,6 +375,12 @@ extern "C" {
     pub fn LLVMArrayType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMGetArrayLength(ArrayTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMPointerType(ElementType: LLVMTypeRef, AddressSpace: ::libc::c_uint) -> LLVMTypeRef;
+    /// Determine whether a pointer is opaque.
+    ///
+    /// True if this is an instance of an opaque PointerType.
+    pub fn LLVMPointerTypeIsOpaque(Ty: LLVMTypeRef) -> LLVMBool;
+    /// Create an opaque pointer type in a context.
+    pub fn LLVMPointerTypeInContext(C: LLVMContextRef, AddressSpace: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMGetPointerAddressSpace(PointerTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMVectorType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
     /// Create a vector type that contains a defined type and has a scalable
@@ -524,6 +532,8 @@ extern "C" {
         ConstantVals: *mut LLVMValueRef,
         Count: ::libc::c_uint,
     ) -> LLVMValueRef;
+    pub fn LLVMGetAggregateElement(C: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
+    #[deprecated(since = "15.0", note = "Use LLVMGetAggregateElement instead")]
     pub fn LLVMGetElementAsConstant(C: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
     pub fn LLVMConstVector(
         ScalarConstantVals: *mut LLVMValueRef,
@@ -542,25 +552,12 @@ extern "C" {
     pub fn LLVMConstAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstExactUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef)
-        -> LLVMValueRef;
-    pub fn LLVMConstSDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstExactSDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef)
-        -> LLVMValueRef;
-    pub fn LLVMConstFDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstURem(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstSRem(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFRem(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAnd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstOr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstXor(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
@@ -648,17 +645,6 @@ extern "C" {
         VectorAConstant: LLVMValueRef,
         VectorBConstant: LLVMValueRef,
         MaskConstant: LLVMValueRef,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstExtractValue(
-        AggConstant: LLVMValueRef,
-        IdxList: *mut ::libc::c_uint,
-        NumIdx: ::libc::c_uint,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstInsertValue(
-        AggConstant: LLVMValueRef,
-        ElementValueConstant: LLVMValueRef,
-        IdxList: *mut ::libc::c_uint,
-        NumIdx: ::libc::c_uint,
     ) -> LLVMValueRef;
     #[deprecated(since = "7.0", note = "Use LLVMGetInlineAsm instead")]
     pub fn LLVMConstInlineAsm(
@@ -1041,6 +1027,9 @@ extern "C" {
     /// Remove the given instruction from its containing building block and
     /// delete it.
     pub fn LLVMInstructionEraseFromParent(Inst: LLVMValueRef);
+    /// Remove the given instruction that is not inserted into a basic block.
+    /// It must have previously been removed from its containing building block.
+    pub fn LLVMDeleteInstruction(Inst: LLVMValueRef);
     pub fn LLVMGetInstructionOpcode(Inst: LLVMValueRef) -> LLVMOpcode;
     pub fn LLVMGetICmpPredicate(Inst: LLVMValueRef) -> LLVMIntPredicate;
     pub fn LLVMGetFCmpPredicate(Inst: LLVMValueRef) -> LLVMRealPredicate;
@@ -1885,6 +1874,12 @@ extern "C" {
         DestTy: LLVMTypeRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
+    pub fn LLVMGetCastOpcode(
+        arg1: LLVMValueRef,
+        SrcIsSigned: LLVMBool,
+        DestTy: LLVMTypeRef,
+        DestIsSigned: LLVMBool,
+    ) -> LLVMOpcode;
 
     // Comparisons
     pub fn LLVMBuildICmp(

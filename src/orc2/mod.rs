@@ -18,6 +18,7 @@ pub type LLVMOrcExecutorAddress = u64;
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMJITSymbolGenericFlags {
+    LLVMJITSymbolGenericFlagsNone = 0,
     LLVMJITSymbolGenericFlagsExported = 1,
     LLVMJITSymbolGenericFlagsWeak = 2,
     LLVMJITSymbolGenericFlagsCallable = 4,
@@ -72,14 +73,14 @@ pub type LLVMOrcCSymbolFlagsMapPairs = *mut LLVMOrcCSymbolFlagsMapPair;
 /// A pair of a symbol name and an evaluated symbol.
 #[repr(C)]
 #[derive(Debug)]
-pub struct LLVMJITCSymbolMapPair {
+pub struct LLVMOrcCSymbolMapPair {
     pub Name: LLVMOrcSymbolStringPoolEntryRef,
     pub Sym: LLVMJITEvaluatedSymbol,
 }
 
 /// A list of (SymbolStringPtr, JITEvaluatedSymbol) pairs that can be
 /// used to construct a SymbolMap.
-pub type LLVMOrcCSymbolMapPairs = *mut LLVMJITCSymbolMapPair;
+pub type LLVMOrcCSymbolMapPairs = *mut LLVMOrcCSymbolMapPair;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -134,6 +135,20 @@ pub enum LLVMOrcJITDylibLookupFlags {
     LLVMOrcJITDylibLookupFlagsMatchExportedSymbolsOnly,
     LLVMOrcJITDylibLookupFlagsMatchAllSymbols,
 }
+
+/// An element type for a JITDylib search order.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct LLVMOrcCJITDylibSearchOrderElement {
+    pub JD: LLVMOrcJITDylibRef,
+    pub JDLookupFlags: LLVMOrcJITDylibLookupFlags,
+}
+
+/// A JITDylib search order.
+///
+/// The list is terminated with an element containing a null pointer for the JD
+/// field.
+pub type LLVMOrcCJITDylibSearchOrder = *mut LLVMOrcCJITDylibSearchOrderElement;
 
 /// Symbol lookup flags for lookup sets.
 #[repr(C)]
@@ -201,6 +216,12 @@ pub type LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction = extern "C" fn(
     LookupSet: LLVMOrcCLookupSet,
     LookupSetSize: usize,
 ) -> LLVMErrorRef;
+
+/// Disposer for a custom generator.
+///
+/// Will be called by ORC when the JITDylib that the generator is attached to
+/// is destroyed.
+pub type LLVMOrcDisposeCAPIDefinitionGeneratorFunction = extern "C" fn(Ctx: *mut ::libc::c_void);
 
 pub type LLVMOrcSymbolPredicate = Option<
     extern "C" fn(Ctx: *mut ::libc::c_void, Sym: LLVMOrcSymbolStringPoolEntryRef) -> ::libc::c_int,
@@ -272,6 +293,26 @@ extern "C" {
         ES: LLVMOrcExecutionSessionRef,
         Name: *const ::libc::c_char,
     ) -> LLVMOrcSymbolStringPoolEntryRef;
+}
+
+pub type LLVMOrcExecutionSessionLookupHandleResultFunction = extern "C" fn(
+    Err: LLVMErrorRef,
+    Result: LLVMOrcCSymbolMapPairs,
+    NumPairs: usize,
+    Ctx: *mut ::libc::c_void,
+);
+
+extern "C" {
+    pub fn LLVMOrcExecutionSessionLookup(
+        ES: LLVMOrcExecutionSessionRef,
+        K: LLVMOrcLookupKind,
+        SearchOrder: LLVMOrcCJITDylibSearchOrder,
+        SearchOrderSize: usize,
+        Symbols: LLVMOrcCLookupSet,
+        SymbolsSize: usize,
+        HandleResult: LLVMOrcExecutionSessionLookupHandleResultFunction,
+        Ctx: *mut ::libc::c_void,
+    );
     pub fn LLVMOrcRetainSymbolStringPoolEntry(S: LLVMOrcSymbolStringPoolEntryRef);
     pub fn LLVMOrcReleaseSymbolStringPoolEntry(S: LLVMOrcSymbolStringPoolEntryRef);
     pub fn LLVMOrcSymbolStringPoolEntryStr(
@@ -391,7 +432,12 @@ extern "C" {
     pub fn LLVMOrcCreateCustomCAPIDefinitionGenerator(
         F: LLVMOrcCAPIDefinitionGeneratorTryToGenerateFunction,
         Ctx: *mut ::libc::c_void,
+        Dispose: LLVMOrcDisposeCAPIDefinitionGeneratorFunction,
     ) -> LLVMOrcDefinitionGeneratorRef;
+    pub fn LLVMOrcLookupStateContinueLookup(
+        S: LLVMOrcLookupStateRef,
+        Err: LLVMErrorRef,
+    );
     pub fn LLVMOrcCreateDynamicLibrarySearchGeneratorForProcess(
         Result: *mut LLVMOrcDefinitionGeneratorRef,
         GlobalPrefix: ::libc::c_char,
