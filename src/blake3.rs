@@ -11,7 +11,7 @@ pub const LLVM_BLAKE3_MAX_DEPTH: usize = 54;
 /// This struct is a private implementation detail. It has to be here because
 /// it's part of llvm_blake3_hasher below.
 #[repr(C)]
-pub struct llvm_blake3_chunk_state {
+struct llvm_blake3_chunk_state {
     cv: [u32; 8],
     chunk_counter: u64,
     buf: [u8; LLVM_BLAKE3_BLOCK_LEN],
