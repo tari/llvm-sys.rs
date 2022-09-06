@@ -1,5 +1,5 @@
 //! LLVM's BLAKE3 implementation.
-//! Original BLAKE3 C API: https://github.com/BLAKE3-team/BLAKE3/tree/1.3.1/c
+//! Original BLAKE3 C API: <https://github.com/BLAKE3-team/BLAKE3/tree/1.3.1/c>
 
 pub const LLVM_BLAKE3_VERSION_STRING: &str = "1.3.1";
 pub const LLVM_BLAKE3_KEY_LEN: usize = 32;

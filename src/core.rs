@@ -44,8 +44,8 @@ extern "C" {
     /// Return a unique id given the name of an enum attribute, or 0 if no attribute
     /// by that name exists.
     ///
-    /// See http://llvm.org/docs/LangRef.html#parameter-attributes
-    /// and http://llvm.org/docs/LangRef.html#function-attributes
+    /// See <http://llvm.org/docs/LangRef.html#parameter-attributes>
+    /// and <http://llvm.org/docs/LangRef.html#function-attributes>
     /// for the list of available attributes.
     ///
     /// Note that attribute names and IDs are not subject to the same stability
