@@ -287,11 +287,26 @@ fn get_system_libraries() -> Vec<String> {
 
                 let maybe_lib = Path::new(&flag);
                 if maybe_lib.is_file() {
-                    // Library on disk, likely an absolute path to a .so
-                    maybe_lib
-                        .parent()
-                        .map(|p| println!("cargo:rustc-link-search={}", p.display()));
-                    &maybe_lib.file_stem().unwrap().to_str().unwrap()[3..]
+                    // Library on disk, likely an absolute path to a .so. We'll add its location to
+                    // the library search path and specify the file as a link target.
+                    println!(
+                        "cargo:rustc-link-search={}",
+                        maybe_lib.parent().unwrap().display()
+                    );
+
+                    // Expect a file named something like libfoo.so, or with a version libfoo.so.1.
+                    // Trim everything after and including the last .so and remove the leading 'lib'
+                    let soname = maybe_lib
+                        .file_name()
+                        .unwrap()
+                        .to_str()
+                        .expect("Shared library path must be a valid string");
+                    let stem = soname
+                        .rsplit_once(".so")
+                        .expect("Shared library should be a .so file")
+                        .0;
+
+                    stem.trim_start_matches("lib")
                 } else {
                     panic!(
                         "Unable to parse result of llvm-config --system-libs: was {:?}",
