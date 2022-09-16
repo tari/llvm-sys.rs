@@ -790,6 +790,7 @@ extern "C" {
     ) -> LLVMValueRef;
     pub fn LLVMIntrinsicGetType(
         Ctx: LLVMContextRef,
+        ID: ::libc::c_uint,
         ParamTypes: *mut LLVMTypeRef,
         ParamCount: ::libc::size_t,
     ) -> LLVMTypeRef;
