@@ -267,21 +267,17 @@ fn get_system_libraries() -> Vec<String> {
                     flag
                 );
                 &flag[..flag.len() - 4]
-            } else if target_os_is("macos") {
-                // Linker flags style, -lfoo
-                assert!(
-                    flag.starts_with("-l"),
-                    "system library flag {:?} does not look like a link library",
-                    flag
-                );
-                if flag.ends_with(".tbd") && flag.starts_with("-llib") {
-                    &flag[5..flag.len() - 4]
-                } else {
-                    &flag[2..]
-                }
             } else {
                 if flag.starts_with("-l") {
                     // Linker flags style, -lfoo
+                    if target_os_is("macos") && flag.starts_with("-llib") && flag.ends_with(".tbd")
+                    {
+                        // .tdb libraries are "text-based stub" files that provide lists of symbols,
+                        // which refer to libraries shipped with a given system and aren't shipped
+                        // as part of the corresponding SDK. They're named like the underlying
+                        // library object, including the 'lib' prefix that we need to strip.
+                        return flag[5..flag.len() - 4].to_owned();
+                    }
                     return flag[2..].to_owned();
                 }
 
@@ -302,7 +298,7 @@ fn get_system_libraries() -> Vec<String> {
                         .to_str()
                         .expect("Shared library path must be a valid string");
                     let stem = soname
-                        .rsplit_once(".so")
+                        .rsplit_once(target_dylib_extension())
                         .expect("Shared library should be a .so file")
                         .0;
 
@@ -318,6 +314,14 @@ fn get_system_libraries() -> Vec<String> {
         })
         .chain(get_system_libcpp().map(str::to_owned))
         .collect::<Vec<String>>()
+}
+
+fn target_dylib_extension() -> &'static str {
+    if target_os_is("macos") {
+        ".dylib"
+    } else {
+        ".so"
+    }
 }
 
 /// Get the library that must be linked for C++, if any.
