@@ -5,6 +5,11 @@ use super::*;
 // Core
 extern "C" {
     pub fn LLVMShutdown();
+    pub fn LLVMGetVersion(
+        Major: *mut ::libc::c_uint,
+        Minor: *mut ::libc::c_uint,
+        Patch: *mut ::libc::c_uint,
+    );
     pub fn LLVMCreateMessage(Message: *const ::libc::c_char) -> *mut ::libc::c_char;
     pub fn LLVMDisposeMessage(Message: *mut ::libc::c_char);
 }
@@ -380,7 +385,8 @@ extern "C" {
     /// True if this is an instance of an opaque PointerType.
     pub fn LLVMPointerTypeIsOpaque(Ty: LLVMTypeRef) -> LLVMBool;
     /// Create an opaque pointer type in a context.
-    pub fn LLVMPointerTypeInContext(C: LLVMContextRef, AddressSpace: ::libc::c_uint) -> LLVMTypeRef;
+    pub fn LLVMPointerTypeInContext(C: LLVMContextRef, AddressSpace: ::libc::c_uint)
+        -> LLVMTypeRef;
     pub fn LLVMGetPointerAddressSpace(PointerTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMVectorType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
     /// Create a vector type that contains a defined type and has a scalable
@@ -406,6 +412,14 @@ extern "C" {
     pub fn LLVMLabelType() -> LLVMTypeRef;
     pub fn LLVMX86MMXType() -> LLVMTypeRef;
     pub fn LLVMX86AMXType() -> LLVMTypeRef;
+    pub fn LLVMTargetExtTypeInContext(
+        C: LLVMContextRef,
+        Name: *const ::libc::c_char,
+        TypeParams: *mut LLVMTypeRef,
+        TypeParamCount: ::libc::c_uint,
+        IntParams: *mut ::libc::c_uint,
+        IntParamCount: ::libc::c_uint,
+    ) -> LLVMTypeRef;
 }
 
 // Core->Values
@@ -547,7 +561,6 @@ extern "C" {
     pub fn LLVMConstNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNot(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
@@ -574,26 +587,8 @@ extern "C" {
     pub fn LLVMConstShl(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstLShr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAShr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMConstGEP2 instead to support opaque pointers."
-    )]
-    pub fn LLVMConstGEP(
-        ConstantVal: LLVMValueRef,
-        ConstantIndices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-    ) -> LLVMValueRef;
     pub fn LLVMConstGEP2(
         Ty: LLVMTypeRef,
-        ConstantVal: LLVMValueRef,
-        ConstantIndices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-    ) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMConstInBoundsGEP2 instead to support opaque pointers."
-    )]
-    pub fn LLVMConstInBoundsGEP(
         ConstantVal: LLVMValueRef,
         ConstantIndices: *mut LLVMValueRef,
         NumIndices: ::libc::c_uint,
@@ -750,17 +745,6 @@ extern "C" {
     pub fn LLVMAliasGetAliasee(Alias: LLVMValueRef) -> LLVMValueRef;
     /// Set the target value of an alias.
     pub fn LLVMAliasSetAliasee(Alias: LLVMValueRef, Aliasee: LLVMValueRef);
-
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMAddAlias2 instead to support opaque pointers."
-    )]
-    pub fn LLVMAddAlias(
-        M: LLVMModuleRef,
-        Ty: LLVMTypeRef,
-        Aliasee: LLVMValueRef,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
 
     pub fn LLVMAddAlias2(
         M: LLVMModuleRef,
@@ -1302,19 +1286,6 @@ extern "C" {
         Addr: LLVMValueRef,
         NumDests: ::libc::c_uint,
     ) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMBuildInvoke2 instead to support opaque pointers."
-    )]
-    pub fn LLVMBuildInvoke(
-        arg1: LLVMBuilderRef,
-        Fn: LLVMValueRef,
-        Args: *mut LLVMValueRef,
-        NumArgs: ::libc::c_uint,
-        Then: LLVMBasicBlockRef,
-        Catch: LLVMBasicBlockRef,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
     pub fn LLVMBuildInvoke2(
         arg1: LLVMBuilderRef,
         Ty: LLVMTypeRef,
@@ -1652,15 +1623,6 @@ extern "C" {
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildFree(arg1: LLVMBuilderRef, PointerVal: LLVMValueRef) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMBuildLoad2 instead to support opaque pointers."
-    )]
-    pub fn LLVMBuildLoad(
-        arg1: LLVMBuilderRef,
-        PointerVal: LLVMValueRef,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
     pub fn LLVMBuildLoad2(
         arg1: LLVMBuilderRef,
         Ty: LLVMTypeRef,
@@ -1671,38 +1633,6 @@ extern "C" {
         arg1: LLVMBuilderRef,
         Val: LLVMValueRef,
         Ptr: LLVMValueRef,
-    ) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMBuildGEP2 instead to support opaque pointers."
-    )]
-    pub fn LLVMBuildGEP(
-        B: LLVMBuilderRef,
-        Pointer: LLVMValueRef,
-        Indices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMBuildInBoundsGEP2 instead to support opaque pointers."
-    )]
-    pub fn LLVMBuildInBoundsGEP(
-        B: LLVMBuilderRef,
-        Pointer: LLVMValueRef,
-        Indices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMBuildStructGEP2 instead to support opaque pointers."
-    )]
-    pub fn LLVMBuildStructGEP(
-        B: LLVMBuilderRef,
-        Pointer: LLVMValueRef,
-        Idx: ::libc::c_uint,
-        Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildGEP2(
         B: LLVMBuilderRef,
@@ -1904,17 +1834,6 @@ extern "C" {
         Ty: LLVMTypeRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMBuildCall2 instead to support opaque pointers."
-    )]
-    pub fn LLVMBuildCall(
-        arg1: LLVMBuilderRef,
-        Fn: LLVMValueRef,
-        Args: *mut LLVMValueRef,
-        NumArgs: ::libc::c_uint,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
     pub fn LLVMBuildCall2(
         arg1: LLVMBuilderRef,
         arg2: LLVMTypeRef,
@@ -1982,16 +1901,6 @@ extern "C" {
     pub fn LLVMBuildIsNotNull(
         arg1: LLVMBuilderRef,
         Val: LLVMValueRef,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
-    #[deprecated(
-        since = "14.0",
-        note = "Use LLVMBuildPtrDiff2 instead to support opaque pointers."
-    )]
-    pub fn LLVMBuildPtrDiff(
-        arg1: LLVMBuilderRef,
-        LHS: LLVMValueRef,
-        RHS: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildPtrDiff2(
