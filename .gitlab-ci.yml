@@ -1,11 +1,14 @@
 image: rust:buster
 
 variables:
-  LLVM_SYS_150_FFI_WORKAROUND: "YES"
+  LLVM_SYS_160_FFI_WORKAROUND: "YES"
 
 before_script:
   - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
-  - bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+  - wget https://apt.llvm.org/llvm.sh
+  - chmod +x llvm.sh
+  - ./llvm.sh 16
+  - apt-get install libpolly-16-dev
 
 test:
   script:

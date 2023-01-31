@@ -12,7 +12,6 @@ extern "C" {
     pub fn LLVMAddAlwaysInlinerPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddGlobalDCEPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddGlobalOptimizerPass(PM: LLVMPassManagerRef);
-    pub fn LLVMAddPruneEHPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddIPSCCPPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddInternalizePass(arg1: LLVMPassManagerRef, AllButMain: ::libc::c_uint);
     pub fn LLVMAddInternalizePassWithMustPreservePredicate(

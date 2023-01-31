@@ -84,6 +84,15 @@ pub enum LLVMDWARFSourceLanguage {
     LLVMDWARFSourceLanguageFortran08,
     LLVMDWARFSourceLanguageRenderScript,
     LLVMDWARFSourceLanguageBLISS,
+    LLVMDWARFSourceLanguageKotlin,
+    LLVMDWARFSourceLanguageZig,
+    LLVMDWARFSourceLanguageCrystal,
+    LLVMDWARFSourceLanguageC_plus_plus_17,
+    LLVMDWARFSourceLanguageC_plus_plus_20,
+    LLVMDWARFSourceLanguageC17,
+    LLVMDWARFSourceLanguageFortran18,
+    LLVMDWARFSourceLanguageAda2005,
+    LLVMDWARFSourceLanguageAda2012,
     // Vendor extensions:
     LLVMDWARFSourceLanguageMips_Assembler,
     LLVMDWARFSourceLanguageGOOGLE_RenderScript,
@@ -137,6 +146,7 @@ pub enum LLVMMetadataKind {
     LLVMDIStringTypeMetadataKind,
     LLVMDIGenericSubrangeMetadataKind,
     LLVMDIArgListMetadataKind,
+    LLVMDIAssignIDMetadataKind,
 }
 
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;

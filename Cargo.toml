@@ -5,9 +5,9 @@ readme = "README.md"
 license = "MIT"
 keywords = ["bindings", "llvm"]
 categories = ["external-ffi-bindings"]
-links = "llvm-15"
+links = "llvm-16"
 name = "llvm-sys"
-version = "150.0.3"
+version = "160.0.0"
 authors = [
   "Peter Marheine <peter@taricorp.net>",
 ]
