@@ -1,4 +1,4 @@
-image: rust:buster
+image: rust:bullseye
 
 variables:
   LLVM_SYS_160_FFI_WORKAROUND: "YES"
