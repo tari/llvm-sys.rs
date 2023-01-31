@@ -1,5 +1,6 @@
 extern crate llvm_sys as llvm;
 
+use std::ffi::CStr;
 use std::mem;
 
 use llvm::core::*;
@@ -44,19 +45,28 @@ fn main() {
         // Dump the module as IR to stdout.
         LLVMDumpModule(module);
 
-        // build an execution engine
-        let mut ee = mem::uninitialized();
-        let mut out = mem::zeroed();
-
-        // robust code should check that these calls complete successfully
-        // each of these calls is necessary to setup an execution engine which compiles to native
-        // code
+        // Robust code should check that these calls complete successfully.
+        // Each of calls is necessary to setup an execution engine which
+        // compiles to native code.
         LLVMLinkInMCJIT();
         LLVM_InitializeNativeTarget();
         LLVM_InitializeNativeAsmPrinter();
 
-        // takes ownership of the module
-        LLVMCreateExecutionEngineForModule(&mut ee, module, &mut out);
+        // Build an execution engine.
+        let ee = {
+            let mut ee = mem::MaybeUninit::uninit();
+            let mut err = mem::zeroed();
+
+            // This moves ownership of the module into the execution engine.
+            if LLVMCreateExecutionEngineForModule(ee.as_mut_ptr(), module, &mut err) != 0 {
+                // In case of error, we must avoid using the uninitialized ExecutionEngineRef.
+                assert!(!err.is_null());
+                panic!("Failed to create execution engine: {:?}", CStr::from_ptr(err));
+            }
+
+            ee.assume_init()
+        };
+
 
         let addr = LLVMGetFunctionAddress(ee, b"sum\0".as_ptr() as *const _);
 
