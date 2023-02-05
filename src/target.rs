@@ -106,7 +106,7 @@ extern "C" {
     pub fn LLVMInitializeBPFTarget();
     pub fn LLVMInitializeBPFTargetMC();
     pub fn LLVMInitializeBPFAsmPrinter();
-    // No AsmParser
+    pub fn LLVMInitializeBPFAsmParser();
     pub fn LLVMInitializeBPFDisassembler();
 
     pub fn LLVMInitializeLanaiTargetInfo();
