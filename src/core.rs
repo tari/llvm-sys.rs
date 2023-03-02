@@ -5,6 +5,11 @@ use super::*;
 // Core
 extern "C" {
     pub fn LLVMShutdown();
+    pub fn LLVMGetVersion(
+        Major: *mut ::libc::c_uint,
+        Minor: *mut ::libc::c_uint,
+        Patch: *mut ::libc::c_uint,
+    );
     pub fn LLVMCreateMessage(Message: *const ::libc::c_char) -> *mut ::libc::c_char;
     pub fn LLVMDisposeMessage(Message: *mut ::libc::c_char);
 }
@@ -29,6 +34,8 @@ extern "C" {
     );
     pub fn LLVMContextShouldDiscardValueNames(C: LLVMContextRef) -> LLVMBool;
     pub fn LLVMContextSetDiscardValueNames(C: LLVMContextRef, Discard: LLVMBool);
+    /// Set whether the given context is in opaque pointer mode.
+    pub fn LLVMContextSetOpaquePointers(C: LLVMContextRef, OpaquePointers: LLVMBool);
     pub fn LLVMContextDispose(C: LLVMContextRef);
     pub fn LLVMGetDiagInfoDescription(DI: LLVMDiagnosticInfoRef) -> *mut ::libc::c_char;
     pub fn LLVMGetDiagInfoSeverity(DI: LLVMDiagnosticInfoRef) -> LLVMDiagnosticSeverity;
@@ -42,8 +49,8 @@ extern "C" {
     /// Return a unique id given the name of an enum attribute, or 0 if no attribute
     /// by that name exists.
     ///
-    /// See http://llvm.org/docs/LangRef.html#parameter-attributes
-    /// and http://llvm.org/docs/LangRef.html#function-attributes
+    /// See <http://llvm.org/docs/LangRef.html#parameter-attributes>
+    /// and <http://llvm.org/docs/LangRef.html#function-attributes>
     /// for the list of available attributes.
     ///
     /// Note that attribute names and IDs are not subject to the same stability
@@ -66,6 +73,16 @@ extern "C" {
     ///
     /// Returns 0 if none exists.
     pub fn LLVMGetEnumAttributeValue(A: LLVMAttributeRef) -> u64;
+
+    /// Create a type attribute.
+    pub fn LLVMCreateTypeAttribute(
+        C: LLVMContextRef,
+        KindID: ::libc::c_uint,
+        type_ref: LLVMTypeRef,
+    ) -> LLVMAttributeRef;
+    /// Get the type attribute's value.
+    pub fn LLVMGetTypeAttributeValue(A: LLVMAttributeRef) -> LLVMTypeRef;
+
     /// Create a string attribute.
     pub fn LLVMCreateStringAttribute(
         C: LLVMContextRef,
@@ -86,6 +103,10 @@ extern "C" {
     ) -> *const ::libc::c_char;
     pub fn LLVMIsEnumAttribute(A: LLVMAttributeRef) -> LLVMBool;
     pub fn LLVMIsStringAttribute(A: LLVMAttributeRef) -> LLVMBool;
+    pub fn LLVMIsTypeAttribute(A: LLVMAttributeRef) -> LLVMBool;
+
+    /// Obtain a Type from a context by its registered name.
+    pub fn LLVMGetTypeByName2(C: LLVMContextRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
 }
 
 // Core->Modules
@@ -206,9 +227,11 @@ extern "C" {
         HasSideEffects: LLVMBool,
         IsAlignStack: LLVMBool,
         Dialect: LLVMInlineAsmDialect,
+        CanThrow: LLVMBool,
     ) -> LLVMValueRef;
 
     pub fn LLVMGetModuleContext(M: LLVMModuleRef) -> LLVMContextRef;
+    #[deprecated(since = "12.0.0", note = "Use LLVMGetTypeByName2 instead")]
     pub fn LLVMGetTypeByName(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
     pub fn LLVMGetFirstNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
     pub fn LLVMGetLastNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
@@ -291,12 +314,14 @@ extern "C" {
 
     // Core->Types->Floating-Point
     pub fn LLVMHalfTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    pub fn LLVMBFloatTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMFloatTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMDoubleTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMX86FP80TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMFP128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMPPCFP128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMHalfType() -> LLVMTypeRef;
+    pub fn LLVMBFloatType() -> LLVMTypeRef;
     pub fn LLVMFloatType() -> LLVMTypeRef;
     pub fn LLVMDoubleType() -> LLVMTypeRef;
     pub fn LLVMX86FP80Type() -> LLVMTypeRef;
@@ -355,19 +380,46 @@ extern "C" {
     pub fn LLVMArrayType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMGetArrayLength(ArrayTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMPointerType(ElementType: LLVMTypeRef, AddressSpace: ::libc::c_uint) -> LLVMTypeRef;
+    /// Determine whether a pointer is opaque.
+    ///
+    /// True if this is an instance of an opaque PointerType.
+    pub fn LLVMPointerTypeIsOpaque(Ty: LLVMTypeRef) -> LLVMBool;
+    /// Create an opaque pointer type in a context.
+    pub fn LLVMPointerTypeInContext(C: LLVMContextRef, AddressSpace: ::libc::c_uint)
+        -> LLVMTypeRef;
     pub fn LLVMGetPointerAddressSpace(PointerTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMVectorType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
+    /// Create a vector type that contains a defined type and has a scalable
+    /// number of elements.
+    ///
+    /// The created type will exist in the context that its element type
+    /// exists in.
+    pub fn LLVMScalableVectorType(
+        ElementType: LLVMTypeRef,
+        ElementCount: ::libc::c_uint,
+    ) -> LLVMTypeRef;
+    /// Obtain the (possibly scalable) number of elements in a vector type.
     pub fn LLVMGetVectorSize(VectorTy: LLVMTypeRef) -> ::libc::c_uint;
 
     // Core->Types->Other
     pub fn LLVMVoidTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMLabelTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMX86MMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    pub fn LLVMX86AMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMTokenTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMMetadataTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMVoidType() -> LLVMTypeRef;
     pub fn LLVMLabelType() -> LLVMTypeRef;
     pub fn LLVMX86MMXType() -> LLVMTypeRef;
+    pub fn LLVMX86AMXType() -> LLVMTypeRef;
+    pub fn LLVMTargetExtTypeInContext(
+        C: LLVMContextRef,
+        Name: *const ::libc::c_char,
+        TypeParams: *mut LLVMTypeRef,
+        TypeParamCount: ::libc::c_uint,
+        IntParams: *mut ::libc::c_uint,
+        IntParamCount: ::libc::c_uint,
+    ) -> LLVMTypeRef;
 }
 
 // Core->Values
@@ -397,6 +449,8 @@ extern "C" {
     /// Determine whether the specified value instance is constant.
     pub fn LLVMIsConstant(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMIsUndef(Val: LLVMValueRef) -> LLVMBool;
+    /// Determine whether a value instance is poisonous.
+    pub fn LLVMIsPoison(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMIsAMDNode(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAMDString(Val: LLVMValueRef) -> LLVMValueRef;
 
@@ -416,6 +470,8 @@ extern "C" {
     pub fn LLVMConstNull(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstAllOnes(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMGetUndef(Ty: LLVMTypeRef) -> LLVMValueRef;
+    /// Obtain a constant value referring to a poison value of a type.
+    pub fn LLVMGetPoison(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMIsNull(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMConstPointerNull(Ty: LLVMTypeRef) -> LLVMValueRef;
 
@@ -490,6 +546,8 @@ extern "C" {
         ConstantVals: *mut LLVMValueRef,
         Count: ::libc::c_uint,
     ) -> LLVMValueRef;
+    pub fn LLVMGetAggregateElement(C: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
+    #[deprecated(since = "15.0", note = "Use LLVMGetAggregateElement instead")]
     pub fn LLVMGetElementAsConstant(C: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
     pub fn LLVMConstVector(
         ScalarConstantVals: *mut LLVMValueRef,
@@ -503,30 +561,16 @@ extern "C" {
     pub fn LLVMConstNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNot(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFSub(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstExactUDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef)
-        -> LLVMValueRef;
-    pub fn LLVMConstSDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstExactSDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef)
-        -> LLVMValueRef;
-    pub fn LLVMConstFDiv(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstURem(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstSRem(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstFRem(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAnd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstOr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstXor(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
@@ -543,18 +587,8 @@ extern "C" {
     pub fn LLVMConstShl(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstLShr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAShr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstGEP(
-        ConstantVal: LLVMValueRef,
-        ConstantIndices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-    ) -> LLVMValueRef;
     pub fn LLVMConstGEP2(
         Ty: LLVMTypeRef,
-        ConstantVal: LLVMValueRef,
-        ConstantIndices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstInBoundsGEP(
         ConstantVal: LLVMValueRef,
         ConstantIndices: *mut LLVMValueRef,
         NumIndices: ::libc::c_uint,
@@ -606,17 +640,6 @@ extern "C" {
         VectorAConstant: LLVMValueRef,
         VectorBConstant: LLVMValueRef,
         MaskConstant: LLVMValueRef,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstExtractValue(
-        AggConstant: LLVMValueRef,
-        IdxList: *mut ::libc::c_uint,
-        NumIdx: ::libc::c_uint,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstInsertValue(
-        AggConstant: LLVMValueRef,
-        ElementValueConstant: LLVMValueRef,
-        IdxList: *mut ::libc::c_uint,
-        NumIdx: ::libc::c_uint,
     ) -> LLVMValueRef;
     #[deprecated(since = "7.0", note = "Use LLVMGetInlineAsm instead")]
     pub fn LLVMConstInlineAsm(
@@ -723,9 +746,10 @@ extern "C" {
     /// Set the target value of an alias.
     pub fn LLVMAliasSetAliasee(Alias: LLVMValueRef, Aliasee: LLVMValueRef);
 
-    pub fn LLVMAddAlias(
+    pub fn LLVMAddAlias2(
         M: LLVMModuleRef,
-        Ty: LLVMTypeRef,
+        ValueTy: LLVMTypeRef,
+        AddrSpace: ::libc::c_uint,
         Aliasee: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
@@ -757,6 +781,7 @@ extern "C" {
     ) -> LLVMValueRef;
     pub fn LLVMIntrinsicGetType(
         Ctx: LLVMContextRef,
+        ID: ::libc::c_uint,
         ParamTypes: *mut LLVMTypeRef,
         ParamCount: ::libc::size_t,
     ) -> LLVMTypeRef;
@@ -764,7 +789,15 @@ extern "C" {
         ID: ::libc::c_uint,
         NameLength: *mut ::libc::size_t,
     ) -> *const ::libc::c_char;
+    #[deprecated = "Use LLVMIntrinsicCopyOverloadedName2 instead."]
     pub fn LLVMIntrinsicCopyOverloadedName(
+        ID: ::libc::c_uint,
+        ParamTypes: *mut LLVMTypeRef,
+        ParamCount: ::libc::size_t,
+        NameLength: *mut ::libc::size_t,
+    ) -> *const ::libc::c_char;
+    pub fn LLVMIntrinsicCopyOverloadedName2(
+        Mod: LLVMModuleRef,
         ID: ::libc::c_uint,
         ParamTypes: *mut LLVMTypeRef,
         ParamCount: ::libc::size_t,
@@ -979,6 +1012,9 @@ extern "C" {
     /// Remove the given instruction from its containing building block and
     /// delete it.
     pub fn LLVMInstructionEraseFromParent(Inst: LLVMValueRef);
+    /// Remove the given instruction that is not inserted into a basic block.
+    /// It must have previously been removed from its containing building block.
+    pub fn LLVMDeleteInstruction(Inst: LLVMValueRef);
     pub fn LLVMGetInstructionOpcode(Inst: LLVMValueRef) -> LLVMOpcode;
     pub fn LLVMGetICmpPredicate(Inst: LLVMValueRef) -> LLVMIntPredicate;
     pub fn LLVMGetFCmpPredicate(Inst: LLVMValueRef) -> LLVMRealPredicate;
@@ -994,7 +1030,7 @@ extern "C" {
     pub fn LLVMGetInstructionCallConv(Instr: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetInstrParamAlignment(
         Instr: LLVMValueRef,
-        index: ::libc::c_uint,
+        Idx: LLVMAttributeIndex,
         Align: ::libc::c_uint,
     );
     pub fn LLVMAddCallSiteAttribute(C: LLVMValueRef, Idx: LLVMAttributeIndex, A: LLVMAttributeRef);
@@ -1060,10 +1096,13 @@ extern "C" {
     pub fn LLVMGetAllocatedType(Alloca: LLVMValueRef) -> LLVMTypeRef;
 
     // Instructions->GEPs
-    // Check whether the given GEP instruction is inbounds.
+    // Check whether the given GEP operator is inbounds.
     pub fn LLVMIsInBounds(GEP: LLVMValueRef) -> LLVMBool;
     /// Set the given GEP instruction to be inbounds or not.
     pub fn LLVMSetIsInBounds(GEP: LLVMValueRef, InBounds: LLVMBool);
+
+    /// Get the source element type of the given GEP operator.
+    pub fn LLVMGetGEPSourceElementType(GEP: LLVMValueRef) -> LLVMTypeRef;
 
     // Instruction->PHI Nodes
     pub fn LLVMAddIncoming(
@@ -1105,6 +1144,7 @@ extern "C" {
     pub fn LLVMIsAFunction(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalVariable(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAUndefValue(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAPoisonValue(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAInstruction(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAUnaryOperator(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsABinaryOperator(Val: LLVMValueRef) -> LLVMValueRef;
@@ -1171,7 +1211,7 @@ extern "C" {
 
 // Core->Extract/Insert Value
 extern "C" {
-    /// Get the number of indices on an ExtractValue, InsertValue or GEP instruction.
+    /// Get the number of indices on an ExtractValue, InsertValue or GEP operator.
     pub fn LLVMGetNumIndices(Inst: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetIndices(Inst: LLVMValueRef) -> *const ::libc::c_uint;
 }
@@ -1205,7 +1245,13 @@ extern "C" {
     /// Attempts to set the debug location for the given instruction using the
     /// current debug location for the given builder.  If the builder has no current
     /// debug location, this function is a no-op.
+    #[deprecated(
+        since = "14.0",
+        note = "Deprecated in favor of the more general LLVMAddMetadataToInst."
+    )]
     pub fn LLVMSetInstDebugLocation(Builder: LLVMBuilderRef, Inst: LLVMValueRef);
+    /// Adds the metadata registered with the given builder to the given instruction.
+    pub fn LLVMAddMetadataToInst(Builder: LLVMBuilderRef, Inst: LLVMValueRef);
     /// Get the dafult floating-point math metadata for a given builder.
     pub fn LLVMBuilderGetDefaultFPMathTag(Builder: LLVMBuilderRef) -> LLVMMetadataRef;
     /// Set the default floating-point math metadata for the given builder.
@@ -1239,15 +1285,6 @@ extern "C" {
         B: LLVMBuilderRef,
         Addr: LLVMValueRef,
         NumDests: ::libc::c_uint,
-    ) -> LLVMValueRef;
-    pub fn LLVMBuildInvoke(
-        arg1: LLVMBuilderRef,
-        Fn: LLVMValueRef,
-        Args: *mut LLVMValueRef,
-        NumArgs: ::libc::c_uint,
-        Then: LLVMBasicBlockRef,
-        Catch: LLVMBasicBlockRef,
-        Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildInvoke2(
         arg1: LLVMBuilderRef,
@@ -1586,11 +1623,6 @@ extern "C" {
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildFree(arg1: LLVMBuilderRef, PointerVal: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMBuildLoad(
-        arg1: LLVMBuilderRef,
-        PointerVal: LLVMValueRef,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
     pub fn LLVMBuildLoad2(
         arg1: LLVMBuilderRef,
         Ty: LLVMTypeRef,
@@ -1601,26 +1633,6 @@ extern "C" {
         arg1: LLVMBuilderRef,
         Val: LLVMValueRef,
         Ptr: LLVMValueRef,
-    ) -> LLVMValueRef;
-    pub fn LLVMBuildGEP(
-        B: LLVMBuilderRef,
-        Pointer: LLVMValueRef,
-        Indices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
-    pub fn LLVMBuildInBoundsGEP(
-        B: LLVMBuilderRef,
-        Pointer: LLVMValueRef,
-        Indices: *mut LLVMValueRef,
-        NumIndices: ::libc::c_uint,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
-    pub fn LLVMBuildStructGEP(
-        B: LLVMBuilderRef,
-        Pointer: LLVMValueRef,
-        Idx: ::libc::c_uint,
-        Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildGEP2(
         B: LLVMBuilderRef,
@@ -1793,6 +1805,12 @@ extern "C" {
         DestTy: LLVMTypeRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
+    pub fn LLVMGetCastOpcode(
+        arg1: LLVMValueRef,
+        SrcIsSigned: LLVMBool,
+        DestTy: LLVMTypeRef,
+        DestIsSigned: LLVMBool,
+    ) -> LLVMOpcode;
 
     // Comparisons
     pub fn LLVMBuildICmp(
@@ -1814,13 +1832,6 @@ extern "C" {
     pub fn LLVMBuildPhi(
         arg1: LLVMBuilderRef,
         Ty: LLVMTypeRef,
-        Name: *const ::libc::c_char,
-    ) -> LLVMValueRef;
-    pub fn LLVMBuildCall(
-        arg1: LLVMBuilderRef,
-        Fn: LLVMValueRef,
-        Args: *mut LLVMValueRef,
-        NumArgs: ::libc::c_uint,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildCall2(
@@ -1892,8 +1903,9 @@ extern "C" {
         Val: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
-    pub fn LLVMBuildPtrDiff(
+    pub fn LLVMBuildPtrDiff2(
         arg1: LLVMBuilderRef,
+        ElemTy: LLVMTypeRef,
         LHS: LLVMValueRef,
         RHS: LLVMValueRef,
         Name: *const ::libc::c_char,
@@ -1921,6 +1933,9 @@ extern "C" {
         FailureOrdering: LLVMAtomicOrdering,
         SingleThread: LLVMBool,
     ) -> LLVMValueRef;
+    pub fn LLVMGetNumMaskElements(ShuffleVectorInst: LLVMValueRef) -> ::libc::c_uint;
+    pub fn LLVMGetUndefMaskElem() -> ::libc::c_int;
+    pub fn LLVMGetMaskValue(ShuffleVectorInst: LLVMValueRef, Elt: ::libc::c_uint) -> ::libc::c_int;
     pub fn LLVMIsAtomicSingleThread(AtomicInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetAtomicSingleThread(AtomicInst: LLVMValueRef, SingleThread: LLVMBool);
     pub fn LLVMGetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef) -> LLVMAtomicOrdering;

@@ -55,6 +55,8 @@ pub enum LLVMBinaryType {
     LLVMBinaryTypeMachO64B,
     /// Web assembly
     LLVMBinaryTypeWasm,
+    /// Offloading fatbinary
+    LLVMBinaryTypeOffload,
 }
 
 #[deprecated(since = "LLVM 9.0")]

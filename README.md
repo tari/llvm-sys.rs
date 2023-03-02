@@ -4,7 +4,7 @@ Rust bindings to LLVM's C API.
 
 ```toml
 [dependencies]
-llvm-sys = "100"
+llvm-sys = "160"
 ```
 
 There must be a compatible version of LLVM available. By default `llvm-sys`
@@ -26,6 +26,8 @@ informative or useful:
  * [Wilfred's BF compiler](https://crates.io/crates/bfc)
  * Jay Phelps wrote about [building a minimal compiler targeting
    WebAssembly](https://medium.com/@jayphelps/93e8c193fdb4)
+    - [Lyle extended this for arm64 using clang](https://github.com/lyledean1/llvm-hello-world-rust)
+ * [Lyle wrote a small PoC compiler Calculon using LLVM with LALRPOP](https://github.com/lyledean1/calculon)
 
 Most of the interfaces are not documented in these bindings. Refer to the
 [LLVM documentation](http://llvm.org/docs/) for more information, particularly
@@ -60,10 +62,28 @@ with the cargo feature flag `strict-versioning` or by setting the environment
 variable `LLVM_SYS_<version>_STRICT_VERSIONING` (where `<version>` is the target
 crate version) to any value.
 
-llvm-sys blacklists some versions of LLVM that are known to be
+llvm-sys blocklists some versions of LLVM that are known to be
 binary-incompatible. If you're feeling lucky, setting
-`LLVM_SYS_<version>_IGNORE_BLACKLIST` to "YES" will permit the use of
-blacklisted library versions (which may cause vexing bugs).
+`LLVM_SYS_<version>_IGNORE_BLOCKLIST` to "YES" will permit the use of
+blocklisted library versions (which may cause vexing bugs).
+
+---
+
+This crate declares that it links to `llvm-<MAJOR VERSION>`, not just `llvm`.
+This makes it possible to declare a crate that depends on multiple
+versions of `llvm-sys` (corresponding to different versions of LLVM) as long as
+only one of them is actually used:
+
+```toml
+llvm-sys-90 = { package = "llvm-sys", version = "90", optional = true }
+llvm-sys-100 = { package = "llvm-sys", version = "100", optional = true }
+```
+
+This requires that the target LLVM version (`llvm-10` for instance) be declared
+as the linking target rather than just `llvm` because Cargo requires that all
+linked libraries be unique regardless of what is actually enabled. Note that
+although Cargo will not prevent you from enabling multiple versions of LLVM at
+once as a result, doing so will likely cause errors at link time.
 
 ---
 

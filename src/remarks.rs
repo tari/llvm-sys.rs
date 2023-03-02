@@ -111,7 +111,7 @@ extern "C" {
 
     pub fn LLVMRemarkParserCreateBitstream(
         Buf: *const ::libc::c_void,
-        Size: u64
+        Size: u64,
     ) -> LLVMRemarkParserRef;
 
     /// Returns the next remark in the file.

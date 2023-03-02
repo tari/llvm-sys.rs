@@ -10,7 +10,7 @@ pub enum LLVMComdatSelectionKind {
     LLVMExactMatchComdatSelectionKind,
     /// The linker will choose the largest COMDAT.
     LLVMLargestComdatSelectionKind,
-    /// No other Module may specify this COMDAT.
+    /// No deduplication is performed.
     LLVMNoDuplicatesComdatSelectionKind,
     /// The data referenced by the COMDAT must be the same size.
     LLVMSameSizeComdatSelectionKind,

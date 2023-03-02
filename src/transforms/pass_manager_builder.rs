@@ -40,10 +40,4 @@ extern "C" {
         PMB: LLVMPassManagerBuilderRef,
         PM: LLVMPassManagerRef,
     );
-    pub fn LLVMPassManagerBuilderPopulateLTOPassManager(
-        PMB: LLVMPassManagerBuilderRef,
-        PM: LLVMPassManagerRef,
-        Internalize: LLVMBool,
-        RunInliner: LLVMBool,
-    );
 }

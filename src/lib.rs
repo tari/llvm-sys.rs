@@ -100,6 +100,7 @@ pub mod prelude {
 pub mod analysis;
 pub mod bit_reader;
 pub mod bit_writer;
+pub mod blake3;
 pub mod comdat;
 pub mod core;
 pub mod debuginfo;
@@ -109,21 +110,19 @@ pub mod error_handling;
 pub mod execution_engine;
 pub mod initialization;
 pub mod ir_reader;
-pub mod link_time_optimizer;
 pub mod linker;
 pub mod lto;
 pub mod object;
-pub mod orc;
+pub mod orc2;
 pub mod remarks;
 pub mod support;
 pub mod target;
 pub mod target_machine;
 
 pub mod transforms {
-    pub mod aggressive_instcombine;
-    pub mod coroutines;
     pub mod instcombine;
     pub mod ipo;
+    pub mod pass_builder;
     pub mod pass_manager_builder;
     pub mod scalar;
     pub mod util;
@@ -222,6 +221,10 @@ pub enum LLVMTypeKind {
     LLVMMetadataTypeKind = 14,
     LLVMX86_MMXTypeKind = 15,
     LLVMTokenTypeKind = 16,
+    LLVMScalableVectorTypeKind = 17,
+    LLVMBFloatTypeKind = 18,
+    LLVMX86_AMXTypeKind = 19,
+    LLVMTargetExtTypeKind = 20,
 }
 
 #[repr(C)]
@@ -351,6 +354,8 @@ pub enum LLVMValueKind {
     LLVMInlineAsmValueKind,
 
     LLVMInstructionValueKind,
+    LLVMPoisonValueKind,
+    LLVMConstantTargetNoneValueKind,
 }
 
 #[repr(C)]
@@ -434,6 +439,8 @@ pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpUMin = 10,
     LLVMAtomicRMWBinOpFAdd = 11,
     LLVMAtomicRMWBinOpFSub = 12,
+    LLVMAtomicRMWBinOpFMax = 13,
+    LLVMAtomicRMWBinOpFMin = 14,
 }
 
 #[repr(C)]
@@ -479,13 +486,16 @@ pub type LLVMDiagnosticHandler =
     Option<extern "C" fn(arg1: LLVMDiagnosticInfoRef, arg2: *mut ::libc::c_void)>;
 pub type LLVMYieldCallback = Option<extern "C" fn(arg1: LLVMContextRef, arg2: *mut ::libc::c_void)>;
 
-#[cfg(all(not(doc),LLVM_SYS_NOT_FOUND))]
+#[cfg(all(not(doc), not(feature = "no-llvm-linking"), LLVM_SYS_NOT_FOUND))]
 std::compile_error!(concat!(
-      "No suitable version of LLVM was found system-wide or pointed
-       to by LLVM_SYS_", env!("CARGO_PKG_VERSION_MAJOR"), "_PREFIX.
+    "No suitable version of LLVM was found system-wide or pointed
+       to by LLVM_SYS_",
+    env!("CARGO_PKG_VERSION_MAJOR"),
+    "_PREFIX.
 
        Consider using `llvmenv` to compile an appropriate copy of LLVM, and
        refer to the llvm-sys documentation for more information.
 
        llvm-sys: https://crates.io/crates/llvm-sys
-       llvmenv: https://crates.io/crates/llvmenv"));
+       llvmenv: https://crates.io/crates/llvmenv"
+));

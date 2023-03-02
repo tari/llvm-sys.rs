@@ -15,6 +15,7 @@ extern "C" {
     pub fn LLVMAddNewGVNPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddIndVarSimplifyPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddInstructionCombiningPass(PM: LLVMPassManagerRef);
+    pub fn LLVMAddInstructionSimplifyPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddJumpThreadingPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLICMPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopDeletionPass(PM: LLVMPassManagerRef);
@@ -23,7 +24,6 @@ extern "C" {
     pub fn LLVMAddLoopRerollPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopUnrollPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLoopUnrollAndJamPass(PM: LLVMPassManagerRef);
-    pub fn LLVMAddLoopUnswitchPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddLowerAtomicPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddMemCpyOptPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddPartiallyInlineLibCallsPass(PM: LLVMPassManagerRef);
@@ -37,7 +37,6 @@ extern "C" {
     );
     pub fn LLVMAddSimplifyLibCallsPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddTailCallEliminationPass(PM: LLVMPassManagerRef);
-    pub fn LLVMAddConstantPropagationPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddDemoteMemoryToRegisterPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddVerifierPass(PM: LLVMPassManagerRef);
     pub fn LLVMAddCorrelatedValuePropagationPass(PM: LLVMPassManagerRef);

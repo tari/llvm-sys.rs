@@ -1,46 +1,44 @@
 //! Generation of DWARF debug info.
 use super::*;
 
-/// Debug info flags.
-#[repr(C)]
-#[derive(Debug)]
-pub enum LLVMDIFlags {
-    LLVMDIFlagZero = 0,
-    LLVMDIFlagPrivate = 1,
-    LLVMDIFlagProtected = 2,
-    LLVMDIFlagPublic = 3,
-    LLVMDIFlagFwdDecl = 1 << 2,
-    LLVMDIFlagAppleBlock = 1 << 3,
-    LLVMDIFlagReservedBit4 = 1 << 4,
-    LLVMDIFlagVirtual = 1 << 5,
-    LLVMDIFlagArtificial = 1 << 6,
-    LLVMDIFlagExplicit = 1 << 7,
-    LLVMDIFlagPrototyped = 1 << 8,
-    LLVMDIFlagObjcClassComplete = 1 << 9,
-    LLVMDIFlagObjectPointer = 1 << 10,
-    LLVMDIFlagVector = 1 << 11,
-    LLVMDIFlagStaticMember = 1 << 12,
-    LLVMDIFlagLValueReference = 1 << 13,
-    LLVMDIFlagRValueReference = 1 << 14,
-    LLVMDIFlagReserved = 1 << 15,
-    LLVMDIFlagSingleInheritance = 1 << 16,
-    LLVMDIFlagMultipleInheritance = 2 << 16,
-    LLVMDIFlagVirtualInheritance = 3 << 16,
-    LLVMDIFlagIntroducedVirtual = 1 << 18,
-    LLVMDIFlagBitField = 1 << 19,
-    LLVMDIFlagNoReturn = 1 << 20,
-    LLVMDIFlagTypePassByValue = 1 << 22,
-    LLVMDIFlagTypePassByReference = 1 << 23,
-    LLVMDIFlagEnumClass = 1 << 24,
-    LLVMDIFlagThunk = 1 << 25,
-    LLVMDIFlagNonTrivial = 1 << 26,
-    LLVMDIFlagBigendian = 1 << 27,
-    LLVMDIFlagLittleEndian = 1 << 28,
-    LLVMDIFlagIndirectVirtualBase = (1 << 2) | (1 << 5),
-}
-
-pub const LLVMDIFlagAccessibility: LLVMDIFlags = LLVMDIFlags::LLVMDIFlagPublic;
-pub const LLVMDIFlagPtrToMemberRep: LLVMDIFlags = LLVMDIFlags::LLVMDIFlagVirtualInheritance;
+// Debug info flags.
+pub type LLVMDIFlags = ::libc::c_int;
+pub const LLVMDIFlagZero: LLVMDIFlags = 0;
+pub const LLVMDIFlagPrivate: LLVMDIFlags = 1;
+pub const LLVMDIFlagProtected: LLVMDIFlags = 2;
+pub const LLVMDIFlagPublic: LLVMDIFlags = 3;
+pub const LLVMDIFlagFwdDecl: LLVMDIFlags = 1 << 2;
+pub const LLVMDIFlagAppleBlock: LLVMDIFlags = 1 << 3;
+pub const LLVMDIFlagReservedBit4: LLVMDIFlags = 1 << 4;
+pub const LLVMDIFlagVirtual: LLVMDIFlags = 1 << 5;
+pub const LLVMDIFlagArtificial: LLVMDIFlags = 1 << 6;
+pub const LLVMDIFlagExplicit: LLVMDIFlags = 1 << 7;
+pub const LLVMDIFlagPrototyped: LLVMDIFlags = 1 << 8;
+pub const LLVMDIFlagObjcClassComplete: LLVMDIFlags = 1 << 9;
+pub const LLVMDIFlagObjectPointer: LLVMDIFlags = 1 << 10;
+pub const LLVMDIFlagVector: LLVMDIFlags = 1 << 11;
+pub const LLVMDIFlagStaticMember: LLVMDIFlags = 1 << 12;
+pub const LLVMDIFlagLValueReference: LLVMDIFlags = 1 << 13;
+pub const LLVMDIFlagRValueReference: LLVMDIFlags = 1 << 14;
+pub const LLVMDIFlagReserved: LLVMDIFlags = 1 << 15;
+pub const LLVMDIFlagSingleInheritance: LLVMDIFlags = 1 << 16;
+pub const LLVMDIFlagMultipleInheritance: LLVMDIFlags = 2 << 16;
+pub const LLVMDIFlagVirtualInheritance: LLVMDIFlags = 3 << 16;
+pub const LLVMDIFlagIntroducedVirtual: LLVMDIFlags = 1 << 18;
+pub const LLVMDIFlagBitField: LLVMDIFlags = 1 << 19;
+pub const LLVMDIFlagNoReturn: LLVMDIFlags = 1 << 20;
+pub const LLVMDIFlagTypePassByValue: LLVMDIFlags = 1 << 22;
+pub const LLVMDIFlagTypePassByReference: LLVMDIFlags = 1 << 23;
+pub const LLVMDIFlagEnumClass: LLVMDIFlags = 1 << 24;
+pub const LLVMDIFlagThunk: LLVMDIFlags = 1 << 25;
+pub const LLVMDIFlagNonTrivial: LLVMDIFlags = 1 << 26;
+pub const LLVMDIFlagBigendian: LLVMDIFlags = 1 << 27;
+pub const LLVMDIFlagLittleEndian: LLVMDIFlags = 1 << 28;
+pub const LLVMDIFlagIndirectVirtualBase: LLVMDIFlags = (1 << 2) | (1 << 5);
+pub const LLVMDIFlagAccessibility: LLVMDIFlags =
+    LLVMDIFlagProtected | LLVMDIFlagPrivate | LLVMDIFlagPublic;
+pub const LLVMDIFlagPtrToMemberRep: LLVMDIFlags =
+    LLVMDIFlagSingleInheritance | LLVMDIFlagMultipleInheritance | LLVMDIFlagVirtualInheritance;
 
 /// Source languages known by DWARF.
 #[repr(C)]
@@ -86,6 +84,15 @@ pub enum LLVMDWARFSourceLanguage {
     LLVMDWARFSourceLanguageFortran08,
     LLVMDWARFSourceLanguageRenderScript,
     LLVMDWARFSourceLanguageBLISS,
+    LLVMDWARFSourceLanguageKotlin,
+    LLVMDWARFSourceLanguageZig,
+    LLVMDWARFSourceLanguageCrystal,
+    LLVMDWARFSourceLanguageC_plus_plus_17,
+    LLVMDWARFSourceLanguageC_plus_plus_20,
+    LLVMDWARFSourceLanguageC17,
+    LLVMDWARFSourceLanguageFortran18,
+    LLVMDWARFSourceLanguageAda2005,
+    LLVMDWARFSourceLanguageAda2012,
     // Vendor extensions:
     LLVMDWARFSourceLanguageMips_Assembler,
     LLVMDWARFSourceLanguageGOOGLE_RenderScript,
@@ -136,6 +143,10 @@ pub enum LLVMMetadataKind {
     LLVMDIMacroMetadataKind,
     LLVMDIMacroFileMetadataKind,
     LLVMDICommonBlockMetadataKind,
+    LLVMDIStringTypeMetadataKind,
+    LLVMDIGenericSubrangeMetadataKind,
+    LLVMDIArgListMetadataKind,
+    LLVMDIAssignIDMetadataKind,
 }
 
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;
@@ -167,6 +178,9 @@ extern "C" {
     pub fn LLVMDisposeDIBuilder(Builder: LLVMDIBuilderRef);
     /// Construct any deferred debug info descriptors.
     pub fn LLVMDIBuilderFinalize(Builder: LLVMDIBuilderRef);
+    /// Finalize a specific subprogram.
+    /// No new variables may be added to this subprogram afterwards.
+    pub fn LLVMDIBuilderFinalizeSubprogram(Builder: LLVMDIBuilderRef, Subprogram: LLVMMetadataRef);
     pub fn LLVMDIBuilderCreateCompileUnit(
         Builder: LLVMDIBuilderRef,
         Lang: LLVMDWARFSourceLanguage,
@@ -183,6 +197,10 @@ extern "C" {
         DWOId: ::libc::c_uint,
         SplitDebugInlining: LLVMBool,
         DebugInfoForProfiling: LLVMBool,
+        SysRoot: *const ::libc::c_char,
+        SysRootLen: ::libc::size_t,
+        SDK: *const ::libc::c_char,
+        SDKLen: ::libc::size_t,
     ) -> LLVMMetadataRef;
     /// Create a file descriptor to hold debugging information for a file.
     pub fn LLVMDIBuilderCreateFile(
@@ -203,8 +221,8 @@ extern "C" {
         ConfigMacrosLen: ::libc::size_t,
         IncludePath: *const ::libc::c_char,
         IncludePathLen: ::libc::size_t,
-        SysRoot: *const ::libc::c_char,
-        SysRootLen: ::libc::size_t,
+        APINotesFile: *const ::libc::c_char,
+        APINotesFileLen: ::libc::size_t,
     ) -> LLVMMetadataRef;
 
     /// Creates a new descriptor for a namespace with the specified parent scope.
@@ -267,6 +285,8 @@ extern "C" {
         ImportedEntity: LLVMMetadataRef,
         File: LLVMMetadataRef,
         Line: ::libc::c_uint,
+        Elements: *mut LLVMMetadataRef,
+        NumElements: ::libc::c_uint,
     ) -> LLVMMetadataRef;
 
     /// Create a descriptor for an imported module.
@@ -276,6 +296,8 @@ extern "C" {
         M: LLVMMetadataRef,
         File: LLVMMetadataRef,
         Line: ::libc::c_uint,
+        Elements: *mut LLVMMetadataRef,
+        NumElements: ::libc::c_uint,
     ) -> LLVMMetadataRef;
 
     /// Create a descriptor for an imported function, type, or variable.
@@ -289,6 +311,8 @@ extern "C" {
         Line: ::libc::c_uint,
         Name: *const ::libc::c_char,
         NameLen: ::libc::size_t,
+        Elements: *mut LLVMMetadataRef,
+        NumElements: ::libc::c_uint,
     ) -> LLVMMetadataRef;
 
     /// Creates a new DebugLocation that describes a source location.
@@ -357,14 +381,14 @@ extern "C" {
         Name: *const ::libc::c_char,
         NameLen: usize,
         Value: *const ::libc::c_char,
-        ValueLen: usize
+        ValueLen: usize,
     ) -> LLVMMetadataRef;
 
     pub fn LLVMDIBuilderCreateTempMacroFile(
         Builder: LLVMDIBuilderRef,
         ParentMacroFile: LLVMMetadataRef,
         Line: ::libc::c_uint,
-        File: LLVMMetadataRef
+        File: LLVMMetadataRef,
     ) -> LLVMMetadataRef;
 
     /// Create debugging information entry for an enumerator.
@@ -704,14 +728,14 @@ extern "C" {
     /// Create a new descriptor for the specified variable which has a complex
     pub fn LLVMDIBuilderCreateExpression(
         Builder: LLVMDIBuilderRef,
-        Addr: *mut i64,
+        Addr: *mut u64,
         Length: ::libc::size_t,
     ) -> LLVMMetadataRef;
 
     /// Create a new descriptor for the specified variable that does not have an
     pub fn LLVMDIBuilderCreateConstantValueExpression(
         Builder: LLVMDIBuilderRef,
-        Value: i64,
+        Value: u64,
     ) -> LLVMMetadataRef;
 
     /// Create a new descriptor for the specified variable.
