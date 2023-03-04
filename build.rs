@@ -392,10 +392,10 @@ fn get_link_libraries(preferences: &LinkingPreferences) -> Vec<Library> {
     }
 
     let mut errs = vec![];
-    let is_static = preferences.is_static;
+    let is_static = preferences.prefer_static;
 
     match get_link_libraries_impl(is_static) {
-        Ok(s) => return extract_library(&s),
+        Ok(s) => return extract_library(&s, is_static),
         Err(e) => errs.push((lib_kind(is_static), e)),
     }
 
@@ -407,40 +407,45 @@ fn get_link_libraries(preferences: &LinkingPreferences) -> Vec<Library> {
         );
 
         match get_link_libraries_impl(!is_static) {
-            Ok(s) => return extract_library(&s),
+            Ok(s) => return extract_library(&s, !is_static),
             Err(e) => errs.push((lib_kind(!is_static), e)),
         }
     }
-    
+
     panic!("failed to get link libraries from llvm-config: {:?}", errs);
 }
 
-fn extract_library(s: &str) -> Vec<Library> {
+fn extract_library(s: &str, is_static: bool) -> Vec<Library> {
     s.split(&[' ', '\n'] as &[char])
         .filter(|s| !s.is_empty())
         .map(|name| {
             // --libnames gives library filenames. Extract only the name that
             // we need to pass to the linker.
-            if target_env_is("msvc") {
-                // LLVMfoo.lib
-                assert!(
-                    name.ends_with(".lib"),
-                    "library name {:?} does not appear to be a MSVC library file",
-                    name
-                );
-                Library::Static(name[..name.len() - 4].to_string())
+            if is_static {
+                // Match static library
+                let name = if name.ends_with(".a") {
+                    &name[3..name.len() - 2]
+                } else if name.ends_with(".lib") {
+                    &name[..name.len() - 4]
+                } else {
+                    panic!("{:?} does not look like a static library name", name)
+                };
+                Library::Static(name.to_string())
             } else {
-                // libLLVMfoo.a or libLLVMfoo.so
-                assert!(name.starts_with("lib"));
-                if name.ends_with(".a") {
-                    // libLLVMfoo.a
-                    Library::Static(name[3..name.len() - 2].to_string())
+                // Match shared library
+                let name = if name.ends_with(".dylib") {
+                    // libLLVMfoo.dylib
+                    &name[3..name.len() - 6]
                 } else if name.ends_with(".so") {
                     // libLLVMfoo.so
-                    Library::Dynamic(name[3..name.len() - 3].to_string())
+                    &name[3..name.len() - 3]
+                } else if name.ends_with(".dll") {
+                    // LLVMfoo.dll
+                    &name[..name.len() - 4]
                 } else {
-                    panic!("Expected static or shared library!")
-                }
+                    panic!("{:?} does not look like a shared library name", name)
+                };
+                Library::Dynamic(name.to_string())
             }
         })
         .collect::<Vec<Library>>()
