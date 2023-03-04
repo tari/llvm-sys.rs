@@ -452,17 +452,12 @@ struct LinkingPreferences {
     force: bool,
 }
 
-const FEATURE_PREFER_STATIC: &str = "CARGO_FEATURE_PREFER_STATIC";
-const FEATURE_PREFER_DYNAMIC: &str = "CARGO_FEATURE_PREFER_DYNAMIC";
-const FEATURE_FORCE_STATIC: &str = "CARGO_FEATURE_FORCE_STATIC";
-const FEATURE_FORCE_DYNAMIC: &str = "CARGO_FEATURE_FORCE_DYNAMIC";
-
 impl LinkingPreferences {
     fn init() -> LinkingPreferences {
-        let prefer_static = env::var_os(FEATURE_PREFER_STATIC).is_some();
-        let prefer_dynamic = env::var_os(FEATURE_PREFER_DYNAMIC).is_some();
-        let force_static = env::var_os(FEATURE_FORCE_STATIC).is_some();
-        let force_dynamic = env::var_os(FEATURE_FORCE_DYNAMIC).is_some();
+        let prefer_static = cfg!(feature = "prefer-static");
+        let prefer_dynamic = cfg!(feature = "prefer-dynamic");
+        let force_static = cfg!(feature = "force-static");
+        let force_dynamic = cfg!(feature = "force-dynamic");
 
         // more than one preference is an error
         if [prefer_static, prefer_dynamic, force_static, force_dynamic]
