@@ -383,33 +383,35 @@ fn get_link_libraries(preferences: &LinkingPreferences) -> Vec<Library> {
         try_llvm_config(["--libnames", link_arg].iter().copied())
     }
 
-    let mut errs = vec![];
-
-    if preferences.prefer_static {
-        match get_link_libraries_impl(true) {
-            Ok(s) => return extract_library(&s),
-            Err(e) => errs.push(("static", e)),
-        }
-        if !preferences.force {
-            println!("cargo:warning=failed to get static libraries from llvm-config, falling back to shared");
-            match get_link_libraries_impl(false) {
-                Ok(s) => return extract_library(&s),
-                Err(e) => errs.push(("shared", e)),
-            }
-        }
-    } else {
-        match get_link_libraries_impl(false) {
-            Ok(s) => return extract_library(&s),
-            Err(e) => errs.push(("shared", e)),
-        }
-        if !preferences.force {
-            println!("cargo:warning=failed to get shared libraries from llvm-config, falling back to static");
-            match get_link_libraries_impl(true) {
-                Ok(s) => return extract_library(&s),
-                Err(e) => errs.push(("static", e)),
-            }
+    fn lib_kind(is_static: bool) -> &'static str {
+        if is_static {
+            "static"
+        } else {
+            "shared"
         }
     }
+
+    let mut errs = vec![];
+    let is_static = preferences.is_static;
+
+    match get_link_libraries_impl(is_static) {
+        Ok(s) => return extract_library(&s),
+        Err(e) => errs.push((lib_kind(is_static), e)),
+    }
+
+    if !preferences.force {
+        println!(
+            "cargo:warning=failed to get {} libraries from llvm-config, falling back to {}",
+            lib_kind(is_static),
+            lib_kind(!is_static),
+        );
+
+        match get_link_libraries_impl(!is_static) {
+            Ok(s) => return extract_library(&s),
+            Err(e) => errs.push((lib_kind(!is_static), e)),
+        }
+    }
+    
     panic!("failed to get link libraries from llvm-config: {:?}", errs);
 }
 
