@@ -268,7 +268,8 @@ fn llvm_version<S: AsRef<OsStr>>(binary: &S) -> io::Result<Version> {
 /// Get the names of the dylibs required by LLVM, including the C++ standard
 /// library.
 fn get_system_libraries() -> Vec<String> {
-    llvm_config("--system-libs")
+    try_llvm_config(["--system-libs", "--link-static"].iter().copied())
+        .expect("Surprising failure from llvm-config")
         .split(&[' ', '\n'] as &[char])
         .filter(|s| !s.is_empty())
         .map(|flag| {
