@@ -622,6 +622,11 @@ fn main() {
     }
 
     // Link system libraries
+    let kind = if target_env_is("musl") {
+        LibraryKind::Static
+    } else {
+        LibraryKind::Dynamic
+    };
     for name in get_system_libraries(kind) {
         println!("cargo:rustc-link-lib={}={}", kind.string(), name);
     }
