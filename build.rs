@@ -375,6 +375,15 @@ fn get_link_libraries(preferences: &LinkingPreferences) -> Vec<Library> {
     // a hack than parsing linker flags output from --libs and --ldflags.
 
     fn get_link_libraries_impl(is_static: bool) -> std::io::Result<String> {
+        // Windows targets don't get dynamic support.
+        // See: https://gitlab.com/taricorp/llvm-sys.rs/-/merge_requests/31#note_1306397918
+        if target_env_is("msvc") && !is_static {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Dynamic linking to LLVM is not supported on Windows.",
+            ));
+        }
+
         let link_arg = if is_static {
             "--link-static"
         } else {
@@ -424,8 +433,12 @@ fn extract_library(s: &str, is_static: bool) -> Vec<Library> {
             if is_static {
                 // Match static library
                 let name = if name.ends_with(".a") {
+                    // Unix (Linux/Mac)
+                    // libLLVMfoo.a
                     &name[3..name.len() - 2]
                 } else if name.ends_with(".lib") {
+                    // Windows
+                    // LLVMfoo.lib
                     &name[..name.len() - 4]
                 } else {
                     panic!("{:?} does not look like a static library name", name)
@@ -434,13 +447,16 @@ fn extract_library(s: &str, is_static: bool) -> Vec<Library> {
             } else {
                 // Match shared library
                 let name = if name.ends_with(".dylib") {
+                    // Mac
                     // libLLVMfoo.dylib
                     &name[3..name.len() - 6]
                 } else if name.ends_with(".so") {
+                    // Linux
                     // libLLVMfoo.so
                     &name[3..name.len() - 3]
-                } else if name.ends_with(".dll") {
-                    // LLVMfoo.dll
+                } else if name.ends_with(".dll") || name.ends_with(".lib") {
+                    // Windows
+                    // LLVMfoo.{dll,lib}
                     &name[..name.len() - 4]
                 } else {
                     panic!("{:?} does not look like a shared library name", name)
