@@ -622,13 +622,15 @@ fn main() {
     }
 
     // Link system libraries
-    let kind = if target_env_is("musl") {
+    // We get the system libraries based on the kind of LLVM libraries we link to, but we link to
+    // system libs based on the target environment.
+    let sys_lib_kind = if target_env_is("musl") {
         LibraryKind::Static
     } else {
         LibraryKind::Dynamic
     };
     for name in get_system_libraries(kind) {
-        println!("cargo:rustc-link-lib={}={}", kind.string(), name);
+        println!("cargo:rustc-link-lib={}={}", sys_lib_kind.string(), name);
     }
 
     let use_debug_msvcrt = env::var_os(&*ENV_USE_DEBUG_MSVCRT).is_some();
