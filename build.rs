@@ -424,8 +424,8 @@ fn get_link_libraries(preferences: &LinkingPreferences) -> (LibraryKind, Vec<Str
         }
     }
 
-    let mut errs = vec![];
     let is_static = preferences.prefer_static;
+    let first_err;
 
     match get_link_libraries_impl(is_static) {
         Ok(s) => {
@@ -434,15 +434,18 @@ fn get_link_libraries(preferences: &LinkingPreferences) -> (LibraryKind, Vec<Str
                 extract_library(&s, is_static),
             )
         }
-        Err(e) => errs.push((lib_kind(is_static), e)),
+        Err(e) => first_err = e,
     }
+
+    let mut second_err = None;
 
     if !preferences.force {
         println!(
-            "cargo:warning=failed to get {} libraries from llvm-config, falling back to {}",
+            "cargo:warning=failed to get {} libraries from llvm-config, falling back to {}.",
             lib_kind(is_static),
             lib_kind(!is_static),
         );
+        println!("cargo:warning=error: {}", first_err);
 
         match get_link_libraries_impl(!is_static) {
             Ok(s) => {
@@ -451,11 +454,25 @@ fn get_link_libraries(preferences: &LinkingPreferences) -> (LibraryKind, Vec<Str
                     extract_library(&s, !is_static),
                 )
             }
-            Err(e) => errs.push((lib_kind(!is_static), e)),
+            Err(e) => second_err = Some(e),
         }
     }
 
-    panic!("failed to get link libraries from llvm-config: {:?}", errs);
+    let first_error = format!(
+        "linking {} library error: {}",
+        lib_kind(is_static),
+        first_err
+    );
+    let second_error = if let Some(err) = second_err {
+        format!("\nlinking {} library error: {}", lib_kind(!is_static), err)
+    } else {
+        String::new()
+    };
+
+    panic!(
+        "failed to get linking libraries from llvm-config.\n{}{}",
+        first_error, second_error
+    );
 }
 
 fn extract_library(s: &str, is_static: bool) -> Vec<String> {
