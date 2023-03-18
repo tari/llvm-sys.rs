@@ -199,35 +199,48 @@ fn is_compatible_llvm(llvm_version: &Version) -> bool {
 /// Lazily searches for or compiles LLVM as configured by the environment
 /// variables.
 fn llvm_config(arg: &str) -> String {
+    try_llvm_config(Some(arg).into_iter()).expect("Surprising failure from llvm-config")
+}
+
+/// Get the output from running `llvm-config` with the given argument.
+///
+/// Does not panic on failure.
+fn try_llvm_config<'a>(arg: impl Iterator<Item = &'a str>) -> io::Result<String> {
     llvm_config_ex(&*LLVM_CONFIG_PATH.clone().unwrap(), arg)
-        .expect("Surprising failure from llvm-config")
 }
 
 /// Invoke the specified binary as llvm-config.
 ///
 /// Explicit version of the `llvm_config` function that bubbles errors
 /// up.
-fn llvm_config_ex<S: AsRef<OsStr>>(binary: S, arg: &str) -> io::Result<String> {
-    Command::new(binary)
-        .arg(arg)
-        .arg("--link-static") // Don't use dylib for >= 3.9
-        .output()
-        .and_then(|output| {
-            if output.stdout.is_empty() {
-                Err(io::Error::new(
-                    io::ErrorKind::NotFound,
-                    "llvm-config returned empty output",
-                ))
-            } else {
-                Ok(String::from_utf8(output.stdout)
-                    .expect("Output from llvm-config was not valid UTF-8"))
-            }
-        })
+fn llvm_config_ex<'a, S: AsRef<OsStr>>(
+    binary: S,
+    args: impl Iterator<Item = &'a str>,
+) -> io::Result<String> {
+    Command::new(binary).args(args).output().and_then(|output| {
+        if output.status.code() != Some(0) {
+            Err(io::Error::new(
+                io::ErrorKind::Other,
+                format!(
+                    "llvm-config failed with error code {:?}",
+                    output.status.code()
+                ),
+            ))
+        } else if output.stdout.is_empty() {
+            Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                "llvm-config returned empty output",
+            ))
+        } else {
+            Ok(String::from_utf8(output.stdout)
+                .expect("Output from llvm-config was not valid UTF-8"))
+        }
+    })
 }
 
 /// Get the LLVM version using llvm-config.
 fn llvm_version<S: AsRef<OsStr>>(binary: &S) -> io::Result<Version> {
-    let version_str = llvm_config_ex(binary.as_ref(), "--version")?;
+    let version_str = llvm_config_ex(binary.as_ref(), ["--version"].iter().copied())?;
 
     // LLVM isn't really semver and uses version suffixes to build
     // version strings like '3.8.0svn', so limit what we try to parse
@@ -254,8 +267,14 @@ fn llvm_version<S: AsRef<OsStr>>(binary: &S) -> io::Result<Version> {
 
 /// Get the names of the dylibs required by LLVM, including the C++ standard
 /// library.
-fn get_system_libraries() -> Vec<String> {
-    llvm_config("--system-libs")
+fn get_system_libraries(kind: LibraryKind) -> Vec<String> {
+    let link_arg = match kind {
+        LibraryKind::Static => "--link-static",
+        LibraryKind::Dynamic => "--link-shared",
+    };
+
+    try_llvm_config(["--system-libs", link_arg].iter().copied())
+        .expect("Surprising failure from llvm-config")
         .split(&[' ', '\n'] as &[char])
         .filter(|s| !s.is_empty())
         .map(|flag| {
@@ -350,37 +369,190 @@ fn get_system_libcpp() -> Option<&'static str> {
     }
 }
 
-/// Get the names of libraries to link against.
-fn get_link_libraries() -> Vec<String> {
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum LibraryKind {
+    Static,
+    Dynamic,
+}
+
+impl LibraryKind {
+    pub fn from_is_static(is_static: bool) -> Self {
+        if is_static {
+            LibraryKind::Static
+        } else {
+            LibraryKind::Dynamic
+        }
+    }
+
+    pub fn string(&self) -> &'static str {
+        match self {
+            LibraryKind::Static => "static",
+            LibraryKind::Dynamic => "dylib",
+        }
+    }
+}
+
+/// Get the names of libraries to link against, along with whether it is static or shared library.
+fn get_link_libraries(preferences: &LinkingPreferences) -> (LibraryKind, Vec<String>) {
     // Using --libnames in conjunction with --libdir is particularly important
     // for MSVC when LLVM is in a path with spaces, but it is generally less of
     // a hack than parsing linker flags output from --libs and --ldflags.
-    llvm_config("--libnames")
-        .split(&[' ', '\n'] as &[char])
+
+    fn get_link_libraries_impl(is_static: bool) -> std::io::Result<String> {
+        // Windows targets don't get dynamic support.
+        // See: https://gitlab.com/taricorp/llvm-sys.rs/-/merge_requests/31#note_1306397918
+        if target_env_is("msvc") && !is_static {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Dynamic linking to LLVM is not supported on Windows.",
+            ));
+        }
+
+        let link_arg = if is_static {
+            "--link-static"
+        } else {
+            "--link-shared"
+        };
+        try_llvm_config(["--libnames", link_arg].iter().copied())
+    }
+
+    fn lib_kind(is_static: bool) -> &'static str {
+        if is_static {
+            "static"
+        } else {
+            "shared"
+        }
+    }
+
+    let is_static = preferences.prefer_static;
+    let first_err;
+
+    match get_link_libraries_impl(is_static) {
+        Ok(s) => {
+            return (
+                LibraryKind::from_is_static(is_static),
+                extract_library(&s, is_static),
+            )
+        }
+        Err(e) => first_err = e,
+    }
+
+    let mut second_err = None;
+
+    if !preferences.force {
+        println!(
+            "cargo:warning=failed to get {} libraries from llvm-config, falling back to {}.",
+            lib_kind(is_static),
+            lib_kind(!is_static),
+        );
+        println!("cargo:warning=error: {}", first_err);
+
+        match get_link_libraries_impl(!is_static) {
+            Ok(s) => {
+                return (
+                    LibraryKind::from_is_static(!is_static),
+                    extract_library(&s, !is_static),
+                )
+            }
+            Err(e) => second_err = Some(e),
+        }
+    }
+
+    let first_error = format!(
+        "linking {} library error: {}",
+        lib_kind(is_static),
+        first_err
+    );
+    let second_error = if let Some(err) = second_err {
+        format!("\nlinking {} library error: {}", lib_kind(!is_static), err)
+    } else {
+        String::new()
+    };
+
+    panic!(
+        "failed to get linking libraries from llvm-config.\n{}{}",
+        first_error, second_error
+    );
+}
+
+fn extract_library(s: &str, is_static: bool) -> Vec<String> {
+    s.split(&[' ', '\n'] as &[char])
         .filter(|s| !s.is_empty())
         .map(|name| {
             // --libnames gives library filenames. Extract only the name that
             // we need to pass to the linker.
-            if target_env_is("msvc") {
-                // LLVMfoo.lib
-                assert!(
-                    name.ends_with(".lib"),
-                    "library name {:?} does not appear to be a MSVC library file",
-                    name
-                );
-                &name[..name.len() - 4]
+            if is_static {
+                // Match static library
+                if name.ends_with(".a") {
+                    // Unix (Linux/Mac)
+                    // libLLVMfoo.a
+                    &name[3..name.len() - 2]
+                } else if name.ends_with(".lib") {
+                    // Windows
+                    // LLVMfoo.lib
+                    &name[..name.len() - 4]
+                } else {
+                    panic!("{:?} does not look like a static library name", name)
+                }
             } else {
-                // libLLVMfoo.a
-                assert!(
-                    name.starts_with("lib") && name.ends_with(".a"),
-                    "library name {:?} does not appear to be a static library",
-                    name
-                );
-                &name[3..name.len() - 2]
+                // Match shared library
+                if name.ends_with(".dylib") {
+                    // Mac
+                    // libLLVMfoo.dylib
+                    &name[3..name.len() - 6]
+                } else if name.ends_with(".so") {
+                    // Linux
+                    // libLLVMfoo.so
+                    &name[3..name.len() - 3]
+                } else if name.ends_with(".dll") || name.ends_with(".lib") {
+                    // Windows
+                    // LLVMfoo.{dll,lib}
+                    &name[..name.len() - 4]
+                } else {
+                    panic!("{:?} does not look like a shared library name", name)
+                }
             }
+            .to_string()
         })
-        .map(str::to_owned)
         .collect::<Vec<String>>()
+}
+
+#[derive(Debug, Clone, Copy)]
+struct LinkingPreferences {
+    /// Prefer static linking over dynamic linking.
+    prefer_static: bool,
+    /// Force the use of the preferred kind of linking.
+    force: bool,
+}
+
+impl LinkingPreferences {
+    fn init() -> LinkingPreferences {
+        let prefer_static = cfg!(feature = "prefer-static");
+        let prefer_dynamic = cfg!(feature = "prefer-dynamic");
+        let force_static = cfg!(feature = "force-static");
+        let force_dynamic = cfg!(feature = "force-dynamic");
+
+        // more than one preference is an error
+        if [prefer_static, prefer_dynamic, force_static, force_dynamic]
+            .iter()
+            .filter(|&&x| x)
+            .count()
+            > 1
+        {
+            panic!(
+                "Only one of the features `prefer-static`, `prefer-dynamic`, `force-static`, \
+                 `force-dynamic` can be enabled at once."
+            );
+        }
+
+        // if no preference is given, default to force static linking, matching previous behavior
+        let force_static = force_static || !(prefer_static || prefer_dynamic || force_dynamic);
+
+        LinkingPreferences {
+            prefer_static: force_static || prefer_static,
+            force: force_static || force_dynamic,
+        }
+    }
 }
 
 fn get_llvm_cflags() -> String {
@@ -455,16 +627,27 @@ fn main() {
     ); // will be DEP_LLVM_CONFIG_PATH
     println!("cargo:libdir={}", libdir); // DEP_LLVM_LIBDIR
 
+    let preferences = LinkingPreferences::init();
+
     // Link LLVM libraries
     println!("cargo:rustc-link-search=native={}", libdir);
-    for name in get_link_libraries() {
-        println!("cargo:rustc-link-lib=static={}", name);
+    // We need to take note of what kind of libraries we linked to, so that
+    // we can link to the same kind of system libraries
+    let (kind, libs) = get_link_libraries(&preferences);
+    for name in libs {
+        println!("cargo:rustc-link-lib={}={}", kind.string(), name);
     }
 
     // Link system libraries
-    for name in get_system_libraries() {
-        let link_type = if target_env_is("musl") { "static" } else { "dylib" };
-        println!("cargo:rustc-link-lib={}={}", link_type, name);
+    // We get the system libraries based on the kind of LLVM libraries we link to, but we link to
+    // system libs based on the target environment.
+    let sys_lib_kind = if target_env_is("musl") {
+        LibraryKind::Static
+    } else {
+        LibraryKind::Dynamic
+    };
+    for name in get_system_libraries(kind) {
+        println!("cargo:rustc-link-lib={}={}", sys_lib_kind.string(), name);
     }
 
     let use_debug_msvcrt = env::var_os(&*ENV_USE_DEBUG_MSVCRT).is_some();
