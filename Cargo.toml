@@ -31,6 +31,18 @@ no-llvm-linking = []
 # not use any of those functions.
 disable-alltargets-init = []
 
+# Linking preference.
+# If none of these is selected, it defaults to force static linking to match
+# the behaviour before this feature is introduced.
+# Prefer dynamic linking to LLVM library if possible.
+prefer-dynamic = []
+# Force dynamic linking.
+force-dynamic = []
+# Prefer static linking to LLVM library if possible.
+prefer-static = []
+# Force static linking
+force-static = []
+
 [dependencies]
 libc = "0.2"
 clang-sys = { version = "1.2.2", optional = true }
