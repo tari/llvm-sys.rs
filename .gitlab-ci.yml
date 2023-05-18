@@ -5,7 +5,10 @@ variables:
 
 before_script:
   - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
-  - bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+  - wget https://apt.llvm.org/llvm.sh
+  - chmod +x llvm.sh
+  - ./llvm.sh 14
+  - apt-get install libpolly-14-dev
 
 test:
   script:
