@@ -36,6 +36,56 @@ the [generated API documentation](http://llvm.org/doxygen/).
 If you have your own project using these bindings that you think is worth
 mentioning here, by all means let me know.
 
+## Cargo features
+
+This crate provides a few feature flags that can be important to particular
+uses. These are mostly useful only at build-time; If you encounter problems
+building something that depends on llvm-sys, enabling one or more option may be
+useful; for example:
+
+    cargo build --features=llvm-sys/prefer-dynamic
+
+Most crates that depend on llvm-sys should not automatically enable any of these
+features, because the appropriateness of any given option usually depends on the
+configuration of the system on which the library is being compiled.
+
+ * Dynamic/static linking preferences `prefer-dynamic`, `force-dynamic`,
+   `prefer-static`, `force-static`. Only one may be specified, indicating how
+   LLVM should be linked. If none are enabled, `force-static` is assumed
+   (matching the behavior of older version of llvm-sys that did not support
+   dynamic linking).
+
+   With dynamic linking, the crate will link against a LLVM shared library
+   (a .dll on Windows, .so on Linux and so forth) which must be available at
+   runtime; static linking instead uses a static library archive (.lib on
+   Windows or .a on most Unix-like systems) that includes all of the library
+   code in the final binary (increasing file size but eliminating any dependency
+   on additional files to run the program).
+
+   If a `prefer-` option is enabled, the crate will attempt to use the specified
+   kind of linking (static or dynamic) but fall back to the other if the first
+   kind is unavailable. Setting a `force-` option will attempt only to do the
+   specified kind of linking and fail otherwise.
+
+ * `strict-versioning`: causes the build to fail if a version of LLVM exactly
+   matching the current crate version is not found. If enabled, linking crate
+   version 150.1.0 against LLVM 16.0 (for example) would fail whereas it is
+   normally permitted.
+
+   This may be useful if there is known to be an incompatibility between some
+   LLVM versions, causing the build to fail rather than possibly causing errors
+   at runtime.
+
+ * `disable-alltargets-init`: disable building the functions that initialize
+   LLVM components for all supported targets. These functions need to be
+   compiled from C, so if they are unneeded then turning them off can allow
+   the build to proceed if a working C compiler is unavailable.
+
+ * `no-llvm-linking`: prevents llvm-sys from instructing the compiler to link
+   against any LLVM libraries. This can be useful if another crate links LLVM in
+   some different way (preventing conflicts) but means the other crate must
+   ensure llvm-sys' library requirements are satisfied.
+
 ## LLVM compatibility
 
 Because the LLVM C [API stability guarantees][c-api-stability] are relatively
