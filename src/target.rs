@@ -123,6 +123,13 @@ extern "C" {
     pub fn LLVMInitializeRISCVAsmParser();
     pub fn LLVMInitializeRISCVDisassembler();
 
+    pub fn LLVMInitializeLoongArchTargetInfo();
+    pub fn LLVMInitializeLoongArchTarget();
+    pub fn LLVMInitializeLoongArchTargetMC();
+    pub fn LLVMInitializeLoongArchAsmPrinter();
+    pub fn LLVMInitializeLoongArchAsmParser();
+    pub fn LLVMInitializeLoongArchDisassembler();
+
     pub fn LLVMInitializeWebAssemblyTargetInfo();
     pub fn LLVMInitializeWebAssemblyTarget();
     pub fn LLVMInitializeWebAssemblyTargetMC();
