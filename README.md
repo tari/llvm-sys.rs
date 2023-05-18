@@ -15,6 +15,8 @@ on your system can be specified via environment variables. See
 
 ## Documentation
 
+[![documentation on docs.rs](https://img.shields.io/docsrs/llvm-sys)](https://docs.rs/llvm-sys/)
+
 See the `examples` directory in this repository for API examples. There also
 exist some other projects using these bindings which may be
 informative or useful:
