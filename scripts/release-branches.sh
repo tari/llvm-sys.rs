@@ -15,5 +15,5 @@ shift
 for branch in "${branches[@]}"
 do
     git checkout "$branch"
-    cargo release --no-dev-version "$@"
+    cargo release "$@"
 done
