@@ -88,7 +88,41 @@ configuration of the system on which the library is being compiled.
    some different way (preventing conflicts) but means the other crate must
    ensure llvm-sys' library requirements are satisfied.
 
-## LLVM compatibility
+## Build requirements
+
+llvm-sys requires a copy of `llvm-config` corresponding to the desired version of
+LLVM to build: `llvm-config` allows it to probe what libraries need to be linked
+and what compiler options are required.
+
+Binary distributions of LLVM (including the official release packages) generally
+**do not** include a copy of `llvm-config`, making them unsuited to use for building
+programs with `llvm-sys`. Known exceptions (that *do* include a copy of `llvm-config`)
+include:
+
+ * Official Debian/Ubuntu packages from [apt.llvm.org](https://apt.llvm.org/)
+ * Arch Linux's [`llvm`](https://archlinux.org/packages/extra/x86_64/llvm/) package
+
+If a suitable binary package is not available for your platform, compiling for
+source is usually the best option. See [Compiling LLVM in this document](#compiling-llvm)
+for details.
+
+---
+
+It may be difficult or even impossible to provide a compatible LLVM version
+system-wide for a given project (consider a program using two libraries that
+internally use different versions of LLVM!) so environment variables can be set
+to help the build scripts find your copy of the libraries. This is also helpful
+if you are unable to provide a system-wide version of LLVM but can still
+compile it yourself.
+
+`LLVM_SYS_<version>_PREFIX` specifies the install prefix for a compiled and
+installed copy of the libraries, where `<version>` is the major version of
+`llvm-sys` (for example, `LLVM_SYS_37_PREFIX`). The llvm-sys build scripts
+will look for a `llvm-config` binary in the directory `<PREFIX>/bin/` in
+addition to searching for a copy on `$PATH`, and verify that the LLVM version
+reported by `llvm-config` is compatible with the current crate version.
+
+### LLVM compatibility
 
 Because the LLVM C [API stability guarantees][c-api-stability] are relatively
 weak, this crate enforces that the LLVM release in use match the one it was made
@@ -136,24 +170,6 @@ as the linking target rather than just `llvm` because Cargo requires that all
 linked libraries be unique regardless of what is actually enabled. Note that
 although Cargo will not prevent you from enabling multiple versions of LLVM at
 once as a result, doing so will likely cause errors at link time.
-
----
-
-It may be difficult or even impossible to provide a compatible LLVM version
-system-wide for a given project (consider a program using two libraries that
-internally use different versions of LLVM!) so environment variables can be set
-to help the build scripts find your copy of the libraries. This is also helpful
-if you are unable to provide a system-wide version of LLVM but can still
-compile it yourself.
-
-`LLVM_SYS_<version>_PREFIX` specifies the install prefix for a compiled and
-installed copy of the libraries, where `<version>` is the major version of
-`llvm-sys` (for example, `LLVM_SYS_37_PREFIX`). For information on compiling
-a copy of LLVM yourself, see [Compiling LLVM](#compiling-llvm).
-
-In the future this library may offer the ability to download and compile LLVM
-automatically, but such a feature should only be considered for building
-one-off releases because its high cost is ill-suited to repeated builds.
 
 ## Compiling LLVM
 
@@ -217,18 +233,18 @@ cmake --build . --target install
 ```
 
 This will automatically invoke the build system and copy binaries into the
-prefix specified at configuration-time when done. Then you can compile llvm-sys
-against it.
+prefix specified at configuration-time when done.
+Some build tools (like Visual Studio on Windows) support all configurations
+concurrently so you also need to specify the build type (which defaults to Debug
+on Windows), adding an option like `--config MinSizeRel` to this invocation of
+cmake.
+
+After building and installing via CMake, you can compile llvm-sys against it.
 
 ```sh
 cd your/crate/path
 LLVM_SYS_39_PREFIX=$HOME/llvm-3.9.0 cargo build
 ```
-
-Some build tools (like Visual Studio on Windows) support all configurations
-concurrently so you also need to specify the build type (which defaults to Debug
-on Windows), adding an option like `--config MinSizeRel` to this invocation of
-cmake.
 
 ## Windows
 
