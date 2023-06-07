@@ -11,7 +11,7 @@ done
 
 shift
 
-while [ $# -gt 1 ]
+while [ $# -gt 0 ]
 do
     commits+=("$1")
     shift
