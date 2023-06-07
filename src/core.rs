@@ -241,7 +241,7 @@ extern "C" {
     ) -> LLVMNamedMDNodeRef;
     pub fn LLVMGetNamedMetadataName(
         NamedMD: LLVMNamedMDNodeRef,
-        NameLen: *const ::libc::size_t,
+        NameLen: *mut ::libc::size_t,
     ) -> *const ::libc::c_char;
     pub fn LLVMGetNamedMetadataNumOperands(
         M: LLVMModuleRef,
