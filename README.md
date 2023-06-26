@@ -24,7 +24,7 @@ informative or useful:
  * Safe, "Rusty" APIs for using LLVM:
    * [Inkwell](https://github.com/TheDan64/inkwell)
    * [llvm-ir](https://github.com/cdisselkoen/llvm-ir)
- * [Tari's merthc](https://bitbucket.org/tari/merthc)
+ * [Tari's merthc](https://gitlab.com/taricorp/merthc)
  * [Wilfred's BF compiler](https://crates.io/crates/bfc)
  * Jay Phelps wrote about [building a minimal compiler targeting
    WebAssembly](https://medium.com/@jayphelps/93e8c193fdb4)
