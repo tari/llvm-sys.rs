@@ -116,6 +116,8 @@ fn llvm_config_binary_names() -> std::vec::IntoIter<String> {
     let mut base_names = vec![
         "llvm-config".into(),
         format!("llvm-config-{}", CRATE_VERSION.major),
+        format!("llvm-config{}", CRATE_VERSION.major),
+        format!("llvm{}-config", CRATE_VERSION.major),
         format!(
             "llvm-config-{}.{}",
             CRATE_VERSION.major, CRATE_VERSION.minor
