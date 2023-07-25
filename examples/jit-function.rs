@@ -61,12 +61,14 @@ fn main() {
             if LLVMCreateExecutionEngineForModule(ee.as_mut_ptr(), module, &mut err) != 0 {
                 // In case of error, we must avoid using the uninitialized ExecutionEngineRef.
                 assert!(!err.is_null());
-                panic!("Failed to create execution engine: {:?}", CStr::from_ptr(err));
+                panic!(
+                    "Failed to create execution engine: {:?}",
+                    CStr::from_ptr(err)
+                );
             }
 
             ee.assume_init()
         };
-
 
         let addr = LLVMGetFunctionAddress(ee, b"sum\0".as_ptr() as *const _);
 
