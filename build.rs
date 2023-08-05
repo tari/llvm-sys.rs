@@ -321,7 +321,9 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
                         .rsplit_once(target_dylib_extension())
                         .expect("Shared library should be a .so file");
 
-                    stem.trim_start_matches("lib")
+                    stem.strip_prefix("lib").unwrap_or_else(|| {
+                        panic!("system library '{}' does not have a 'lib' prefix", soname)
+                    })
                 } else {
                     panic!(
                         "Unable to parse result of llvm-config --system-libs: {}",
