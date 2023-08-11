@@ -4,7 +4,7 @@ Rust bindings to LLVM's C API.
 
 ```toml
 [dependencies]
-llvm-sys = "160"
+llvm-sys = "170"
 ```
 
 There must be a compatible version of LLVM available. By default `llvm-sys`

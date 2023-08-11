@@ -1,14 +1,14 @@
 image: rust:bullseye
 
 variables:
-  LLVM_SYS_160_FFI_WORKAROUND: "YES"
+  LLVM_SYS_170_FFI_WORKAROUND: "YES"
 
 before_script:
   - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
   - wget https://apt.llvm.org/llvm.sh
   - chmod +x llvm.sh
-  - ./llvm.sh 16
-  - apt-get install libpolly-16-dev
+  - ./llvm.sh 17
+  - apt-get install libpolly-17-dev
 
 test:
   script:

@@ -34,8 +34,6 @@ extern "C" {
     );
     pub fn LLVMContextShouldDiscardValueNames(C: LLVMContextRef) -> LLVMBool;
     pub fn LLVMContextSetDiscardValueNames(C: LLVMContextRef, Discard: LLVMBool);
-    /// Set whether the given context is in opaque pointer mode.
-    pub fn LLVMContextSetOpaquePointers(C: LLVMContextRef, OpaquePointers: LLVMBool);
     pub fn LLVMContextDispose(C: LLVMContextRef);
     pub fn LLVMGetDiagInfoDescription(DI: LLVMDiagnosticInfoRef) -> *mut ::libc::c_char;
     pub fn LLVMGetDiagInfoSeverity(DI: LLVMDiagnosticInfoRef) -> LLVMDiagnosticSeverity;
@@ -377,8 +375,25 @@ extern "C" {
     pub fn LLVMGetSubtypes(Tp: LLVMTypeRef, Arr: *mut LLVMTypeRef);
     /// Return the number of types in the derived type.
     pub fn LLVMGetNumContainedTypes(Tp: LLVMTypeRef) -> ::libc::c_uint;
+    #[deprecated(
+        since = "17.0",
+        note = "LLVMArrayType is deprecated in favor of the API accurate LLVMArrayType2"
+    )]
     pub fn LLVMArrayType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
+    /// Create a fixed size array type that refers to a specific type.
+    ///
+    /// The created type will exist in the context that its element type
+    /// exists in.
+    pub fn LLVMArrayType2(ElementType: LLVMTypeRef, ElementCount: u64) -> LLVMTypeRef;
+    #[deprecated(
+        since = "17.0",
+        note = "LLVMGetArrayLength is deprecated in favor of the API accurate LLVMGetArrayLength2"
+    )]
     pub fn LLVMGetArrayLength(ArrayTy: LLVMTypeRef) -> ::libc::c_uint;
+    /// Obtain the length of an array type.
+    ///
+    /// This only works on types that represent arrays.
+    pub fn LLVMGetArrayLength2(ArrayTy: LLVMTypeRef) -> u64;
     pub fn LLVMPointerType(ElementType: LLVMTypeRef, AddressSpace: ::libc::c_uint) -> LLVMTypeRef;
     /// Determine whether a pointer is opaque.
     ///
@@ -452,6 +467,7 @@ extern "C" {
     /// Determine whether a value instance is poisonous.
     pub fn LLVMIsPoison(Val: LLVMValueRef) -> LLVMBool;
     pub fn LLVMIsAMDNode(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAValueAsMetadata(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAMDString(Val: LLVMValueRef) -> LLVMValueRef;
 
     // Core->Values->Usage
@@ -536,10 +552,20 @@ extern "C" {
         Count: ::libc::c_uint,
         Packed: LLVMBool,
     ) -> LLVMValueRef;
+    #[deprecated(
+        since = "17.0",
+        note = "LLVMConstArray is deprecated in favor of the API accurate LLVMConstArray2"
+    )]
     pub fn LLVMConstArray(
         ElementTy: LLVMTypeRef,
         ConstantVals: *mut LLVMValueRef,
         Length: ::libc::c_uint,
+    ) -> LLVMValueRef;
+    /// Create a ConstantArray from values.
+    pub fn LLVMConstArray2(
+        ElementTy: LLVMTypeRef,
+        ConstantVals: *mut LLVMValueRef,
+        Length: u64,
     ) -> LLVMValueRef;
     pub fn LLVMConstNamedStruct(
         StructTy: LLVMTypeRef,
@@ -622,11 +648,6 @@ extern "C" {
         isSigned: LLVMBool,
     ) -> LLVMValueRef;
     pub fn LLVMConstFPCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstSelect(
-        ConstantCondition: LLVMValueRef,
-        ConstantIfTrue: LLVMValueRef,
-        ConstantIfFalse: LLVMValueRef,
-    ) -> LLVMValueRef;
     pub fn LLVMConstExtractElement(
         VectorConstant: LLVMValueRef,
         IndexConstant: LLVMValueRef,
@@ -941,6 +962,12 @@ extern "C" {
     pub fn LLVMGetMDString(V: LLVMValueRef, Len: *mut ::libc::c_uint) -> *const ::libc::c_char;
     pub fn LLVMGetMDNodeNumOperands(V: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetMDNodeOperands(V: LLVMValueRef, Dest: *mut LLVMValueRef);
+    /// Replace an operand at a specific index in a llvm::MDNode value.
+    pub fn LLVMReplaceMDNodeOperandWith(
+        V: LLVMValueRef,
+        Index: ::libc::c_uint,
+        Replacement: LLVMMetadataRef,
+    );
 }
 
 // Core->Basic Block
@@ -1576,6 +1603,13 @@ extern "C" {
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
 
+    pub fn LLVMGetNUW(ArithInst: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMSetNUW(ArithInst: LLVMValueRef, HasNUW: LLVMBool);
+    pub fn LLVMGetNSW(ArithInst: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMSetNSW(ArithInst: LLVMValueRef, HasNSW: LLVMBool);
+    pub fn LLVMGetExact(DivOrShrInst: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMSetExact(DivOrShrInst: LLVMValueRef, IsExact: LLVMBool);
+
     // Memory
     pub fn LLVMBuildMalloc(
         arg1: LLVMBuilderRef,
@@ -1975,11 +2009,6 @@ extern "C" {
     pub fn LLVMGetBufferStart(MemBuf: LLVMMemoryBufferRef) -> *const ::libc::c_char;
     pub fn LLVMGetBufferSize(MemBuf: LLVMMemoryBufferRef) -> ::libc::size_t;
     pub fn LLVMDisposeMemoryBuffer(MemBuf: LLVMMemoryBufferRef);
-}
-
-// Core->pass registry
-extern "C" {
-    pub fn LLVMGetGlobalPassRegistry() -> LLVMPassRegistryRef;
 }
 
 // Core->Pass managers

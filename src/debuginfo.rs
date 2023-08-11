@@ -93,6 +93,7 @@ pub enum LLVMDWARFSourceLanguage {
     LLVMDWARFSourceLanguageFortran18,
     LLVMDWARFSourceLanguageAda2005,
     LLVMDWARFSourceLanguageAda2012,
+    LLVMDWARFSourceLanguageMojo,
     // Vendor extensions:
     LLVMDWARFSourceLanguageMips_Assembler,
     LLVMDWARFSourceLanguageGOOGLE_RenderScript,
@@ -754,6 +755,9 @@ extern "C" {
         Decl: LLVMMetadataRef,
         AlignInBits: u32,
     ) -> LLVMMetadataRef;
+
+    /// Get the dwarf::Tag of a DINode
+    pub fn LLVMGetDINodeTag(MD: LLVMMetadataRef) -> u16;
 
     /// Retrieves the DIVariable associated with this global variable expression.
     pub fn LLVMDIGlobalVariableExpressionGetVariable(GVE: LLVMMetadataRef) -> LLVMMetadataRef;
