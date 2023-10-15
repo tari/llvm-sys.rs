@@ -2,11 +2,11 @@ extern crate anyhow;
 extern crate cc;
 #[macro_use]
 extern crate lazy_static;
-extern crate regex;
+extern crate regex_lite;
 extern crate semver;
 
 use anyhow::Context as _;
-use regex::Regex;
+use regex_lite::Regex;
 use semver::Version;
 use std::env;
 use std::ffi::OsStr;
