@@ -8,7 +8,7 @@ before_script:
   - wget https://apt.llvm.org/llvm.sh
   - chmod +x llvm.sh
   - ./llvm.sh 17
-  - apt-get install libpolly-17-dev
+  - apt-get install libpolly-17-dev libzstd-dev
 
 test:
   script:
