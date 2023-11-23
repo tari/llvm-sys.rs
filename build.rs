@@ -306,7 +306,7 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
                     // Library on disk, likely an absolute path to a .so. We'll add its location to
                     // the library search path and specify the file as a link target.
                     println!(
-                        "cargo:rustc-link-search={}",
+                        "cargo:rustc-link-search=native={}",
                         maybe_lib.parent().unwrap().display()
                     );
 
@@ -332,6 +332,11 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
                 }
             }
         })
+        .chain(
+            get_implicit_dependencies()
+                .iter()
+                .filter_map(|opt_dependency| (*opt_dependency).as_deref()),
+        )
         .chain(get_system_libcpp())
         .map(str::to_owned)
         .collect()
@@ -343,6 +348,19 @@ fn target_dylib_extension() -> &'static str {
     } else {
         ".so"
     }
+}
+
+/// Get libraries that LLVM depends on statically, yet that aren't declared through their build system.
+fn get_implicit_dependencies() -> [Option<String>; 3] {
+    // Link libffi if the user requested this workaround.
+    // See https://bitbucket.org/tari/llvm-sys.rs/issues/12/
+    [
+        env::var(&*ENV_FORCE_FFI)
+            .is_ok_and(|argument| argument == "YES")
+            .then_some::<String>("ffi".to_owned()),
+        Some("lzma".to_owned()),
+        Some("ncurses".to_owned()),
+    ]
 }
 
 /// Get the library that must be linked for C++, if any.
@@ -359,9 +377,6 @@ fn get_system_libcpp() -> Option<&'static str> {
         // when LLVM was built against libstdc++.
         Some("c++")
     } else if target_os_is("freebsd") {
-        Some("c++")
-    } else if target_env_is("musl") {
-        // The one built with musl.
         Some("c++")
     } else {
         // Otherwise assume GCC's libstdc++.
@@ -612,36 +627,50 @@ fn main() {
 
     let preferences = LinkingPreferences::init();
 
-    // Link LLVM libraries
-    println!("cargo:rustc-link-search=native={}", libdir);
-    // We need to take note of what kind of libraries we linked to, so that
-    // we can link to the same kind of system libraries
-    let (kind, libs) = get_link_libraries(&llvm_config_path, &preferences);
-    for name in libs {
-        println!("cargo:rustc-link-lib={}={}", kind.string(), name);
-    }
-
     // Link system libraries
     // We get the system libraries based on the kind of LLVM libraries we link to, but we link to
     // system libs based on the target environment.
-    let sys_lib_kind = if target_env_is("musl") {
+    if cfg!(target_feature = "crt-static") && target_env_is("musl") {
+        // Point rustc to possible directories with system static libraries.
+        #[cfg(target_pointer_width = "64")]
+        {
+            println!("cargo:rustc-link-search=native=/lib64");
+            println!("cargo:rustc-link-search=native=/usr/lib64");
+            println!("cargo:rustc-link-search=native=/usr/local/lib64");
+        }
+        println!("cargo:rustc-link-search=native=/lib");
+        println!("cargo:rustc-link-search=native=/usr/lib");
+        println!("cargo:rustc-link-search=native=/usr/local/lib");
+    }
+    let sys_lib_kind = if cfg!(target_feature = "crt-static") {
+        println!("cargo:rustc-link-arg=-static-libgcc");
+        println!("cargo:rustc-link-arg=-lgcc");
         LibraryKind::Static
     } else {
+        println!("cargo:rustc-link-arg=-lstdc++");
         LibraryKind::Dynamic
     };
+    // We need to take note of what kind of libraries we linked to, so that
+    // we can link to the same kind of system libraries
+    let (kind, libs) = get_link_libraries(&llvm_config_path, &preferences);
     for name in get_system_libraries(&llvm_config_path, kind) {
-        println!("cargo:rustc-link-lib={}={}", sys_lib_kind.string(), name);
+        println!("cargo:rustc-link-lib={}={name}", sys_lib_kind.string());
+        println!("cargo:rustc-link-arg-examples=-l{name}");
+        // TODO: Doesn't detect integration or unit tests with rustc 1.74.0 (79e9716c9 2023-11-13).
+        println!("cargo:rustc-link-arg-tests=-l{name}");
+        // So add this general flag at the risk of breakage when binaries are added to this crate.
+        println!("cargo:rustc-link-arg=-l{name}");
     }
 
     let use_debug_msvcrt = env::var_os(&*ENV_USE_DEBUG_MSVCRT).is_some();
     if target_env_is("msvc") && (use_debug_msvcrt || is_llvm_debug(&llvm_config_path)) {
-        println!("cargo:rustc-link-lib={}", "msvcrtd");
+        println!("cargo:rustc-link-lib=msvcrtd");
     }
 
-    // Link libffi if the user requested this workaround.
-    // See https://bitbucket.org/tari/llvm-sys.rs/issues/12/
-    let force_ffi = env::var_os(&*ENV_FORCE_FFI).is_some();
-    if force_ffi {
-        println!("cargo:rustc-link-lib=dylib={}", "ffi");
+    // Link LLVM libraries
+    println!("cargo:rustc-link-search=native={}", libdir);
+
+    for name in libs {
+        println!("cargo:rustc-link-lib={}={}", kind.string(), name);
     }
 }

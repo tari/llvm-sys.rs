@@ -1,19 +1,31 @@
-image: rust:bullseye
-
 variables:
   LLVM_SYS_160_FFI_WORKAROUND: "YES"
 
-before_script:
-  - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
-  - wget https://apt.llvm.org/llvm.sh
-  - chmod +x llvm.sh
-  - ./llvm.sh 16
-  - apt-get install libpolly-16-dev
-
-test:
+.build_definition:
   script:
-    - cargo build
-    - cargo test
+    - cargo --verbose --verbose build
+    - cargo --verbose --verbose test
     - cargo run --example nop-function
     - cargo run --example jit-function
     - echo "Hello, world!" | cargo run --example disassembler
+
+# Dynamically linked Debian build, using glibc.
+test:debian:
+  image: rust:bullseye
+  before_script:
+    - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
+    - wget https://apt.llvm.org/llvm.sh
+    - chmod +x llvm.sh
+    - ./llvm.sh 16
+    - apt-get install libpolly-16-dev libzstd-dev
+  extends:
+    - .build_definition
+
+# Statically linked Alpine Linux build, using musl.
+test:alpine:
+  image: rust:alpine
+  before_script:
+    - apk update
+    - apk add libxml2-static llvm16 llvm16-dev llvm16-static musl-dev zlib-static zstd-static libstdc++-dev xz-static libffi-dev ncurses-static
+  extends:
+    - .build_definition
