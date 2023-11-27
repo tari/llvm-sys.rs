@@ -15,7 +15,8 @@ variables:
     - cargo --verbose --verbose build --features $FEATURES_CARGO >cargo_build.stdout.log 2>cargo_build.stderr.log
     - cargo --verbose --verbose test --features $FEATURES_CARGO >cargo_test.stdout.log 2>cargo_test.stderr.log
     - cargo run --example nop-function --features $FEATURES_CARGO
-    - cargo run --example jit-function --features $FEATURES_CARGO
+    # Only run LLJIT example when linked dynamically.
+    - if [ "${FEATURES_CARGO#*"force-dynamic"}" != "$FEATURES_CARGO" ] ; then cargo run --example jit-function --features $FEATURES_CARGO ; fi
     - echo "Hello, world!" | cargo run --example disassembler --features $FEATURES_CARGO
 
 # Dynamically linked Debian build, using glibc.

@@ -1,4 +1,5 @@
 [package]
+autoexamples = false
 description = "Bindings to LLVM's C API"
 repository = "https://gitlab.com/taricorp/llvm-sys.rs"
 readme = "README.md"
@@ -52,3 +53,15 @@ cc = "1.0"
 lazy_static = "1.0"
 regex-lite = "0.1.5"
 semver = "1.0.7"
+
+[[example]]
+name = "jit-function"
+# LLJIT uses `dlopen()`.
+# This would be very hard to implement correctly for statically linked binaries and so isn't implemented in musl.
+required-features = ["force-dynamic"]
+
+[[example]]
+name = "disassembler"
+
+[[example]]
+name = "nop-function"
