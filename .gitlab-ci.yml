@@ -10,12 +10,13 @@ variables:
       - '*.log'
     public: true
     when: always
+  dependencies: []
   script:
-    - cargo --verbose --verbose build >cargo_build.stdout.log 2>cargo_build.stderr.log
-    - cargo --verbose --verbose test >cargo_test.stdout.log 2>cargo_test.stderr.log
-    - cargo run --example nop-function
-    - cargo run --example jit-function
-    - echo "Hello, world!" | cargo run --example disassembler
+    - cargo --verbose --verbose build --features $FEATURES_CARGO >cargo_build.stdout.log 2>cargo_build.stderr.log
+    - cargo --verbose --verbose test --features $FEATURES_CARGO >cargo_test.stdout.log 2>cargo_test.stderr.log
+    - cargo run --example nop-function --features $FEATURES_CARGO
+    - cargo run --example jit-function --features $FEATURES_CARGO
+    - echo "Hello, world!" | cargo run --example disassembler --features $FEATURES_CARGO
 
 # Dynamically linked Debian build, using glibc.
 test:debian:
@@ -28,12 +29,22 @@ test:debian:
     - apt-get install libpolly-16-dev libzstd-dev
   extends:
     - .build_definition
+  variables:
+    FEATURES_CARGO: 'force-dynamic'
 
-# Statically linked Alpine Linux build, using musl.
+# Dynamically or statically linked Alpine Linux build, using musl.
 test:alpine:
   image: rust:alpine
   before_script:
     - apk update
-    - apk add libxml2-static llvm16 llvm16-dev llvm16-static musl-dev zlib-static zstd-static libstdc++-dev xz-static libffi-dev ncurses-static
+    - apk add $DEPENDENCIES_OS
   extends:
     - .build_definition
+  parallel:
+    matrix:
+      - DEPENDENCIES_OS: ['build-base gcompat libffi-dev libgcc libstdc++-dev libxml2-dev llvm16 llvm16-dev musl-dev ncurses-dev xz-libs zlib-dev zstd-dev']
+        FEATURES_CARGO: 'force-dynamic'
+        RUSTFLAGS: ['-C target-feature=-crt-static']
+      - DEPENDENCIES_OS: ['build-base libffi-dev libstdc++-dev libxml2-static llvm16 llvm16-dev llvm16-static musl-dev ncurses-static xz-static zlib-static zstd-static']
+        FEATURES_CARGO: 'force-static'
+        RUSTFLAGS: ['-C target-feature=+crt-static']
