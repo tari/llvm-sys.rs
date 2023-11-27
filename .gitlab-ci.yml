@@ -2,9 +2,17 @@ variables:
   LLVM_SYS_160_FFI_WORKAROUND: "YES"
 
 .build_definition:
+  after_script:
+    - tail *.log
+  artifacts:
+    expire_in: 3 months
+    paths:
+      - '*.log'
+    public: true
+    when: always
   script:
-    - cargo --verbose --verbose build
-    - cargo --verbose --verbose test
+    - cargo --verbose --verbose build >cargo_build.stdout.log 2>cargo_build.stderr.log
+    - cargo --verbose --verbose test >cargo_test.stdout.log 2>cargo_test.stderr.log
     - cargo run --example nop-function
     - cargo run --example jit-function
     - echo "Hello, world!" | cargo run --example disassembler
