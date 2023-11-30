@@ -15,7 +15,6 @@ use llvm_sys::target::{
 };
 use std::ffi::CStr;
 use std::io::{stdin, stdout, Read, Result as IoResult, Write};
-use std::os::raw::c_char;
 use std::ptr;
 
 fn main() -> IoResult<()> {
@@ -24,7 +23,7 @@ fn main() -> IoResult<()> {
         LLVM_InitializeAllTargetMCs();
         LLVM_InitializeAllDisassemblers();
         LLVMCreateDisasm(
-            "x86_64\0".as_ptr() as *const c_char,
+            "x86_64\0".as_ptr() as *const i8,
             ptr::null_mut(),
             0,
             None,
@@ -57,14 +56,14 @@ fn disassemble_bytes<W: Write>(
     let mut pc = PC_BASE_ADDR;
 
     loop {
-        let mut sbuf = [0; 128];
+        let mut sbuf = [0i8; 128];
         let sz = unsafe {
             LLVMDisasmInstruction(
                 disasm,
                 x.as_mut_ptr(),
                 x.len() as u64,
                 pc,
-                sbuf.as_mut_ptr() as *mut c_char,
+                sbuf.as_mut_ptr() as *mut i8,
                 sbuf.len(),
             )
         };
