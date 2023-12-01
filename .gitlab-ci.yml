@@ -10,7 +10,7 @@ before_script:
   # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
   - echo >> /etc/apt/sources.list
   - ./llvm.sh 17
-  - apt-get install libpolly-17-dev libzstd-dev
+  - apt-get install -qq -y libpolly-17-dev libzstd-dev
 
 test:
   script:
