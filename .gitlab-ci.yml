@@ -7,6 +7,8 @@ before_script:
   - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
   - wget https://apt.llvm.org/llvm.sh
   - chmod +x llvm.sh
+  # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
+  - echo >> /etc/apt/sources.list
   - ./llvm.sh 17
   - apt-get install libpolly-17-dev libzstd-dev
 
