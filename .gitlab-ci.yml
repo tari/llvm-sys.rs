@@ -19,3 +19,8 @@ test:
     - cargo run --example nop-function
     - cargo run --example jit-function
     - echo "Hello, world!" | cargo run --example disassembler
+  parallel:
+    matrix:
+      - RUNNER_TAG: ["", "aarch64"]
+  tags:
+    - "${RUNNER_TAG}"
