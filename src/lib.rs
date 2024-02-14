@@ -53,6 +53,9 @@ pub enum LLVMPassManager {}
 pub enum LLVMUse {}
 
 #[derive(Debug)]
+pub enum LLVMOpaqueOperandBundle {}
+
+#[derive(Debug)]
 pub enum LLVMDiagnosticInfo {}
 
 #[derive(Debug)]
@@ -86,6 +89,7 @@ pub mod prelude {
     pub type LLVMModuleProviderRef = *mut super::LLVMModuleProvider;
     pub type LLVMPassManagerRef = *mut super::LLVMPassManager;
     pub type LLVMUseRef = *mut super::LLVMUse;
+    pub type LLVMOperandBundleRef = *mut super::LLVMOpaqueOperandBundle;
     pub type LLVMDiagnosticInfoRef = *mut super::LLVMDiagnosticInfo;
     pub type LLVMComdatRef = *mut super::LLVMComdat;
     pub type LLVMModuleFlagEntry = *mut super::LLVMOpaqueModuleFlagEntry;
@@ -273,7 +277,6 @@ pub enum LLVMCallConv {
     LLVMColdCallConv = 9,
     LLVMGHCCallConv = 10,
     LLVMHiPECallConv = 11,
-    LLVMWebKitJSCallConv = 12,
     LLVMAnyRegCallConv = 13,
     LLVMPreserveMostCallConv = 14,
     LLVMPreserveAllCallConv = 15,
@@ -470,6 +473,39 @@ pub const LLVMAttributeFunctionIndex: ::libc::c_uint = !0; // -1
 /// Either LLVMAttributeReturnIndex, LLVMAttributeFunctionIndex, or a parameter
 /// number from 1 to N.
 pub type LLVMAttributeIndex = ::libc::c_uint;
+
+/// Tail call kind for LLVMSetTailCallKind and LLVMGetTailCallKind.
+///
+/// Note that `musttail` implies `tail`.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LLVMTailCallKind {
+    LLVMTailCallKindNone = 0,
+    LLVMTailCallKindTail = 1,
+    LLVMTailCallKindMustTail = 2,
+    LLVMTailCallKindNoTail = 3,
+}
+
+pub const LLVMFastMathAllowReassoc: ::libc::c_uint = 1 << 0;
+pub const LLVMFastMathNoNaNs: ::libc::c_uint = 1 << 1;
+pub const LLVMFastMathNoInfs: ::libc::c_uint = 1 << 2;
+pub const LLVMFastMathNoSignedZeros: ::libc::c_uint = 1 << 3;
+pub const LLVMFastMathAllowReciprocal: ::libc::c_uint = 1 << 4;
+pub const LLVMFastMathAllowContract: ::libc::c_uint = 1 << 5;
+pub const LLVMFastMathApproxFunc: ::libc::c_uint = 1 << 6;
+pub const LLVMFastMathNone: ::libc::c_uint = 0;
+pub const LLVMFastMathAll: ::libc::c_uint = LLVMFastMathAllowReassoc
+    | LLVMFastMathNoNaNs
+    | LLVMFastMathNoInfs
+    | LLVMFastMathNoSignedZeros
+    | LLVMFastMathAllowReciprocal
+    | LLVMFastMathAllowContract
+    | LLVMFastMathApproxFunc;
+
+/// Flags to indicate what fast-math-style optimizations are allowed on operations.
+///
+/// See https://llvm.org/docs/LangRef.html#fast-math-flags
+pub type LLVMFastMathFlags = ::libc::c_uint;
 
 pub type LLVMDiagnosticHandler =
     Option<extern "C" fn(arg1: LLVMDiagnosticInfoRef, arg2: *mut ::libc::c_void)>;

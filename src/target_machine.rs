@@ -9,6 +9,11 @@ pub enum LLVMOpaqueTargetMachine {}
 pub type LLVMTargetMachineRef = *mut LLVMOpaqueTargetMachine;
 
 #[derive(Debug)]
+pub enum LLVMOpaqueTargetMachineOptions {}
+
+pub type LLVMTargetMachineOptionsRef = *mut LLVMOpaqueTargetMachineOptions;
+
+#[derive(Debug)]
 pub enum LLVMTarget {}
 
 pub type LLVMTargetRef = *mut LLVMTarget;
@@ -53,6 +58,14 @@ pub enum LLVMCodeGenFileType {
     LLVMObjectFile = 1,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LLVMGlobalISelAbortMode {
+    LLVMGlobalISelAbortEnable,
+    LLVMGlobalISelAbortDisable,
+    LLVMGlobalISelAbortDisableWithDiag,
+}
+
 extern "C" {
     pub fn LLVMGetFirstTarget() -> LLVMTargetRef;
     pub fn LLVMGetNextTarget(T: LLVMTargetRef) -> LLVMTargetRef;
@@ -67,6 +80,48 @@ extern "C" {
     pub fn LLVMTargetHasJIT(T: LLVMTargetRef) -> LLVMBool;
     pub fn LLVMTargetHasTargetMachine(T: LLVMTargetRef) -> LLVMBool;
     pub fn LLVMTargetHasAsmBackend(T: LLVMTargetRef) -> LLVMBool;
+
+    /// Create a new set of options for an llvm::TargetMachine.
+    ///
+    /// The returned option structure must be released with
+    /// LLVMDisposeTargetMachineOptions() after the call to
+    /// LLVMCreateTargetMachineWithOptions().
+    pub fn LLVMCreateTargetMachineOptions() -> LLVMTargetMachineOptionsRef;
+    /// Dispose of an LLVMTargetMachineOptionsRef instance.
+    pub fn LLVMDisposeTargetMachineOptions(Options: LLVMTargetMachineOptionsRef);
+    pub fn LLVMTargetMachineOptionsSetCPU(
+        Options: LLVMTargetMachineOptionsRef,
+        CPU: *const ::libc::c_char,
+    );
+    /// Set the list of features for the target machine.
+    ///
+    /// `Features` is a comma-separated list of features.
+    pub fn LLVMTargetMachineOptionsSetFeatures(
+        Options: LLVMTargetMachineOptionsRef,
+        Features: *const ::libc::c_char,
+    );
+    pub fn LLVMTargetMachineOptionsSetABI(
+        Options: LLVMTargetMachineOptionsRef,
+        ABI: *const ::libc::c_char,
+    );
+    pub fn LLVMTargetMachineOptionsSetCodeGenOptLevel(
+        Options: LLVMTargetMachineOptionsRef,
+        Level: LLVMCodeGenOptLevel,
+    );
+    pub fn LLVMTargetMachineOptionsSetRelocMode(
+        Options: LLVMTargetMachineOptionsRef,
+        Reloc: LLVMRelocMode,
+    );
+    pub fn LLVMTargetMachineOptionsSetCodeModel(
+        Options: LLVMTargetMachineOptionsRef,
+        CodeModel: LLVMCodeModel,
+    );
+    pub fn LLVMCreateTargetMachineWithOptions(
+        T: LLVMTargetRef,
+        Triple: *const ::libc::c_char,
+        Options: LLVMTargetMachineOptionsRef,
+    ) -> LLVMTargetMachineRef;
+
     pub fn LLVMCreateTargetMachine(
         T: LLVMTargetRef,
         Triple: *const ::libc::c_char,
@@ -84,6 +139,19 @@ extern "C" {
     /// Create a DataLayout based on the target machine.
     pub fn LLVMCreateTargetDataLayout(T: LLVMTargetMachineRef) -> LLVMTargetDataRef;
     pub fn LLVMSetTargetMachineAsmVerbosity(T: LLVMTargetMachineRef, VerboseAsm: LLVMBool);
+
+    /// Enable fast-path instruction selection.
+    pub fn LLVMSetTargetMachineFastISel(T: LLVMTargetMachineRef, Enable: LLVMBool);
+    /// Enable global instruction selection.
+    pub fn LLVMSetTargetMachineGlobalISel(T: LLVMTargetMachineRef, Enable: LLVMBool);
+    /// Set abort behaviour when global instruction selection fails to lower/select an instruction.
+    pub fn LLVMSetTargetMachineGlobalISelAbort(
+        T: LLVMTargetMachineRef,
+        Mode: LLVMGlobalISelAbortMode,
+    );
+    /// Enable the MachineOutliner pass.
+    pub fn LLVMSetTargetMachineMachineOutliner(T: LLVMTargetMachineRef, Enable: LLVMBool);
+
     pub fn LLVMTargetMachineEmitToFile(
         T: LLVMTargetMachineRef,
         M: LLVMModuleRef,

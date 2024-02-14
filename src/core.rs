@@ -218,15 +218,44 @@ extern "C" {
     );
     pub fn LLVMGetInlineAsm(
         Ty: LLVMTypeRef,
-        AsmString: *mut ::libc::c_char,
+        AsmString: *const ::libc::c_char,
         AsmStringSize: ::libc::size_t,
-        Constraints: *mut ::libc::c_char,
+        Constraints: *const ::libc::c_char,
         ConstraintsSize: ::libc::size_t,
         HasSideEffects: LLVMBool,
         IsAlignStack: LLVMBool,
         Dialect: LLVMInlineAsmDialect,
         CanThrow: LLVMBool,
     ) -> LLVMValueRef;
+
+    /// Get the template string used for an inline assembly snippet.
+    pub fn LLVMGetInlineAsmAsmString(
+        InlineAsmVal: LLVMValueRef,
+        Len: *mut ::libc::size_t,
+    ) -> *const ::libc::c_char;
+
+    /// Get the raw constraint string for an inline assembly snippet.
+    pub fn LLVMGetInlineAsmConstraintString(
+        InlineAsmVal: LLVMValueRef,
+        Len: *mut ::libc::size_t,
+    ) -> *const ::libc::c_char;
+
+    /// Get the dialect used by the inline asm snippet.
+    pub fn LLVMGetInlineAsmDialect(InlineAsmVal: LLVMValueRef) -> LLVMInlineAsmDialect;
+
+    /// Get the function type of the inline assembly snippet.
+    ///
+    /// This is the same type that was passed into LLVMGetInlineAsm originally.
+    pub fn LLVMGetInlineAsmFunctionType(InlineAsmVal: LLVMValueRef) -> LLVMTypeRef;
+
+    /// Get if the inline asm snippet has side effects
+    pub fn LLVMGetInlineAsmHasSideEffects(InlineAsmVal: LLVMValueRef) -> LLVMBool;
+
+    /// Get if the inline asm snippet needs an aligned stack
+    pub fn LLVMGetInlineAsmNeedsAlignedStack(InlineAsmVal: LLVMValueRef) -> LLVMBool;
+
+    /// Get if the inline asm snippet may unwind the stack
+    pub fn LLVMGetInlineAsmCanUnwind(InlineAsmVal: LLVMValueRef) -> LLVMBool;
 
     pub fn LLVMGetModuleContext(M: LLVMModuleRef) -> LLVMContextRef;
     #[deprecated(since = "12.0.0", note = "Use LLVMGetTypeByName2 instead")]
@@ -597,8 +626,6 @@ extern "C" {
     pub fn LLVMConstMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstAnd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstOr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstXor(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstICmp(
         Predicate: LLVMIntPredicate,
@@ -611,8 +638,6 @@ extern "C" {
         RHSConstant: LLVMValueRef,
     ) -> LLVMValueRef;
     pub fn LLVMConstShl(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstLShr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstAShr(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstGEP2(
         Ty: LLVMTypeRef,
         ConstantVal: LLVMValueRef,
@@ -626,28 +651,12 @@ extern "C" {
         NumIndices: ::libc::c_uint,
     ) -> LLVMValueRef;
     pub fn LLVMConstTrunc(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstSExt(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstZExt(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstFPTrunc(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstFPExt(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstUIToFP(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstSIToFP(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstFPToUI(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstFPToSI(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstPtrToInt(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstIntToPtr(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstBitCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstAddrSpaceCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstZExtOrBitCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstSExtOrBitCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstTruncOrBitCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstPointerCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
-    pub fn LLVMConstIntCast(
-        ConstantVal: LLVMValueRef,
-        ToType: LLVMTypeRef,
-        isSigned: LLVMBool,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstFPCast(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstExtractElement(
         VectorConstant: LLVMValueRef,
         IndexConstant: LLVMValueRef,
@@ -896,6 +905,43 @@ extern "C" {
     #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDNodeInContext2 instead.")]
     pub fn LLVMMDNode(Vals: *mut LLVMValueRef, Count: ::libc::c_uint) -> LLVMValueRef;
 
+    /// Create a new operand bundle.
+    ///
+    /// Every invocation should be paired with LLVMDisposeOperandBundle() or memory
+    /// will be leaked.
+    pub fn LLVMCreateOperandBundle(
+        Tag: *const ::libc::c_char,
+        TagLen: ::libc::size_t,
+        Args: *mut LLVMValueRef,
+        NumArgs: ::libc::c_uint,
+    ) -> LLVMOperandBundleRef;
+
+    /// Destroy an operand bundle.
+    ///
+    /// This must be called for every created operand bundle or memory will be
+    /// leaked.
+    pub fn LLVMDisposeOperandBundle(Bundle: LLVMOperandBundleRef);
+
+    /// Obtain the tag of an operand bundle as a string.
+    ///
+    /// @param Bundle Operand bundle to obtain tag of.
+    /// @param Len Out parameter which holds the length of the returned string.
+    /// @return The tag name of Bundle.
+    /// @see OperandBundleDef::getTag()
+    pub fn LLVMGetOperandBundleTag(
+        Bundle: LLVMOperandBundleRef,
+        Len: *mut ::libc::size_t,
+    ) -> *const ::libc::c_char;
+
+    /// Obtain the number of operands for an operand bundle.
+    pub fn LLVMGetNumOperandBundleArgs(Bundle: LLVMOperandBundleRef) -> ::libc::c_uint;
+
+    /// Obtain the operand for an operand bundle at the given index.
+    pub fn LLVMGetOperandBundleArgAtIndex(
+        Bundle: LLVMOperandBundleRef,
+        Index: ::libc::c_uint,
+    ) -> LLVMValueRef;
+
     /// Add a global indirect function to a module under a specified name.
     pub fn LLVMAddGlobalIFunc(
         M: LLVMModuleRef,
@@ -1097,9 +1143,23 @@ extern "C" {
     ///
     /// The provided value should be a CallInst or InvokeInst.
     pub fn LLVMGetCalledValue(Instr: LLVMValueRef) -> LLVMValueRef;
+    /// Get the number of operand bundles attached to this instruction.
+    ///
+    /// Only works with CallInst and InvokeInst instructions.
+    pub fn LLVMGetNumOperandBundles(C: LLVMValueRef) -> ::libc::c_uint;
+    /// Get the operand bundle attached to this instruction at the given index.
+    ///
+    /// Use LLVMDisposeOperandBundle to free the operand bundle. This only works
+    /// on CallInst and InvokeInst instructions.
+    pub fn LLVMGetOperandBundleAtIndex(
+        C: LLVMValueRef,
+        Index: ::libc::c_uint,
+    ) -> LLVMOperandBundleRef;
     /// Get whether a call instruction is a tail call.
     pub fn LLVMIsTailCall(CallInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetTailCall(CallInst: LLVMValueRef, IsTailCall: LLVMBool);
+    pub fn LLVMGetTailCallKind(CallInst: LLVMValueRef) -> LLVMTailCallKind;
+    pub fn LLVMSetTailCallKind(CallInst: LLVMValueRef, kind: LLVMTailCallKind);
     /// Return the normal destination basic block of an invoke instruction.
     pub fn LLVMGetNormalDest(InvokeInst: LLVMValueRef) -> LLVMBasicBlockRef;
     /// Return the unwind destination basic block.
@@ -1321,6 +1381,18 @@ extern "C" {
         NumArgs: ::libc::c_uint,
         Then: LLVMBasicBlockRef,
         Catch: LLVMBasicBlockRef,
+        Name: *const ::libc::c_char,
+    ) -> LLVMValueRef;
+    pub fn LLVMBuildInvokeWithOperandBundles(
+        arg1: LLVMBuilderRef,
+        Ty: LLVMTypeRef,
+        Fn: LLVMValueRef,
+        Args: *mut LLVMValueRef,
+        NumArgs: ::libc::c_uint,
+        Then: LLVMBasicBlockRef,
+        Catch: LLVMBasicBlockRef,
+        Bundles: *mut LLVMOperandBundleRef,
+        NumBundles: ::libc::c_uint,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildUnreachable(B: LLVMBuilderRef) -> LLVMValueRef;
@@ -1610,6 +1682,43 @@ extern "C" {
     pub fn LLVMGetExact(DivOrShrInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetExact(DivOrShrInst: LLVMValueRef, IsExact: LLVMBool);
 
+    /// Gets if the instruction has the non-negative flag set.
+    ///
+    /// Only valid for zext instructions.
+    pub fn LLVMGetNNeg(NonNegInst: LLVMValueRef) -> LLVMBool;
+
+    /// Sets the non-negative flag for the instruction.
+    ///
+    /// Only valid for zext instructions.
+    pub fn LLVMSetNNeg(NonNegInst: LLVMValueRef, IsNonNeg: LLVMBool);
+
+    /// Get the flags for which fast-math-style optimizations are allowed for this value.
+    ///
+    /// Only valid on floating point instructions.
+    pub fn LLVMGetFastMathFlags(FPMathInst: LLVMValueRef) -> LLVMFastMathFlags;
+
+    /// Sets the flags for which fast-math-style optimizations are allowed for this value.
+    ///
+    /// Only valid on floating point instructions.
+    pub fn LLVMSetFastMathFlags(FPMathInst: LLVMValueRef, FMF: LLVMFastMathFlags);
+
+    /// Check if a given value can potentially have fast math flags.
+    ///
+    /// Will return true for floating point arithmetic instructions, and for select,
+    /// phi, and call instructions whose type is a floating point type, or a vector
+    /// or array thereof. See https://llvm.org/docs/LangRef.html#fast-math-flags
+    pub fn LLVMCanValueUseFastMathFlags(Inst: LLVMValueRef) -> LLVMBool;
+
+    /// Gets whether the instruction has the disjoint flag set.
+    ///
+    /// Only valid for or instructions.
+    pub fn LLVMGetIsDisjoint(Inst: LLVMValueRef) -> LLVMBool;
+
+    /// Sets the disjoint flag for the instruction.
+    ///
+    /// Only valid for or instructions.
+    pub fn LLVMSetIsDisjoint(Inst: LLVMValueRef, IsDisjoint: LLVMBool);
+
     // Memory
     pub fn LLVMBuildMalloc(
         arg1: LLVMBuilderRef,
@@ -1874,6 +1983,16 @@ extern "C" {
         Fn: LLVMValueRef,
         Args: *mut LLVMValueRef,
         NumArgs: ::libc::c_uint,
+        Name: *const ::libc::c_char,
+    ) -> LLVMValueRef;
+    pub fn LLVMBuildCallWithOperandBundles(
+        arg1: LLVMBuilderRef,
+        arg2: LLVMTypeRef,
+        Fn: LLVMValueRef,
+        Args: *mut LLVMValueRef,
+        NumArgs: ::libc::c_uint,
+        Bundles: *mut LLVMOperandBundleRef,
+        NumBundles: ::libc::c_uint,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildSelect(

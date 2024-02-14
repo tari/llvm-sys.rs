@@ -71,4 +71,9 @@ extern "C" {
     pub fn LLVMOrcLLJITGetObjTransformLayer(J: LLVMOrcLLJITRef) -> LLVMOrcObjectTransformLayerRef;
     pub fn LLVMOrcLLJITGetIRTransformLayer(J: LLVMOrcLLJITRef) -> LLVMOrcIRTransformLayerRef;
     pub fn LLVMOrcLLJITGetDataLayoutStr(J: LLVMOrcLLJITRef) -> *const ::libc::c_char;
+
+    /// Install the plugin that submits debug objects to the executor.
+    ///
+    /// Executors must expose the llvm_orc_registerJITLoaderGDBWrapper symbol.
+    pub fn LLVMOrcLLJITEnableDebugSupport(J: LLVMOrcLLJITRef) -> LLVMErrorRef;
 }
