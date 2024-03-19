@@ -7,7 +7,7 @@ keywords = ["bindings", "llvm"]
 categories = ["external-ffi-bindings"]
 links = "llvm-18"
 name = "llvm-sys"
-version = "180.0.0-rc2"
+version = "180.0.0"
 authors = ["Peter Marheine <peter@taricorp.net>"]
 build = "build.rs"
 
