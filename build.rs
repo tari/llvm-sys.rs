@@ -648,7 +648,7 @@ fn main() {
     // Link system libraries
     // We get the system libraries based on the kind of LLVM libraries we link to, but we link to
     // system libs based on the target environment.
-    let sys_lib_kind = if target_env_is("musl") {
+    let sys_lib_kind = if cfg!(target_feature = "crt-static") {
         LibraryKind::Static
     } else {
         LibraryKind::Dynamic
