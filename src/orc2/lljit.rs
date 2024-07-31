@@ -1,6 +1,6 @@
-use super::*;
 use error::LLVMErrorRef;
-use prelude::*;
+
+use super::*;
 
 pub type LLVMOrcLLJITBuilderObjectLinkingLayerCreatorFunction =
     extern "C" fn(

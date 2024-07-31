@@ -81,6 +81,18 @@ extern "C" {
     /// Get the type attribute's value.
     pub fn LLVMGetTypeAttributeValue(A: LLVMAttributeRef) -> LLVMTypeRef;
 
+    /// Create a ConstantRange attribute.
+    ///
+    /// LoweWords and UpperWords need to be NumBits divided by 64 rounded
+    /// up elements long.
+    pub fn LLVMCreateConstantRangeAttribute(
+        C: LLVMContextRef,
+        KindID: ::libc::c_uint,
+        NumBits: ::libc::c_uint,
+        LowerWords: *const u64,
+        UpperWords: *const u64,
+    ) -> LLVMAttributeRef;
+
     /// Create a string attribute.
     pub fn LLVMCreateStringAttribute(
         C: LLVMContextRef,
@@ -116,6 +128,19 @@ extern "C" {
     ) -> LLVMModuleRef;
     pub fn LLVMCloneModule(M: LLVMModuleRef) -> LLVMModuleRef;
     pub fn LLVMDisposeModule(M: LLVMModuleRef);
+
+    /// [Soon to be deprecated](https://llvm.org/docs/RemoveDIsDebugInfo.html#c-api-changes).
+    ///
+    /// Returns true if the module is in the new debug info mode which uses
+    /// non-instruction debug records instead of debug intrinsics for variable
+    /// location tracking.
+    pub fn LLVMIsNewDbgInfoFormat(M: LLVMModuleRef) -> LLVMBool;
+
+    /// [Soon to be deprecated](https://llvm.org/docs/RemoveDIsDebugInfo.html#c-api-changes).
+    ///
+    /// Convert module into desired debug info format.
+    pub fn LLVMSetIsNewDbgInfoFormat(M: LLVMModuleRef, UseNewFormat: LLVMBool);
+
     /// Get the identifier of a module.
     ///
     /// `Len` is written to contains the length of the returned string.
@@ -445,6 +470,19 @@ extern "C" {
     /// Obtain the (possibly scalable) number of elements in a vector type.
     pub fn LLVMGetVectorSize(VectorTy: LLVMTypeRef) -> ::libc::c_uint;
 
+    /// Get the pointer value for the associated ConstantPtrAuth constant.
+    pub fn LLVMGetConstantPtrAuthPointer(PtrAuth: LLVMValueRef) -> LLVMValueRef;
+
+    /// Get the key value for the associated ConstantPtrAuth constant.
+    pub fn LLVMGetConstantPtrAuthKey(PtrAuth: LLVMValueRef) -> LLVMValueRef;
+
+    /// Get the discriminator value for the associated ConstantPtrAuth constant.
+    pub fn LLVMGetConstantPtrAuthDiscriminator(PtrAuth: LLVMValueRef) -> LLVMValueRef;
+
+    /// Get the address discriminator value for the associated ConstantPtrAuth
+    /// constant.
+    pub fn LLVMGetConstantPtrAuthAddrDiscriminator(PtrAuth: LLVMValueRef) -> LLVMValueRef;
+
     // Core->Types->Other
     pub fn LLVMVoidTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMLabelTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
@@ -464,6 +502,27 @@ extern "C" {
         IntParams: *mut ::libc::c_uint,
         IntParamCount: ::libc::c_uint,
     ) -> LLVMTypeRef;
+
+    /// Obtain the name for this target extension type.
+    pub fn LLVMGetTargetExtTypeName(TargetExtTy: LLVMTypeRef) -> *const ::libc::c_char;
+
+    /// Obtain the number of type parameters for this target extension type.
+    pub fn LLVMGetTargetExtTypeNumTypeParams(TargetExtTy: LLVMTypeRef) -> ::libc::c_uint;
+
+    /// Get the type parameter at the given index for the target extension type.
+    pub fn LLVMGetTargetExtTypeTypeParam(
+        TargetExtTy: LLVMTypeRef,
+        Idx: ::libc::c_uint,
+    ) -> LLVMTypeRef;
+
+    /// Obtain the number of int parameters for this target extension type.
+    pub fn LLVMGetTargetExtTypeNumIntParams(TargetExtTy: LLVMTypeRef) -> ::libc::c_uint;
+
+    /// Get the int parameter at the given index for the target extension type.
+    pub fn LLVMGetTargetExtTypeIntParam(
+        TargetExtTy: LLVMTypeRef,
+        Idx: ::libc::c_uint,
+    ) -> ::libc::c_uint;
 }
 
 // Core->Values
@@ -489,6 +548,10 @@ extern "C" {
 
     pub fn LLVMDumpValue(Val: LLVMValueRef);
     pub fn LLVMPrintValueToString(Val: LLVMValueRef) -> *mut ::libc::c_char;
+    /// Return a string representation of the DbgRecord.
+    ///
+    /// Use LLVMDisposeMessage to free the string.
+    pub fn LLVMPrintDbgRecordToString(Record: LLVMDbgRecordRef) -> *mut ::libc::c_char;
     pub fn LLVMReplaceAllUsesWith(OldVal: LLVMValueRef, NewVal: LLVMValueRef);
     /// Determine whether the specified value instance is constant.
     pub fn LLVMIsConstant(Val: LLVMValueRef) -> LLVMBool;
@@ -557,10 +620,17 @@ extern "C" {
     ) -> ::libc::c_double;
 
     // Core->Values->Constants->Composite
+    #[deprecated(since = "19.1", note = "Use LLVMConstStringInContext2 instead.")]
     pub fn LLVMConstStringInContext(
         C: LLVMContextRef,
         Str: *const ::libc::c_char,
         Length: ::libc::c_uint,
+        DontNullTerminate: LLVMBool,
+    ) -> LLVMValueRef;
+    pub fn LLVMConstStringInContext2(
+        C: LLVMContextRef,
+        Str: *const ::libc::c_char,
+        Length: usize,
         DontNullTerminate: LLVMBool,
     ) -> LLVMValueRef;
     pub fn LLVMConstString(
@@ -608,6 +678,13 @@ extern "C" {
         ScalarConstantVals: *mut LLVMValueRef,
         Size: ::libc::c_uint,
     ) -> LLVMValueRef;
+    /// Create a ConstantPtrAuth constant with the given values.
+    pub fn LLVMConstantPtrAuth(
+        Ptr: LLVMValueRef,
+        Key: LLVMValueRef,
+        Disc: LLVMValueRef,
+        AddrDisc: LLVMValueRef,
+    ) -> LLVMValueRef;
 
     // Core->Values->Constants->Constant expressions
     pub fn LLVMGetConstOpcode(ConstantVal: LLVMValueRef) -> LLVMOpcode;
@@ -615,6 +692,7 @@ extern "C" {
     pub fn LLVMSizeOf(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
+    #[deprecated(since = "19.1", note = "Use LLVMConstNull instead.")]
     pub fn LLVMConstNUWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNot(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
@@ -627,17 +705,6 @@ extern "C" {
     pub fn LLVMConstNSWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNUWMul(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstXor(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
-    pub fn LLVMConstICmp(
-        Predicate: LLVMIntPredicate,
-        LHSConstant: LLVMValueRef,
-        RHSConstant: LLVMValueRef,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstFCmp(
-        Predicate: LLVMRealPredicate,
-        LHSConstant: LLVMValueRef,
-        RHSConstant: LLVMValueRef,
-    ) -> LLVMValueRef;
-    pub fn LLVMConstShl(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstGEP2(
         Ty: LLVMTypeRef,
         ConstantVal: LLVMValueRef,
@@ -649,6 +716,16 @@ extern "C" {
         ConstantVal: LLVMValueRef,
         ConstantIndices: *mut LLVMValueRef,
         NumIndices: ::libc::c_uint,
+    ) -> LLVMValueRef;
+    /// Creates a constant GetElementPtr expression.
+    ///
+    /// Similar to LLVMConstGEP2, but allows specifying the no-wrap flags.
+    pub fn LLVMConstGEPWithNoWrapFlags(
+        Ty: LLVMTypeRef,
+        ConstantVal: LLVMValueRef,
+        ConstantIndices: *mut LLVMValueRef,
+        NumIndices: ::libc::c_uint,
+        NoWrapFlags: LLVMGEPNoWrapFlags,
     ) -> LLVMValueRef;
     pub fn LLVMConstTrunc(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstPtrToInt(ConstantVal: LLVMValueRef, ToType: LLVMTypeRef) -> LLVMValueRef;
@@ -680,6 +757,10 @@ extern "C" {
         IsAlignStack: LLVMBool,
     ) -> LLVMValueRef;
     pub fn LLVMBlockAddress(F: LLVMValueRef, BB: LLVMBasicBlockRef) -> LLVMValueRef;
+    /// Gets the function associated with a given BlockAddress constant value.
+    pub fn LLVMGetBlockAddressFunction(BlockAddr: LLVMValueRef) -> LLVMValueRef;
+    /// Gets the basic block associated with a given BlockAddress constant value.
+    pub fn LLVMGetBlockAddressBasicBlock(BlockAddr: LLVMValueRef) -> LLVMBasicBlockRef;
 
     // Core->Values->Constants->Global Values
     pub fn LLVMGetGlobalParent(Global: LLVMValueRef) -> LLVMModuleRef;
@@ -838,6 +919,29 @@ extern "C" {
     pub fn LLVMSetFunctionCallConv(Fn: LLVMValueRef, CC: ::libc::c_uint);
     pub fn LLVMGetGC(Fn: LLVMValueRef) -> *const ::libc::c_char;
     pub fn LLVMSetGC(Fn: LLVMValueRef, Name: *const ::libc::c_char);
+
+    /// Gets the prefix data associated with a function.
+    ///
+    /// Only valid on functions, and only if LLVMHasPrefixData returns true.
+    pub fn LLVMGetPrefixData(Fn: LLVMValueRef) -> LLVMValueRef;
+
+    /// Check if a given function has prefix data. Only valid on functions.
+    pub fn LLVMHasPrefixData(Fn: LLVMValueRef) -> LLVMBool;
+
+    /// Sets the prefix data for the function. Only valid on functions.
+    pub fn LLVMSetPrefixData(Fn: LLVMValueRef, prefixData: LLVMValueRef);
+
+    /// Gets the prologue data associated with a function.
+    ///
+    /// Only valid on functions, and only if LLVMHasPrologueData returns true.
+    pub fn LLVMGetPrologueData(Fn: LLVMValueRef) -> LLVMValueRef;
+
+    /// Check if a given function has prologue data. Only valid on functions.
+    pub fn LLVMHasPrologueData(Fn: LLVMValueRef) -> LLVMBool;
+
+    /// Sets the prologue data for the function. Only valid on functions.
+    pub fn LLVMSetPrologueData(Fn: LLVMValueRef, prologueData: LLVMValueRef);
+
     pub fn LLVMAddAttributeAtIndex(F: LLVMValueRef, Idx: LLVMAttributeIndex, A: LLVMAttributeRef);
     pub fn LLVMGetAttributeCountAtIndex(F: LLVMValueRef, Idx: LLVMAttributeIndex)
         -> ::libc::c_uint;
@@ -1169,6 +1273,16 @@ extern "C" {
     /// Set the unwind destination basic block.
     pub fn LLVMSetUnwindDest(InvokeInst: LLVMValueRef, B: LLVMBasicBlockRef);
 
+    /// Get the default destination of a CallBr instruction.
+    pub fn LLVMGetCallBrDefaultDest(CallBr: LLVMValueRef) -> LLVMBasicBlockRef;
+    /// Get the number of indirect destinations of a CallBr instruction.
+    pub fn LLVMGetCallBrNumIndirectDests(CallBr: LLVMValueRef) -> ::libc::c_uint;
+    /// Get the indirect destination of a CallBr instruction at the given index.
+    pub fn LLVMGetCallBrIndirectDest(
+        CallBr: LLVMValueRef,
+        Idx: ::libc::c_uint,
+    ) -> LLVMBasicBlockRef;
+
     // Instructions->Terminators
     pub fn LLVMGetNumSuccessors(Term: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetSuccessor(Term: LLVMValueRef, i: ::libc::c_uint) -> LLVMBasicBlockRef;
@@ -1190,6 +1304,10 @@ extern "C" {
 
     /// Get the source element type of the given GEP operator.
     pub fn LLVMGetGEPSourceElementType(GEP: LLVMValueRef) -> LLVMTypeRef;
+    /// Get the no-wrap related flags for the given GEP instruction.
+    pub fn LLVMGEPGetNoWrapFlags(GEP: LLVMValueRef) -> LLVMGEPNoWrapFlags;
+    /// Set the no-wrap related flags for the given GEP instruction.
+    pub fn LLVMGEPSetNoWrapFlags(GEP: LLVMValueRef, NoWrapFlags: LLVMGEPNoWrapFlags);
 
     // Instruction->PHI Nodes
     pub fn LLVMAddIncoming(
@@ -1201,7 +1319,6 @@ extern "C" {
     pub fn LLVMCountIncoming(PhiNode: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetIncomingValue(PhiNode: LLVMValueRef, Index: ::libc::c_uint) -> LLVMValueRef;
     pub fn LLVMGetIncomingBlock(PhiNode: LLVMValueRef, Index: ::libc::c_uint) -> LLVMBasicBlockRef;
-
 }
 
 // Core->Values again; these don't appear in Doxygen because they're macro-generated.
@@ -1224,6 +1341,7 @@ extern "C" {
     pub fn LLVMIsAConstantStruct(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAConstantTokenNone(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAConstantVector(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAConstantPtrAuth(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalValue(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalAlias(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAGlobalIFunc(Val: LLVMValueRef) -> LLVMValueRef;
@@ -1307,12 +1425,27 @@ extern "C" {
 extern "C" {
     pub fn LLVMCreateBuilderInContext(C: LLVMContextRef) -> LLVMBuilderRef;
     pub fn LLVMCreateBuilder() -> LLVMBuilderRef;
+    /// Set the builder position before Instr but after any attached debug records,
+    /// or if Instr is null set the position to the end of Block.
     pub fn LLVMPositionBuilder(
         Builder: LLVMBuilderRef,
         Block: LLVMBasicBlockRef,
         Instr: LLVMValueRef,
     );
+    /// Set the builder position before Instr and any attached debug records,
+    /// or if Instr is null set the position to the end of Block.
+    pub fn LLVMPositionBuilderBeforeDbgRecords(
+        Builder: LLVMBuilderRef,
+        Block: LLVMBasicBlockRef,
+        Inst: LLVMValueRef,
+    );
+    /// Set the builder position before Instr but after any attached debug records.
     pub fn LLVMPositionBuilderBefore(Builder: LLVMBuilderRef, Instr: LLVMValueRef);
+    /// Set the builder position before Instr and any attached debug records.
+    pub fn LLVMPositionBuilderBeforeInstrAndDbgRecords(
+        Builder: LLVMBuilderRef,
+        Instr: LLVMValueRef,
+    );
     pub fn LLVMPositionBuilderAtEnd(Builder: LLVMBuilderRef, Block: LLVMBasicBlockRef);
     pub fn LLVMGetInsertBlock(Builder: LLVMBuilderRef) -> LLVMBasicBlockRef;
     pub fn LLVMClearInsertionPosition(Builder: LLVMBuilderRef);
@@ -1372,6 +1505,19 @@ extern "C" {
         B: LLVMBuilderRef,
         Addr: LLVMValueRef,
         NumDests: ::libc::c_uint,
+    ) -> LLVMValueRef;
+    pub fn LLVMBuildCallBr(
+        B: LLVMBuilderRef,
+        Ty: LLVMTypeRef,
+        Fn: LLVMValueRef,
+        DefaultDest: LLVMBasicBlockRef,
+        IndirectDests: *mut LLVMBasicBlockRef,
+        NumIndirectDests: ::libc::c_uint,
+        Args: *mut LLVMValueRef,
+        NumArgs: ::libc::c_uint,
+        Bundles: *mut LLVMOperandBundleRef,
+        NumBundles: ::libc::c_uint,
+        Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
     pub fn LLVMBuildInvoke2(
         arg1: LLVMBuilderRef,
@@ -1659,6 +1805,7 @@ extern "C" {
         V: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
+    #[deprecated(since = "19.1", note = "Use LLVMBuildNeg + LLVMSetNUW instead.")]
     pub fn LLVMBuildNUWNeg(
         B: LLVMBuilderRef,
         V: LLVMValueRef,
@@ -1792,6 +1939,18 @@ extern "C" {
         Indices: *mut LLVMValueRef,
         NumIndices: ::libc::c_uint,
         Name: *const ::libc::c_char,
+    ) -> LLVMValueRef;
+    /// Creates a GetElementPtr instruction.
+    ///
+    /// Similar to LLVMBuildGEP2, but allows specifying the no-wrap flags.
+    pub fn LLVMBuildGEPWithNoWrapFlags(
+        B: LLVMBuilderRef,
+        Ty: LLVMTypeRef,
+        Pointer: LLVMValueRef,
+        Indices: *mut LLVMValueRef,
+        NumIndices: ::libc::c_uint,
+        Name: *const ::libc::c_char,
+        NoWrapFlags: LLVMGEPNoWrapFlags,
     ) -> LLVMValueRef;
     pub fn LLVMBuildStructGEP2(
         B: LLVMBuilderRef,

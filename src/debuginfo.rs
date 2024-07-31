@@ -93,7 +93,19 @@ pub enum LLVMDWARFSourceLanguage {
     LLVMDWARFSourceLanguageFortran18,
     LLVMDWARFSourceLanguageAda2005,
     LLVMDWARFSourceLanguageAda2012,
+    LLVMDWARFSourceLanguageHIP,
+    LLVMDWARFSourceLanguageAssembly,
+    LLVMDWARFSourceLanguageC_sharp,
     LLVMDWARFSourceLanguageMojo,
+    LLVMDWARFSourceLanguageGLSL,
+    LLVMDWARFSourceLanguageGLSL_ES,
+    LLVMDWARFSourceLanguageHLSL,
+    LLVMDWARFSourceLanguageOpenCL_CPP,
+    LLVMDWARFSourceLanguageCPP_for_OpenCL,
+    LLVMDWARFSourceLanguageSYCL,
+    LLVMDWARFSourceLanguageRuby,
+    LLVMDWARFSourceLanguageMove,
+    LLVMDWARFSourceLanguageHylo,
     // Vendor extensions:
     LLVMDWARFSourceLanguageMips_Assembler,
     LLVMDWARFSourceLanguageGOOGLE_RenderScript,
@@ -806,45 +818,57 @@ extern "C" {
         AlignInBits: u32,
     ) -> LLVMMetadataRef;
 
-    /// Insert a new llvm.dbg.declare intrinsic call before the given instruction.
-    pub fn LLVMDIBuilderInsertDeclareBefore(
+    /// Insert a Declare DbgRecord before the given instruction.
+    ///
+    /// Only use in the "new debug format", when `LLVMIsNewDbgInfoFormat` is true.
+    pub fn LLVMDIBuilderInsertDeclareRecordBefore(
         Builder: LLVMDIBuilderRef,
         Storage: LLVMValueRef,
         VarInfo: LLVMMetadataRef,
         Expr: LLVMMetadataRef,
         DebugLoc: LLVMMetadataRef,
         Instr: LLVMValueRef,
-    ) -> LLVMValueRef;
+    ) -> LLVMDbgRecordRef;
 
-    /// Insert a new llvm.dbg.declare intrinsic call at the end of the given basic block. If the basic block has a terminator instruction, the intrinsic is inserted before that terminator instruction.
-    pub fn LLVMDIBuilderInsertDeclareAtEnd(
+    /// Insert a Declare DbgRecord at the end of the given basic block.
+    ///
+    /// If the basic block has a terminator instruction, the record is inserted before that
+    /// terminator instruction. Only use in the "new debug format", when `LLVMIsNewDbgInfoFormat`
+    /// is true.
+    pub fn LLVMDIBuilderInsertDeclareRecordAtEnd(
         Builder: LLVMDIBuilderRef,
         Storage: LLVMValueRef,
         VarInfo: LLVMMetadataRef,
         Expr: LLVMMetadataRef,
         DebugLoc: LLVMMetadataRef,
         Block: LLVMBasicBlockRef,
-    ) -> LLVMValueRef;
+    ) -> LLVMDbgRecordRef;
 
-    /// Insert a new llvm.dbg.value intrinsic call before the given instruction.
-    pub fn LLVMDIBuilderInsertDbgValueBefore(
+    /// Insert a new debug record before the given instruction.
+    ///
+    /// Only use in the "new debug format", when `LLVMIsNewDbgInfoFormat` is true.
+    pub fn LLVMDIBuilderInsertDbgValueRecordBefore(
         Builder: LLVMDIBuilderRef,
         Val: LLVMValueRef,
         VarInfo: LLVMMetadataRef,
         Expr: LLVMMetadataRef,
         DebugLoc: LLVMMetadataRef,
         Instr: LLVMValueRef,
-    ) -> LLVMValueRef;
+    ) -> LLVMDbgRecordRef;
 
-    /// Insert a new llvm.dbg.value intrinsic call at the end of the given basic block. If the basic block has a terminator instruction, the intrinsic is inserted before that terminator instruction.
-    pub fn LLVMDIBuilderInsertDbgValueAtEnd(
+    /// Insert a new debug record at the end of the given basic block.
+    ///
+    /// If the basic block has a terminator instruction, the record is inserted before
+    /// that terminator instruction. Only use in the "new debug format", when
+    /// `LLVMIsNewDbgInfoFormat` is true.
+    pub fn LLVMDIBuilderInsertDbgValueRecordAtEnd(
         Builder: LLVMDIBuilderRef,
         Val: LLVMValueRef,
         VarInfo: LLVMMetadataRef,
         Expr: LLVMMetadataRef,
         DebugLoc: LLVMMetadataRef,
         Block: LLVMBasicBlockRef,
-    ) -> LLVMValueRef;
+    ) -> LLVMDbgRecordRef;
 
     /// Create a new descriptor for a local auto variable.
     pub fn LLVMDIBuilderCreateAutoVariable(

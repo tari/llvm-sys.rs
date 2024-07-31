@@ -70,6 +70,9 @@ pub enum LLVMOpaqueJITEventListener {}
 #[derive(Debug)]
 pub enum LLVMOpaqueAttributeRef {}
 
+#[derive(Debug)]
+pub enum LLVMOpaqueDbgRecord {}
+
 /// Core types used throughout LLVM.
 ///
 /// In most cases you will want to `use llvm::prelude::*`.
@@ -95,6 +98,7 @@ pub mod prelude {
     pub type LLVMModuleFlagEntry = *mut super::LLVMOpaqueModuleFlagEntry;
     pub type LLVMJITEventListenerRef = *mut super::LLVMOpaqueJITEventListener;
     pub type LLVMAttributeRef = *mut super::LLVMOpaqueAttributeRef;
+    pub type LLVMDbgRecordRef = *mut super::LLVMOpaqueDbgRecord;
 }
 
 pub mod analysis;
@@ -348,6 +352,7 @@ pub enum LLVMValueKind {
     LLVMInstructionValueKind,
     LLVMPoisonValueKind,
     LLVMConstantTargetNoneValueKind,
+    LLVMConstantPtrAuthValueKind,
 }
 
 #[repr(C)]
@@ -433,6 +438,8 @@ pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpFSub = 12,
     LLVMAtomicRMWBinOpFMax = 13,
     LLVMAtomicRMWBinOpFMin = 14,
+    LLVMAtomicRMWBinOpUIncWrap = 15,
+    LLVMAtomicRMWBinOpUDecWrap = 16,
 }
 
 #[repr(C)]
@@ -506,6 +513,13 @@ pub const LLVMFastMathAll: ::libc::c_uint = LLVMFastMathAllowReassoc
 ///
 /// See https://llvm.org/docs/LangRef.html#fast-math-flags
 pub type LLVMFastMathFlags = ::libc::c_uint;
+
+/// Flags that constrain the allowed wrap semantics of a gelementptr instruction.
+pub type LLVMGEPNoWrapFlags = ::libc::c_uint;
+
+pub const LLVMGEPFlagInBounds: LLVMGEPNoWrapFlags = 1;
+pub const LLVMGEPFlagNUSW: LLVMGEPNoWrapFlags = 1 << 1;
+pub const LLVMGEPFlagNUW: LLVMGEPNoWrapFlags = 1 << 2;
 
 pub type LLVMDiagnosticHandler =
     Option<extern "C" fn(arg1: LLVMDiagnosticInfoRef, arg2: *mut ::libc::c_void)>;

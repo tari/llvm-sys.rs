@@ -1,12 +1,12 @@
 #![allow(non_snake_case)]
 //! OrcV2
 
-pub mod ee;
-pub mod lljit;
-
 use error::LLVMErrorRef;
 use prelude::*;
 use target_machine::LLVMTargetMachineRef;
+
+pub mod ee;
+pub mod lljit;
 
 /// Represents an address in the executor process.
 pub type LLVMOrcJITTargetAddress = u64;
@@ -117,6 +117,14 @@ pub struct LLVMOrcCDependenceMapPair {
 }
 
 pub type LLVMOrcCDependenceMapPairs = *mut LLVMOrcCDependenceMapPair;
+
+/// A set of symbols that share dependencies.
+#[repr(C)]
+pub struct LLVMOrcCSymbolDependenceGroup {
+    Symbols: LLVMOrcCSymbolsList,
+    Dependencies: LLVMOrcCDependenceMapPairs,
+    NumDependencies: usize,
+}
 
 /// Lookup kind. This can be used by definition generators when deciding whether
 /// to produce a definition for a requested symbol.
@@ -374,6 +382,8 @@ extern "C" {
     ) -> LLVMErrorRef;
     pub fn LLVMOrcMaterializationResponsibilityNotifyEmitted(
         MR: LLVMOrcMaterializationResponsibilityRef,
+        SymbolDepGroups: *mut LLVMOrcCSymbolDependenceGroup,
+        NumSymbolDepGroups: usize,
     ) -> LLVMErrorRef;
     pub fn LLVMOrcMaterializationResponsibilityDefineMaterializing(
         MR: LLVMOrcMaterializationResponsibilityRef,
@@ -393,17 +403,6 @@ extern "C" {
         NumSymbols: ::libc::size_t,
         Result: *mut LLVMOrcMaterializationResponsibilityRef,
     ) -> LLVMErrorRef;
-    pub fn LLVMOrcMaterializationResponsibilityAddDependencies(
-        MR: LLVMOrcMaterializationResponsibilityRef,
-        Name: LLVMOrcSymbolStringPoolEntryRef,
-        Dependencies: LLVMOrcCDependenceMapPairs,
-        NumPairs: ::libc::size_t,
-    );
-    pub fn LLVMOrcMaterializationResponsibilityAddDependenciesForAll(
-        MR: LLVMOrcMaterializationResponsibilityRef,
-        Dependencies: LLVMOrcCDependenceMapPairs,
-        NumPairs: ::libc::size_t,
-    );
     pub fn LLVMOrcExecutionSessionCreateBareJITDylib(
         ES: LLVMOrcExecutionSessionRef,
         Name: *const ::libc::c_char,
