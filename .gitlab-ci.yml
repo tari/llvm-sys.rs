@@ -1,7 +1,7 @@
 image: rust:1
 
 variables:
-  LLVM_SYS_180_FFI_WORKAROUND: "YES"
+  LLVM_SYS_191_FFI_WORKAROUND: "YES"
 
 before_script:
   - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
