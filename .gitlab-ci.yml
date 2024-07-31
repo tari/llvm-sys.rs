@@ -9,8 +9,8 @@ before_script:
   - chmod +x llvm.sh
   # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
   - echo >> /etc/apt/sources.list
-  - ./llvm.sh 18
-  - apt-get install -qq -y libpolly-18-dev libzstd-dev
+  - ./llvm.sh 19
+  - apt-get install -qq -y libpolly-19-dev libzstd-dev
 
 test:
   script:
