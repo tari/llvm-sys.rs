@@ -351,7 +351,7 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
 /// knowledge that aren't otherwise discovered from either `llvm-config` or a linked library
 /// that includes an absolute path.
 fn get_system_library_dirs() -> impl IntoIterator<Item = &'static str> {
-    if target_os_is("openbsd") {
+    if target_os_is("openbsd") || target_os_is("freebsd") {
         Some("/usr/local/lib")
     } else {
         None
