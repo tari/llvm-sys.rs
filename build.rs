@@ -83,6 +83,28 @@ fn locate_llvm_config() -> Option<PathBuf> {
     let prefix = env::var_os(&*ENV_LLVM_PREFIX)
         .map(|p| PathBuf::from(p).join("bin"))
         .unwrap_or_else(PathBuf::new);
+
+    if let Some(x) = llvm_compatible_binary_name(&prefix) {
+        return Some(x);
+    }
+
+    // For users of Homebrew, LLVM is located in a non-standard location and
+    // typically not linked such that it appears in PATH. We try to handle that
+    // here, but only if we didn't already find a working llvm-config in PATH.
+    // This removes the need for fiddling around with LIBRARY_PATH or `brew
+    // link`.
+    if target_os_is("macos") {
+        if let Some(p) = homebrew_prefix(Some(&format!("llvm@{}", CRATE_VERSION.major)))
+            .or_else(|| homebrew_prefix(Some("llvm")))
+        {
+            return llvm_compatible_binary_name(&PathBuf::from(p).join("bin"));
+        }
+    }
+
+    None
+}
+
+fn llvm_compatible_binary_name(prefix: &Path) -> Option<PathBuf> {
     for binary_name in llvm_config_binary_names() {
         let binary_name = prefix.join(binary_name);
         match llvm_version(&binary_name) {
@@ -350,12 +372,34 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
 /// In particular, this should include only directories that are known from platform-specific
 /// knowledge that aren't otherwise discovered from either `llvm-config` or a linked library
 /// that includes an absolute path.
-fn get_system_library_dirs() -> impl IntoIterator<Item = &'static str> {
+fn get_system_library_dirs() -> impl IntoIterator<Item = String> {
     if target_os_is("openbsd") || target_os_is("freebsd") {
-        Some("/usr/local/lib")
+        Some("/usr/local/lib".to_string())
+    } else if target_os_is("macos") {
+        if let Some(p) = homebrew_prefix(None) {
+            Some(format!("{}/lib", p))
+        } else {
+            None
+        }
     } else {
         None
     }
+}
+
+fn homebrew_prefix(name: Option<&str>) -> Option<String> {
+    let mut cmd = Command::new("brew");
+
+    cmd.arg("--prefix");
+
+    if let Some(name) = name {
+        cmd.arg(name);
+    }
+
+    cmd.output()
+        .ok()
+        .filter(|o| !o.stdout.is_empty())
+        .and_then(|out| String::from_utf8(out.stdout).ok())
+        .map(|val| val.trim().to_string())
 }
 
 fn target_dylib_extension() -> &'static str {
