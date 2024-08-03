@@ -5,14 +5,15 @@ extern crate lazy_static;
 extern crate regex_lite;
 extern crate semver;
 
-use anyhow::Context as _;
-use regex_lite::Regex;
-use semver::Version;
 use std::env;
 use std::ffi::OsStr;
 use std::io::{self, ErrorKind};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
+
+use anyhow::Context as _;
+use regex_lite::Regex;
+use semver::Version;
 
 // Environment variables that can guide compilation
 //
@@ -593,8 +594,8 @@ impl LinkingPreferences {
             );
         }
 
-        // if no preference is given, default to force static linking, matching previous behavior
-        let force_static = force_static || !(prefer_static || prefer_dynamic || force_dynamic);
+        // if no preference is given, default to prefer static linking
+        let prefer_static = prefer_static || !(prefer_dynamic || force_static || force_dynamic);
 
         LinkingPreferences {
             prefer_static: force_static || prefer_static,
