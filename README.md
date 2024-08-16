@@ -100,6 +100,7 @@ programs with `llvm-sys`. Known exceptions (that *do* include a copy of `llvm-co
 include:
 
  * Official Debian/Ubuntu packages from [apt.llvm.org](https://apt.llvm.org/)
+ * Fedora/Red Hat's `llvm-devel` package
  * Arch Linux's [`llvm`](https://archlinux.org/packages/extra/x86_64/llvm/) package
 
 If a suitable binary package is not available for your platform, compiling from
