@@ -13,6 +13,15 @@ For new LLVM major versions:
  * [ ] Update `links` key in Cargo.toml for new LLVM version
  * [ ] Update usage example in README.md for new crate version
  * [ ] Update CI to refer to new version
+   * [ ] That includes an update of `RUSTC_COMMIT` variable to reference a
+         commit in github.com/rust-lang/rust providing the new LLVM version.
+         It can be determined using `./scripts/rustc-commit.sh`. If preferred,
+         it can be also checked in a local Rust repository clone:
+
+         ```
+         git clone --mirror https://github.com/rust-lang/rust.git
+         git log --oneline --grep=LLVM --grep=$LLVM_VERSION main -- .gitmodules
+         ```
 
 For all versions:
 
