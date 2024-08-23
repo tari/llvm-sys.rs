@@ -511,7 +511,7 @@ pub const LLVMFastMathAll: ::libc::c_uint = LLVMFastMathAllowReassoc
 
 /// Flags to indicate what fast-math-style optimizations are allowed on operations.
 ///
-/// See https://llvm.org/docs/LangRef.html#fast-math-flags
+/// See <https://llvm.org/docs/LangRef.html#fast-math-flags>
 pub type LLVMFastMathFlags = ::libc::c_uint;
 
 /// Flags that constrain the allowed wrap semantics of a gelementptr instruction.
