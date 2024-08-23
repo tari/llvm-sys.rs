@@ -3,19 +3,52 @@ image: rust:1
 variables:
   LLVM_SYS_191_FFI_WORKAROUND: "YES"
 
-before_script:
-  - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
-  - wget https://apt.llvm.org/llvm.sh
-  - chmod +x llvm.sh
-  # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
-  - echo >> /etc/apt/sources.list
-  - ./llvm.sh 19
-  - apt-get install -qq -y libpolly-19-dev libzstd-dev
-
-test:
-  script:
+.build_definition:
+  script: &default_build_script
     - cargo build
     - cargo test
     - cargo run --example nop-function
-    - cargo run --example jit-function
     - echo "Hello, world!" | cargo run --example disassembler
+
+# Test on Alpine, using `unknown-linux-musl` LLVM tarballs provided by Rust CI.
+# These tarballs are the same ones which Rust nightly uses.
+#
+# Unfortunately, Alpine doesn't package rc releases of LLVM and the stable
+# versions usually land months after the release.
+test:alpine-rustc-llvm-tarball:
+  image: rust:alpine3.20
+  variables:
+    LLVM_SYS_191_PREFIX: /usr/lib/llvm-rustc
+    # Commit in github.com/rust-lang/rust which corresponds to the newest LLVM.
+    # Rust CI hosts tarballs with their LLVM builds, which are more up to date
+    # than packages in distros where we can't use LLVM's nightly packages
+    # (e.g. Alpine), which are usually one version behind.
+    RUSTC_COMMIT: 41dd149fd6a6a06795fc6b9f54cb49af2f61775f
+  before_script:
+    # LLVM from Rust CI, even for the musl targets, is linked against libgcc_s
+    # and libstdc++, not compiler-rt nor libc++.
+    - apk update && apk add libffi-dev libgcc libstdc++-dev musl-dev
+    - mkdir -p /usr/lib/llvm-rustc
+    - |
+      wget -q -O - "https://ci-artifacts.rust-lang.org/rustc-builds/${RUSTC_COMMIT}/rust-dev-nightly-x86_64-unknown-linux-musl.tar.xz" | \
+      tar -xJ --strip-components 2 -C /usr/lib/llvm-rustc
+  extends:
+    - .build_definition
+
+test:debian:
+  image: rust:bullseye
+  before_script:
+    - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
+    - wget https://apt.llvm.org/llvm.sh
+    - chmod +x llvm.sh
+    # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
+    - echo >> /etc/apt/sources.list
+    - ./llvm.sh 19
+    - apt-get install -qq -y libpolly-19-dev libzstd-dev
+  script:
+    - *default_build_script
+    # LLJIT uses `dlopen()` to open the shared libLLVM library. Therefore, we
+    # run the JIT test only on environments where we link dynamically.
+    - cargo run --example jit-function
+  extends:
+    - .build_definition
