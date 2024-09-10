@@ -5,14 +5,15 @@ extern crate lazy_static;
 extern crate regex_lite;
 extern crate semver;
 
-use anyhow::Context as _;
-use regex_lite::Regex;
-use semver::Version;
 use std::env;
 use std::ffi::OsStr;
 use std::io::{self, ErrorKind};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
+
+use anyhow::Context as _;
+use regex_lite::Regex;
+use semver::Version;
 
 // Environment variables that can guide compilation
 //
@@ -373,17 +374,38 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
 /// knowledge that aren't otherwise discovered from either `llvm-config` or a linked library
 /// that includes an absolute path.
 fn get_system_library_dirs() -> impl IntoIterator<Item = String> {
+    let mut system_library_dirs = Vec::new();
+
+    // Add the directories provided through the environment variable.
+    if let Some(dirs) = option_env!("LLVM_SYS_SYSTEM_LIBRARY_DIRS") {
+        system_library_dirs.extend(dirs.split(':').map(|s| s.to_string()));
+    }
+
     if target_os_is("openbsd") || target_os_is("freebsd") {
-        Some("/usr/local/lib".to_string())
+        system_library_dirs.push("/usr/local/lib".to_string());
     } else if target_os_is("macos") {
         if let Some(p) = homebrew_prefix(None) {
-            Some(format!("{}/lib", p))
-        } else {
-            None
+            system_library_dirs.push(format!("{}/lib", p));
         }
-    } else {
-        None
+    } else if target_os_is("linux") && cfg!(target_feature = "crt-static") {
+        // When linking statically on Linux, we need to provide the directory
+        // with system-wide static libraries explicitly.
+        #[cfg(any(
+            target_arch = "x86_64",
+            target_arch = "powerpc64",
+            target_arch = "aarch64"
+        ))]
+        {
+            system_library_dirs.push("/lib64".to_string());
+            system_library_dirs.push("/usr/lib64".to_string());
+            system_library_dirs.push("/usr/local/lib64".to_string());
+        }
+        system_library_dirs.push("/lib".to_string());
+        system_library_dirs.push("/usr/lib".to_string());
+        system_library_dirs.push("/usr/local/lib".to_string());
     }
+
+    system_library_dirs
 }
 
 fn homebrew_prefix(name: Option<&str>) -> Option<String> {
@@ -412,7 +434,10 @@ fn target_dylib_extension() -> &'static str {
 
 /// Get the library that must be linked for C++, if any.
 fn get_system_libcpp() -> Option<&'static str> {
-    if target_env_is("msvc") {
+    if let Some(libcpp) = option_env!("LLVM_SYS_LIBCPP") {
+        // Use the library defined by the caller, if provided.
+        Some(libcpp)
+    } else if target_env_is("msvc") {
         // MSVC doesn't need an explicit one.
         None
     } else if target_os_is("macos") {
@@ -425,13 +450,10 @@ fn get_system_libcpp() -> Option<&'static str> {
         Some("c++")
     } else if target_os_is("freebsd") || target_os_is("openbsd") {
         Some("c++")
-    } else if target_env_is("musl") {
-        // The one built with musl.
-        Some("c++")
     } else {
         // Otherwise assume GCC's libstdc++.
-        // This assumption is probably wrong on some platforms, but would need
-        // testing on them.
+        // This assumption is probably wrong on some platforms, but it can be
+        // always overwritten through `LLVM_SYS_LIBCPP` variable.
         Some("stdc++")
     }
 }
@@ -593,8 +615,8 @@ impl LinkingPreferences {
             );
         }
 
-        // if no preference is given, default to force static linking, matching previous behavior
-        let force_static = force_static || !(prefer_static || prefer_dynamic || force_dynamic);
+        // if no preference is given, default to prefer static linking
+        let prefer_static = prefer_static || !(prefer_dynamic || force_static || force_dynamic);
 
         LinkingPreferences {
             prefer_static: force_static || prefer_static,
@@ -692,7 +714,7 @@ fn main() {
     // Link system libraries
     // We get the system libraries based on the kind of LLVM libraries we link to, but we link to
     // system libs based on the target environment.
-    let sys_lib_kind = if target_env_is("musl") {
+    let sys_lib_kind = if cfg!(target_feature = "crt-static") {
         LibraryKind::Static
     } else {
         LibraryKind::Dynamic
