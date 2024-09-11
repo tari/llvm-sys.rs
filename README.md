@@ -53,9 +53,9 @@ configuration of the system on which the library is being compiled.
 
  * Dynamic/static linking preferences `prefer-dynamic`, `force-dynamic`,
    `prefer-static`, `force-static`. Only one may be specified, indicating how
-   LLVM should be linked. If none are enabled, `force-static` is assumed
-   (matching the behavior of older version of llvm-sys that did not support
-   dynamic linking).
+   LLVM should be linked. If none are enabled, `prefer-static` is assumed.
+   (Prior to crate version `181.2`, the default linking behavior is
+   `force-static`.)
 
    With dynamic linking, the crate will link against a LLVM shared library
    (a .dll on Windows, .so on Linux and so forth) which must be available at
@@ -100,6 +100,7 @@ programs with `llvm-sys`. Known exceptions (that *do* include a copy of `llvm-co
 include:
 
  * Official Debian/Ubuntu packages from [apt.llvm.org](https://apt.llvm.org/)
+ * Fedora/Red Hat's `llvm-devel` package
  * Arch Linux's [`llvm`](https://archlinux.org/packages/extra/x86_64/llvm/) package
 
 If a suitable binary package is not available for your platform, compiling from

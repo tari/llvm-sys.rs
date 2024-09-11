@@ -52,3 +52,8 @@ cc = "1.0"
 lazy_static = "1.0"
 regex-lite = "0.1.5"
 semver = "1.0.7"
+
+[lints.rust]
+# LLVM_SYS_NOT_FOUND is set by build.rs if no LLVM library is located, which
+# fails builds but still allows docs to be built.
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(LLVM_SYS_NOT_FOUND)"] }
