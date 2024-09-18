@@ -11,6 +11,9 @@ version = "191.0.0-rc1"
 authors = ["Peter Marheine <peter@taricorp.net>"]
 build = "build.rs"
 
+rust-version = "1.65.0"
+edition = "2015"
+
 [badges]
 gitlab = { repository = "taricorp/llvm-sys.rs" }
 maintenance = { status = "passively-maintained" }
