@@ -1323,6 +1323,7 @@ extern "C" {
 
 // Core->Values again; these don't appear in Doxygen because they're macro-generated.
 extern "C" {
+    pub fn LLVMGetValueContext(Val: LLVMValueRef) -> LLVMContextRef;
     pub fn LLVMIsAArgument(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsABasicBlock(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAInlineAsm(Val: LLVMValueRef) -> LLVMValueRef;
@@ -1425,6 +1426,7 @@ extern "C" {
 extern "C" {
     pub fn LLVMCreateBuilderInContext(C: LLVMContextRef) -> LLVMBuilderRef;
     pub fn LLVMCreateBuilder() -> LLVMBuilderRef;
+    pub fn LLVMGetBuilderContext(Builder: LLVMBuilderRef) -> LLVMContextRef;
     /// Set the builder position before Instr but after any attached debug records,
     /// or if Instr is null set the position to the end of Block.
     pub fn LLVMPositionBuilder(
