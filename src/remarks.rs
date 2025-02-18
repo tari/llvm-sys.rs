@@ -1,5 +1,5 @@
 //! Remark diagnostics library.
-use prelude::LLVMBool;
+use crate::prelude::LLVMBool;
 
 #[repr(C)]
 pub enum LLVMRemarkType {
