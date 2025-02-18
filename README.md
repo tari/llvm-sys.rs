@@ -4,7 +4,7 @@ Rust bindings to LLVM's C API.
 
 ```toml
 [dependencies]
-llvm-sys = "180"
+llvm-sys = "201.0.0-rc1"
 ```
 
 There must be a compatible version of LLVM available. By default `llvm-sys`
@@ -118,7 +118,7 @@ compile it yourself.
 
 `LLVM_SYS_<version>_PREFIX` specifies the install prefix for a compiled and
 installed copy of the libraries, where `<version>` is the major version of
-`llvm-sys` (for example, `LLVM_SYS_37_PREFIX`). The llvm-sys build scripts
+`llvm-sys` (for example, `LLVM_SYS_201_PREFIX`). The llvm-sys build scripts
 will look for a `llvm-config` binary in the directory `<PREFIX>/bin/` in
 addition to searching for a copy on `$PATH`, and verify that the LLVM version
 reported by `llvm-config` is compatible with the current crate version.
@@ -129,8 +129,8 @@ Because the LLVM C [API stability guarantees][c-api-stability] are relatively
 weak, this crate enforces that the LLVM release in use match the one it was made
 for. The crate version is constructed by treating the LLVM version as a real
 number and multiplying by 10, ignoring any fractional part. Thus `llvm-sys`
-version 37 is compatible with LLVM 3.7.x, and `llvm-sys` 41 would be compatible
-with LLVM 4.1.x.
+version 191 is compatible with LLVM 19.1.x, and `llvm-sys` 201 would be compatible
+with LLVM 20.1.x.
 
 [c-api-stability]: http://llvm.org/docs/DeveloperPolicy.html#c-api-changes
 
@@ -162,11 +162,11 @@ versions of `llvm-sys` (corresponding to different versions of LLVM) as long as
 only one of them is actually used:
 
 ```toml
-llvm-sys-90 = { package = "llvm-sys", version = "90", optional = true }
-llvm-sys-100 = { package = "llvm-sys", version = "100", optional = true }
+llvm-sys-191 = { package = "llvm-sys", version = "191", optional = true }
+llvm-sys-201 = { package = "llvm-sys", version = "201", optional = true }
 ```
 
-This requires that the target LLVM version (`llvm-10` for instance) be declared
+This requires that the target LLVM version (`llvm-20` for instance) be declared
 as the linking target rather than just `llvm` because Cargo requires that all
 linked libraries be unique regardless of what is actually enabled. Note that
 although Cargo will not prevent you from enabling multiple versions of LLVM at
@@ -189,8 +189,8 @@ to the official documentation.
 Download and unpack a copy of the source for the required version.
 
 ```sh
-wget https://llvm.org/releases/3.9.0/llvm-3.9.0.src.tar.xz
-tar xJf llvm-3.9.0.src.tar.xz
+wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-20.1.0-rc1.tar.gz
+tar xJf llvmorg-20.1.0-rc1.tar.xz
 ```
 
 Note that you do not need to compile Clang or the test suite.

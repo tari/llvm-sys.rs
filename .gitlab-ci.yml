@@ -1,7 +1,7 @@
 image: rust:1
 
 variables:
-  LLVM_SYS_191_FFI_WORKAROUND: "YES"
+  LLVM_SYS_201_FFI_WORKAROUND: "YES"
 
 .build_definition:
   script: &default_build_script
@@ -18,12 +18,12 @@ variables:
 test:alpine-rustc-llvm-tarball:
   image: rust:alpine3.20
   variables:
-    LLVM_SYS_191_PREFIX: /usr/lib/llvm-rustc
+    LLVM_SYS_201_PREFIX: /usr/lib/llvm-rustc
     # Commit in github.com/rust-lang/rust which corresponds to the newest LLVM.
     # Rust CI hosts tarballs with their LLVM builds, which are more up to date
     # than packages in distros where we can't use LLVM's nightly packages
     # (e.g. Alpine), which are usually one version behind.
-    RUSTC_COMMIT: d61f55d8b9d4703207a5980f27b6c28973ba27ee
+    RUSTC_COMMIT: ce36a966c79e109dabeef7a47fe68e5294c6d71e
   before_script:
     # LLVM from Rust CI, even for the musl targets, is linked against libgcc_s
     # and libstdc++, not compiler-rt nor libc++.
@@ -43,7 +43,7 @@ test:debian:
     - chmod +x llvm.sh
     # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
     - echo >> /etc/apt/sources.list
-    - ./llvm.sh 19 all
+    - ./llvm.sh 20 all
   script:
     - *default_build_script
     # LLJIT uses `dlopen()` to open the shared libLLVM library. Therefore, we

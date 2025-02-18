@@ -106,6 +106,7 @@ pub enum LLVMDWARFSourceLanguage {
     LLVMDWARFSourceLanguageRuby,
     LLVMDWARFSourceLanguageMove,
     LLVMDWARFSourceLanguageHylo,
+    LLVMDWARFSourceLanguageMetal,
     // Vendor extensions:
     LLVMDWARFSourceLanguageMips_Assembler,
     LLVMDWARFSourceLanguageGOOGLE_RenderScript,
@@ -583,10 +584,12 @@ extern "C" {
         Ty: LLVMMetadataRef,
     ) -> LLVMMetadataRef;
 
-    /// Create a uniqued DIType* clone with FlagObjectPointer and FlagArtificial set.
+    /// Create a uniqued DIType* clone with FlagObjectPointer. If `Implicit` is
+    /// true, then also set FlagArtificial.
     pub fn LLVMDIBuilderCreateObjectPointerType(
         Builder: LLVMDIBuilderRef,
         Type: LLVMMetadataRef,
+        Implicit: LLVMBool,
     ) -> LLVMMetadataRef;
 
     /// Create debugging information entry for a qualified type, e.g. 'const int'.
@@ -912,6 +915,33 @@ extern "C" {
 
     /// Set the debug location for the given instruction.
     pub fn LLVMInstructionSetDebugLoc(Inst: LLVMValueRef, Loc: LLVMMetadataRef);
+
+    /// Create a new descriptor for a label.
+    pub fn LLVMDIBuilderCreateLabel(
+        Builder: LLVMDIBuilderRef,
+        Context: LLVMMetadataRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        File: LLVMMetadataRef,
+        LineNo: ::libc::size_t,
+        AlwaysPreserve: LLVMBool,
+    ) -> LLVMMetadataRef;
+
+    /// Insert a new llvm.dbg.label intrinsic call.
+    pub fn LLVMDIBuilderInsertLabelBefore(
+        Builder: LLVMDIBuilderRef,
+        LabelInfo: LLVMMetadataRef,
+        Location: LLVMMetadataRef,
+        InsertBefore: LLVMValueRef,
+    ) -> LLVMDbgRecordRef;
+
+    /// Insert a new llvm.dbg.label intrinsic call.
+    pub fn LLVMDIBuilderInsertLabelAtEnd(
+        Builder: LLVMDIBuilderRef,
+        LabelInfo: LLVMMetadataRef,
+        Location: LLVMMetadataRef,
+        InsertAtEnd: LLVMBasicBlockRef,
+    );
 
     /// Obtain the enumerated type of a metadata instance.
     pub fn LLVMGetMetadataKind(Metadata: LLVMMetadataRef) -> LLVMMetadataKind;

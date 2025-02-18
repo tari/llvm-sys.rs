@@ -44,6 +44,9 @@ extern "C" {
     ) -> ::libc::c_uint;
     pub fn LLVMGetMDKindID(Name: *const ::libc::c_char, SLen: ::libc::c_uint) -> ::libc::c_uint;
 
+    /// Maps a synchronization scope name to a ID unique within this context.
+    pub fn LLVMGetSyncScopeID(C: LLVMContextRef, Name: *const ::libc::c_char, SLen: ::libc::size_t);
+
     /// Return a unique id given the name of an enum attribute, or 0 if no attribute
     /// by that name exists.
     ///
@@ -336,6 +339,14 @@ extern "C" {
         FunctionTy: LLVMTypeRef,
     ) -> LLVMValueRef;
     pub fn LLVMGetNamedFunction(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMValueRef;
+    /// Obtain a Function value from a Module by its name.
+    ///
+    /// The returned value corresponds to a Function value.
+    pub fn LLVMGetNamedFunctionWithLength(
+        M: LLVMModuleRef,
+        Name: *const ::libc::c_char,
+        Length: ::libc::size_t,
+    ) -> LLVMValueRef;
     pub fn LLVMGetFirstFunction(M: LLVMModuleRef) -> LLVMValueRef;
     pub fn LLVMGetLastFunction(M: LLVMModuleRef) -> LLVMValueRef;
     pub fn LLVMGetNextFunction(Fn: LLVMValueRef) -> LLVMValueRef;
@@ -489,13 +500,11 @@ extern "C" {
     // Core->Types->Other
     pub fn LLVMVoidTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMLabelTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
-    pub fn LLVMX86MMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMX86AMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMTokenTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMMetadataTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMVoidType() -> LLVMTypeRef;
     pub fn LLVMLabelType() -> LLVMTypeRef;
-    pub fn LLVMX86MMXType() -> LLVMTypeRef;
     pub fn LLVMX86AMXType() -> LLVMTypeRef;
     pub fn LLVMTargetExtTypeInContext(
         C: LLVMContextRef,
@@ -551,6 +560,10 @@ extern "C" {
 
     pub fn LLVMDumpValue(Val: LLVMValueRef);
     pub fn LLVMPrintValueToString(Val: LLVMValueRef) -> *mut ::libc::c_char;
+
+    /// Obtain the context to which this value is associated.
+    pub fn LLVMGetValueContext(Val: LLVMValueRef) -> LLVMContextRef;
+
     /// Return a string representation of the DbgRecord.
     ///
     /// Use LLVMDisposeMessage to free the string.
@@ -818,6 +831,11 @@ extern "C" {
         AddressSpace: ::libc::c_uint,
     ) -> LLVMValueRef;
     pub fn LLVMGetNamedGlobal(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMValueRef;
+    pub fn LLVMGetNamedGlobalWithLength(
+        M: LLVMModuleRef,
+        Name: *const ::libc::c_char,
+        Length: ::libc::size_t,
+    ) -> LLVMValueRef;
     pub fn LLVMGetFirstGlobal(M: LLVMModuleRef) -> LLVMValueRef;
     pub fn LLVMGetLastGlobal(M: LLVMModuleRef) -> LLVMValueRef;
     pub fn LLVMGetNextGlobal(GlobalVar: LLVMValueRef) -> LLVMValueRef;
@@ -916,7 +934,7 @@ extern "C" {
         ParamTypes: *mut LLVMTypeRef,
         ParamCount: ::libc::size_t,
         NameLength: *mut ::libc::size_t,
-    ) -> *const ::libc::c_char;
+    ) -> *mut ::libc::c_char;
     pub fn LLVMIntrinsicIsOverloaded(ID: ::libc::c_uint) -> LLVMBool;
     pub fn LLVMGetFunctionCallConv(Fn: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMSetFunctionCallConv(Fn: LLVMValueRef, CC: ::libc::c_uint);
@@ -1201,6 +1219,22 @@ extern "C" {
     pub fn LLVMInstructionClone(Inst: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsATerminatorInst(Inst: LLVMValueRef) -> LLVMValueRef;
 
+    /// Obtain the first debug record attached to an instruction.
+    ///
+    /// Use LLVMGetNextDbgRecord() and LLVMGetPreviousDbgRecord() to traverse the
+    /// sequence of DbgRecords.
+    ///
+    /// Return the first DbgRecord attached to Inst or NULL if there are none.
+    pub fn LLVMGetFirstDbgRecord(Inst: LLVMValueRef) -> LLVMDbgRecordRef;
+    /// Obtain the last debug record attached to an instruction.
+    ///
+    /// Return the last DbgRecord attached to Inst or NULL if there are none.
+    pub fn LLVMGetLastDbgRecord(Inst: LLVMValueRef) -> LLVMDbgRecordRef;
+    /// Obtain the next DbgRecord in the sequence or NULL if there are no more.
+    pub fn LLVMGetNextDbgRecord(DbgRecord: LLVMDbgRecordRef) -> LLVMDbgRecordRef;
+    /// Obtain the previous DbgRecord in the sequence or NULL if there are no more.
+    pub fn LLVMGetPreviousDbgRecord(DbgRecord: LLVMDbgRecordRef) -> LLVMDbgRecordRef;
+
     // Instructions->Call Sites and Invocations
     // Obtain the argument count for a call instruction.
     //
@@ -1326,7 +1360,6 @@ extern "C" {
 
 // Core->Values again; these don't appear in Doxygen because they're macro-generated.
 extern "C" {
-    pub fn LLVMGetValueContext(Val: LLVMValueRef) -> LLVMContextRef;
     pub fn LLVMIsAArgument(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsABasicBlock(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAInlineAsm(Val: LLVMValueRef) -> LLVMValueRef;
@@ -1429,7 +1462,6 @@ extern "C" {
 extern "C" {
     pub fn LLVMCreateBuilderInContext(C: LLVMContextRef) -> LLVMBuilderRef;
     pub fn LLVMCreateBuilder() -> LLVMBuilderRef;
-    pub fn LLVMGetBuilderContext(Builder: LLVMBuilderRef) -> LLVMContextRef;
     /// Set the builder position before Instr but after any attached debug records,
     /// or if Instr is null set the position to the end of Block.
     pub fn LLVMPositionBuilder(
@@ -1481,6 +1513,10 @@ extern "C" {
     pub fn LLVMBuilderGetDefaultFPMathTag(Builder: LLVMBuilderRef) -> LLVMMetadataRef;
     /// Set the default floating-point math metadata for the given builder.
     pub fn LLVMBuilderSetDefaultFPMathTag(Builder: LLVMBuilderRef, FPMathTag: LLVMMetadataRef);
+
+    /// Obtain the context to which this builder is associated.
+    pub fn LLVMGetBuilderContext(Builder: LLVMBuilderRef) -> LLVMContextRef;
+
     #[deprecated(since = "90.0.0", note = "Use LLVMGetCurrentDebugLocation2 instead.")]
     pub fn LLVMSetCurrentDebugLocation(Builder: LLVMBuilderRef, L: LLVMValueRef);
     pub fn LLVMGetCurrentDebugLocation(Builder: LLVMBuilderRef) -> LLVMValueRef;
@@ -1969,6 +2005,10 @@ extern "C" {
         Str: *const ::libc::c_char,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
+    #[deprecated(
+        since = "201.0.0",
+        note = "Use LLVMBuildGlobalString instead, which has identical behavior"
+    )]
     pub fn LLVMBuildGlobalStringPtr(
         B: LLVMBuilderRef,
         Str: *const ::libc::c_char,
@@ -2233,6 +2273,12 @@ extern "C" {
         singleThread: LLVMBool,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
+    pub fn LLVMBuildFenceSyncScope(
+        B: LLVMBuilderRef,
+        ordering: LLVMAtomicOrdering,
+        SSID: ::libc::c_uint,
+        Name: *const ::libc::c_char,
+    ) -> LLVMValueRef;
     pub fn LLVMBuildAtomicRMW(
         B: LLVMBuilderRef,
         op: LLVMAtomicRMWBinOp,
@@ -2240,6 +2286,14 @@ extern "C" {
         Val: LLVMValueRef,
         ordering: LLVMAtomicOrdering,
         singleThread: LLVMBool,
+    ) -> LLVMValueRef;
+    pub fn LLVMBuildAtomicRMWSyncScope(
+        B: LLVMBuilderRef,
+        op: LLVMAtomicRMWBinOp,
+        PTR: LLVMValueRef,
+        Val: LLVMValueRef,
+        ordering: LLVMAtomicOrdering,
+        SSID: ::libc::c_uint,
     ) -> LLVMValueRef;
     pub fn LLVMBuildAtomicCmpXchg(
         B: LLVMBuilderRef,
@@ -2250,11 +2304,27 @@ extern "C" {
         FailureOrdering: LLVMAtomicOrdering,
         SingleThread: LLVMBool,
     ) -> LLVMValueRef;
+    pub fn LLVMBuildAtomicCmpXchgSyncScope(
+        B: LLVMBuilderRef,
+        Ptr: LLVMValueRef,
+        Cmp: LLVMValueRef,
+        New: LLVMValueRef,
+        SuccessOrdering: LLVMAtomicOrdering,
+        FailureOrdering: LLVMAtomicOrdering,
+        SSID: ::libc::c_uint,
+    ) -> LLVMValueRef;
     pub fn LLVMGetNumMaskElements(ShuffleVectorInst: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetUndefMaskElem() -> ::libc::c_int;
     pub fn LLVMGetMaskValue(ShuffleVectorInst: LLVMValueRef, Elt: ::libc::c_uint) -> ::libc::c_int;
     pub fn LLVMIsAtomicSingleThread(AtomicInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetAtomicSingleThread(AtomicInst: LLVMValueRef, SingleThread: LLVMBool);
+    /// Returns whether an instruction is an atomic instruction, e.g., atomicrmw,
+    /// cmpxchg, fence, or loads and stores with atomic ordering.
+    pub fn LLVMIsAtomic(Inst: LLVMValueRef) -> LLVMBool;
+    /// Returns the synchronization scope ID of an atomic instruction.
+    pub fn LLVMGetAtomicSyncScopeID(AtomicInst: LLVMValueRef) -> ::libc::c_uint;
+    /// Sets the synchronization scope ID of an atomic instruction.
+    pub fn LLVMSetAtomicSyncScopeID(AtomicInst: LLVMValueRef, SSID: ::libc::c_uint);
     pub fn LLVMGetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef) -> LLVMAtomicOrdering;
     pub fn LLVMSetCmpXchgSuccessOrdering(CmpXchgInst: LLVMValueRef, Ordering: LLVMAtomicOrdering);
     pub fn LLVMGetCmpXchgFailureOrdering(CmpXchgInst: LLVMValueRef) -> LLVMAtomicOrdering;
