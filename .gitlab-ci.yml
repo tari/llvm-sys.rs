@@ -23,7 +23,7 @@ test:alpine-rustc-llvm-tarball:
     # Rust CI hosts tarballs with their LLVM builds, which are more up to date
     # than packages in distros where we can't use LLVM's nightly packages
     # (e.g. Alpine), which are usually one version behind.
-    RUSTC_COMMIT: 41dd149fd6a6a06795fc6b9f54cb49af2f61775f
+    RUSTC_COMMIT: d61f55d8b9d4703207a5980f27b6c28973ba27ee
   before_script:
     # LLVM from Rust CI, even for the musl targets, is linked against libgcc_s
     # and libstdc++, not compiler-rt nor libc++.
