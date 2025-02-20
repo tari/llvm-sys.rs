@@ -59,11 +59,11 @@ pub enum LLVMBinaryType {
     LLVMBinaryTypeOffload,
 }
 
-#[deprecated(since = "LLVM 9.0")]
+#[deprecated(since = "90.0.0")]
 pub enum LLVMOpaqueObjectFile {}
 
 #[allow(deprecated)]
-#[deprecated(since = "LLVM 9.0")]
+#[deprecated(since = "90.0.0")]
 pub type LLVMObjectFileRef = *mut LLVMOpaqueObjectFile;
 
 extern "C" {
@@ -126,20 +126,20 @@ extern "C" {
     pub fn LLVMGetRelocationValueString(RI: LLVMRelocationIteratorRef) -> *const ::libc::c_char;
 
     #[allow(deprecated)]
-    #[deprecated(since = "LLVM 9.0", note = "Use LLVMCreateBinary instead")]
+    #[deprecated(since = "90.0.0", note = "Use LLVMCreateBinary instead")]
     pub fn LLVMCreateObjectFile(MemBuf: LLVMMemoryBufferRef) -> LLVMObjectFileRef;
     #[allow(deprecated)]
-    #[deprecated(since = "LLVM 9.0", note = "Use LLVMDisposeBinary instead")]
+    #[deprecated(since = "90.0.0", note = "Use LLVMDisposeBinary instead")]
     pub fn LLVMDisposeObjectFile(ObjectFile: LLVMObjectFileRef);
     #[allow(deprecated)]
     #[deprecated(
-        since = "LLVM 9.0",
+        since = "90.0.0",
         note = "Use LLVMObjectFileCopySectionIterator instead"
     )]
     pub fn LLVMGetSections(ObjectFile: LLVMObjectFileRef) -> LLVMSectionIteratorRef;
     #[allow(deprecated)]
     #[deprecated(
-        since = "LLVM 9.0",
+        since = "90.0.0",
         note = "Use LLVMObjectFileIsSectionIteratorAtEnd instead"
     )]
     pub fn LLVMIsSectionIteratorAtEnd(
@@ -148,13 +148,13 @@ extern "C" {
     ) -> LLVMBool;
     #[allow(deprecated)]
     #[deprecated(
-        since = "LLVM 9.0",
+        since = "90.0.0",
         note = "Use LLVMObjectFileCopySymbolIterator instead"
     )]
     pub fn LLVMGetSymbols(ObjectFile: LLVMObjectFileRef) -> LLVMSymbolIteratorRef;
     #[allow(deprecated)]
     #[deprecated(
-        since = "LLVM 9.0",
+        since = "90.0.0",
         note = "Use LLVMObjectFileIsSymbolIteratorAtEnd instead"
     )]
     pub fn LLVMIsSymbolIteratorAtEnd(

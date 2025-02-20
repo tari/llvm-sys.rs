@@ -1,4 +1,4 @@
-use error::LLVMErrorRef;
+use crate::error::LLVMErrorRef;
 
 use super::*;
 

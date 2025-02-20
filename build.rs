@@ -83,7 +83,7 @@ fn target_os_is(name: &str) -> bool {
 fn locate_llvm_config() -> Option<PathBuf> {
     let prefix = env::var_os(&*ENV_LLVM_PREFIX)
         .map(|p| PathBuf::from(p).join("bin"))
-        .unwrap_or_else(PathBuf::new);
+        .unwrap_or_default();
 
     if let Some(x) = llvm_compatible_binary_name(&prefix) {
         return Some(x);
@@ -166,7 +166,7 @@ fn llvm_config_binary_names() -> impl Iterator<Item = String> {
 /// Check whether the given version of LLVM is blocklisted,
 /// returning `Some(reason)` if it is.
 fn is_blocklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
-    static BLOCKLIST: &'static [(u64, u64, u64, &'static str)] = &[];
+    static BLOCKLIST: &[(u64, u64, u64, &str)] = &[];
 
     if let Some(x) = env::var_os(&*ENV_IGNORE_BLOCKLIST) {
         if &x == "YES" {
@@ -185,9 +185,9 @@ fn is_blocklisted_llvm(llvm_version: &Version) -> Option<&'static str> {
 
     for &(major, minor, patch, reason) in BLOCKLIST.iter() {
         let bad_version = Version {
-            major: major,
-            minor: minor,
-            patch: patch,
+            major,
+            minor,
+            patch,
             pre: semver::Prerelease::EMPTY,
             build: semver::BuildMetadata::EMPTY,
         };
@@ -725,13 +725,13 @@ fn main() {
 
     let use_debug_msvcrt = env::var_os(&*ENV_USE_DEBUG_MSVCRT).is_some();
     if target_env_is("msvc") && (use_debug_msvcrt || is_llvm_debug(&llvm_config_path)) {
-        println!("cargo:rustc-link-lib={}", "msvcrtd");
+        println!("cargo:rustc-link-lib=msvcrtd");
     }
 
     // Link libffi if the user requested this workaround.
     // See https://bitbucket.org/tari/llvm-sys.rs/issues/12/
     let force_ffi = env::var_os(&*ENV_FORCE_FFI).is_some();
     if force_ffi {
-        println!("cargo:rustc-link-lib=dylib={}", "ffi");
+        println!("cargo:rustc-link-lib=dylib=ffi");
     }
 }

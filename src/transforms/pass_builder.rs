@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
 
-use super::super::prelude::*;
-use error::LLVMErrorRef;
-use target_machine::LLVMTargetMachineRef;
+use crate::error::LLVMErrorRef;
+use crate::prelude::*;
+use crate::target_machine::LLVMTargetMachineRef;
 
 #[derive(Debug)]
 pub enum LLVMOpaquePassBuilderOptions {}

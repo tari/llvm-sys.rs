@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
 //! OrcV2
 
-use error::LLVMErrorRef;
-use prelude::*;
-use target_machine::LLVMTargetMachineRef;
+use crate::error::LLVMErrorRef;
+use crate::prelude::*;
+use crate::target_machine::LLVMTargetMachineRef;
 
 pub mod ee;
 pub mod lljit;

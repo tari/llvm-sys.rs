@@ -1,4 +1,5 @@
-use super::{super::execution_engine::*, *};
+use super::*;
+use crate::execution_engine::*;
 
 pub type LLVMMemoryManagerCreateContextCallback = extern "C" fn(CtxCtx: *mut ::libc::c_void);
 pub type LLVMMemoryManagerNotifyTerminatingCallback = extern "C" fn(CtxCtx: *mut ::libc::c_void);
