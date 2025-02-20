@@ -7,7 +7,7 @@ extern "C" {
     ///
     /// Returns 0 on success and the generated module in `OutModule`.
     /// Optionally returns a human-readable error message in `OutMessage`.
-    #[deprecated(since = "3.8", note = "Use LLVMParseBitcode2")]
+    #[deprecated(since = "38.0.0", note = "Use LLVMParseBitcode2")]
     pub fn LLVMParseBitcode(
         MemBuf: LLVMMemoryBufferRef,
         OutModule: *mut LLVMModuleRef,
@@ -21,7 +21,7 @@ extern "C" {
         OutModule: *mut LLVMModuleRef,
     ) -> LLVMBool;
 
-    #[deprecated(since = "3.8", note = "Use LLVMParseBitcodeInContext2")]
+    #[deprecated(since = "38.0.0", note = "Use LLVMParseBitcodeInContext2")]
     pub fn LLVMParseBitcodeInContext(
         ContextRef: LLVMContextRef,
         MemBuf: LLVMMemoryBufferRef,
@@ -38,7 +38,7 @@ extern "C" {
     /// performing lazy deserialization.
     ///
     /// Returns 0 on success and an optional error message.
-    #[deprecated(since = "3.8", note = "Use LLVMGetBitcodeModuleInContext2")]
+    #[deprecated(since = "38.0.0", note = "Use LLVMGetBitcodeModuleInContext2")]
     pub fn LLVMGetBitcodeModuleInContext(
         ContextRef: LLVMContextRef,
         MemBuf: LLVMMemoryBufferRef,
@@ -55,7 +55,7 @@ extern "C" {
         OutM: *mut LLVMModuleRef,
     ) -> LLVMBool;
 
-    #[deprecated(since = "3.8", note = "Use LLVMGetBitcodeModule2")]
+    #[deprecated(since = "38.0.0", note = "Use LLVMGetBitcodeModule2")]
     pub fn LLVMGetBitcodeModule(
         MemBuf: LLVMMemoryBufferRef,
         OutM: *mut LLVMModuleRef,

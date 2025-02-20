@@ -171,7 +171,10 @@ extern "C" {
         Len: ::libc::size_t,
     );
 
-    #[deprecated(since = "3.9", note = "Confusingly named. Use LLVMGetDataLayoutStr.")]
+    #[deprecated(
+        since = "39.0.0",
+        note = "Confusingly named. Use LLVMGetDataLayoutStr."
+    )]
     pub fn LLVMGetDataLayout(M: LLVMModuleRef) -> *const ::libc::c_char;
     /// Obtain the data layout for a module.
     pub fn LLVMGetDataLayoutStr(M: LLVMModuleRef) -> *const ::libc::c_char;
@@ -229,7 +232,7 @@ extern "C" {
         M: LLVMModuleRef,
         Len: *mut ::libc::size_t,
     ) -> *const ::libc::c_char;
-    #[deprecated(since = "7.0", note = "Use LLVMSetModuleInlineAsm2 instead")]
+    #[deprecated(since = "70.0.0", note = "Use LLVMSetModuleInlineAsm2 instead")]
     pub fn LLVMSetModuleInlineAsm(M: LLVMModuleRef, Asm: *const ::libc::c_char);
     pub fn LLVMSetModuleInlineAsm2(
         M: LLVMModuleRef,
@@ -283,7 +286,7 @@ extern "C" {
     pub fn LLVMGetInlineAsmCanUnwind(InlineAsmVal: LLVMValueRef) -> LLVMBool;
 
     pub fn LLVMGetModuleContext(M: LLVMModuleRef) -> LLVMContextRef;
-    #[deprecated(since = "12.0.0", note = "Use LLVMGetTypeByName2 instead")]
+    #[deprecated(since = "120.0.0", note = "Use LLVMGetTypeByName2 instead")]
     pub fn LLVMGetTypeByName(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMTypeRef;
     pub fn LLVMGetFirstNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
     pub fn LLVMGetLastNamedMetadata(M: LLVMModuleRef) -> LLVMNamedMDNodeRef;
@@ -430,7 +433,7 @@ extern "C" {
     /// Return the number of types in the derived type.
     pub fn LLVMGetNumContainedTypes(Tp: LLVMTypeRef) -> ::libc::c_uint;
     #[deprecated(
-        since = "17.0",
+        since = "170.0.0",
         note = "LLVMArrayType is deprecated in favor of the API accurate LLVMArrayType2"
     )]
     pub fn LLVMArrayType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
@@ -440,7 +443,7 @@ extern "C" {
     /// exists in.
     pub fn LLVMArrayType2(ElementType: LLVMTypeRef, ElementCount: u64) -> LLVMTypeRef;
     #[deprecated(
-        since = "17.0",
+        since = "170.0.0",
         note = "LLVMGetArrayLength is deprecated in favor of the API accurate LLVMGetArrayLength2"
     )]
     pub fn LLVMGetArrayLength(ArrayTy: LLVMTypeRef) -> ::libc::c_uint;
@@ -532,13 +535,13 @@ extern "C" {
     pub fn LLVMGetValueKind(Val: LLVMValueRef) -> LLVMValueKind;
     pub fn LLVMTypeOf(Val: LLVMValueRef) -> LLVMTypeRef;
 
-    #[deprecated(since = "7.0", note = "Use LLVMGetValueName2 instead")]
+    #[deprecated(since = "70.0.0", note = "Use LLVMGetValueName2 instead")]
     pub fn LLVMGetValueName(Val: LLVMValueRef) -> *const ::libc::c_char;
     pub fn LLVMGetValueName2(
         Val: LLVMValueRef,
         Length: *mut ::libc::size_t,
     ) -> *const ::libc::c_char;
-    #[deprecated(since = "7.0", note = "Use LLVMSetValueName2 instead")]
+    #[deprecated(since = "70.0.0", note = "Use LLVMSetValueName2 instead")]
     pub fn LLVMSetValueName(Val: LLVMValueRef, Name: *const ::libc::c_char);
     pub fn LLVMSetValueName2(
         Val: LLVMValueRef,
@@ -620,7 +623,7 @@ extern "C" {
     ) -> ::libc::c_double;
 
     // Core->Values->Constants->Composite
-    #[deprecated(since = "19.1", note = "Use LLVMConstStringInContext2 instead.")]
+    #[deprecated(since = "191.0.0", note = "Use LLVMConstStringInContext2 instead.")]
     pub fn LLVMConstStringInContext(
         C: LLVMContextRef,
         Str: *const ::libc::c_char,
@@ -652,7 +655,7 @@ extern "C" {
         Packed: LLVMBool,
     ) -> LLVMValueRef;
     #[deprecated(
-        since = "17.0",
+        since = "170.0.0",
         note = "LLVMConstArray is deprecated in favor of the API accurate LLVMConstArray2"
     )]
     pub fn LLVMConstArray(
@@ -672,7 +675,7 @@ extern "C" {
         Count: ::libc::c_uint,
     ) -> LLVMValueRef;
     pub fn LLVMGetAggregateElement(C: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
-    #[deprecated(since = "15.0", note = "Use LLVMGetAggregateElement instead")]
+    #[deprecated(since = "150.0.0", note = "Use LLVMGetAggregateElement instead")]
     pub fn LLVMGetElementAsConstant(C: LLVMValueRef, idx: ::libc::c_uint) -> LLVMValueRef;
     pub fn LLVMConstVector(
         ScalarConstantVals: *mut LLVMValueRef,
@@ -692,7 +695,7 @@ extern "C" {
     pub fn LLVMSizeOf(Ty: LLVMTypeRef) -> LLVMValueRef;
     pub fn LLVMConstNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNSWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
-    #[deprecated(since = "19.1", note = "Use LLVMConstNull instead.")]
+    #[deprecated(since = "191.0.0", note = "Use LLVMConstNull instead.")]
     pub fn LLVMConstNUWNeg(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstNot(ConstantVal: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMConstAdd(LHSConstant: LLVMValueRef, RHSConstant: LLVMValueRef) -> LLVMValueRef;
@@ -748,7 +751,7 @@ extern "C" {
         VectorBConstant: LLVMValueRef,
         MaskConstant: LLVMValueRef,
     ) -> LLVMValueRef;
-    #[deprecated(since = "7.0", note = "Use LLVMGetInlineAsm instead")]
+    #[deprecated(since = "70.0.0", note = "Use LLVMGetInlineAsm instead")]
     pub fn LLVMConstInlineAsm(
         Ty: LLVMTypeRef,
         AsmString: *const ::libc::c_char,
@@ -777,9 +780,9 @@ extern "C" {
     pub fn LLVMGetUnnamedAddress(Global: LLVMValueRef) -> LLVMUnnamedAddr;
     pub fn LLVMSetUnnamedAddress(Global: LLVMValueRef, UnnamedAddr: LLVMUnnamedAddr);
     pub fn LLVMGlobalGetValueType(Global: LLVMValueRef) -> LLVMTypeRef;
-    #[deprecated(since = "7.0", note = "Use LLVMGetUnnamedAddress instead")]
+    #[deprecated(since = "70.0.0", note = "Use LLVMGetUnnamedAddress instead")]
     pub fn LLVMHasUnnamedAddr(Global: LLVMValueRef) -> LLVMBool;
-    #[deprecated(since = "7.0", note = "Use LLVMSetUnnamedAddress instead")]
+    #[deprecated(since = "70.0.0", note = "Use LLVMSetUnnamedAddress instead")]
     pub fn LLVMSetUnnamedAddr(Global: LLVMValueRef, HasUnnamedAddr: LLVMBool);
 
     pub fn LLVMGetAlignment(V: LLVMValueRef) -> ::libc::c_uint;
@@ -992,21 +995,21 @@ extern "C" {
 
 // Core->Metadata
 extern "C" {
-    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDStringInContext2 instead.")]
+    #[deprecated(since = "90.0.0", note = "Use LLVMMDStringInContext2 instead.")]
     pub fn LLVMMDStringInContext(
         C: LLVMContextRef,
         Str: *const ::libc::c_char,
         SLen: ::libc::c_uint,
     ) -> LLVMValueRef;
-    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDStringInContext2 instead.")]
+    #[deprecated(since = "90.0.0", note = "Use LLVMMDStringInContext2 instead.")]
     pub fn LLVMMDString(Str: *const ::libc::c_char, SLen: ::libc::c_uint) -> LLVMValueRef;
-    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDNodeInContext2 instead.")]
+    #[deprecated(since = "90.0.0", note = "Use LLVMMDNodeInContext2 instead.")]
     pub fn LLVMMDNodeInContext(
         C: LLVMContextRef,
         Vals: *mut LLVMValueRef,
         Count: ::libc::c_uint,
     ) -> LLVMValueRef;
-    #[deprecated(since = "LLVM 9.0", note = "Use LLVMMDNodeInContext2 instead.")]
+    #[deprecated(since = "90.0.0", note = "Use LLVMMDNodeInContext2 instead.")]
     pub fn LLVMMDNode(Vals: *mut LLVMValueRef, Count: ::libc::c_uint) -> LLVMValueRef;
 
     /// Create a new operand bundle.
@@ -1468,7 +1471,7 @@ extern "C" {
     /// current debug location for the given builder.  If the builder has no current
     /// debug location, this function is a no-op.
     #[deprecated(
-        since = "14.0",
+        since = "140.0.0",
         note = "Deprecated in favor of the more general LLVMAddMetadataToInst."
     )]
     pub fn LLVMSetInstDebugLocation(Builder: LLVMBuilderRef, Inst: LLVMValueRef);
@@ -1478,7 +1481,7 @@ extern "C" {
     pub fn LLVMBuilderGetDefaultFPMathTag(Builder: LLVMBuilderRef) -> LLVMMetadataRef;
     /// Set the default floating-point math metadata for the given builder.
     pub fn LLVMBuilderSetDefaultFPMathTag(Builder: LLVMBuilderRef, FPMathTag: LLVMMetadataRef);
-    #[deprecated(since = "LLVM 9.0", note = "Use LLVMGetCurrentDebugLocation2 instead.")]
+    #[deprecated(since = "90.0.0", note = "Use LLVMGetCurrentDebugLocation2 instead.")]
     pub fn LLVMSetCurrentDebugLocation(Builder: LLVMBuilderRef, L: LLVMValueRef);
     pub fn LLVMGetCurrentDebugLocation(Builder: LLVMBuilderRef) -> LLVMValueRef;
 
@@ -1807,7 +1810,7 @@ extern "C" {
         V: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
-    #[deprecated(since = "19.1", note = "Use LLVMBuildNeg + LLVMSetNUW instead.")]
+    #[deprecated(since = "191.0.0", note = "Use LLVMBuildNeg + LLVMSetNUW instead.")]
     pub fn LLVMBuildNUWNeg(
         B: LLVMBuilderRef,
         V: LLVMValueRef,
