@@ -98,6 +98,8 @@ pub const LLVMDisassembler_Option_AsmPrinterVariant: u64 = 4;
 pub const LLVMDisassembler_Option_SetInstrComments: u64 = 8;
 /// The option to print latency information alongside instructions
 pub const LLVMDisassembler_Option_PrintLatency: u64 = 16;
+/// The option to print in color
+pub const LLVMDisassembler_Option_Color: u64 = 32;
 
 pub type LLVMSymbolLookupCallback = Option<
     extern "C" fn(

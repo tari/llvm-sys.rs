@@ -15,6 +15,16 @@ extern "C" {
         TM: LLVMTargetMachineRef,
         Options: LLVMPassBuilderOptionsRef,
     ) -> LLVMErrorRef;
+    /// Construct and run a set of passes over a function.
+    ///
+    /// This function behaves the same as LLVMRunPasses, but operates on a single
+    /// function instead of an entire module.
+    pub fn LLVMRunPassesOnFunction(
+        F: LLVMValueRef,
+        Passes: *const ::libc::c_char,
+        TM: LLVMTargetMachineRef,
+        Options: LLVMPassBuilderOptionsRef,
+    ) -> LLVMErrorRef;
     pub fn LLVMCreatePassBuilderOptions() -> LLVMPassBuilderOptionsRef;
     pub fn LLVMPassBuilderOptionsSetVerifyEach(
         Options: LLVMPassBuilderOptionsRef,
@@ -23,6 +33,10 @@ extern "C" {
     pub fn LLVMPassBuilderOptionsSetDebugLogging(
         Options: LLVMPassBuilderOptionsRef,
         DebugLogging: LLVMBool,
+    );
+    pub fn LLVMPassBuilderOptionsSetAAPipeline(
+        Options: LLVMPassBuilderOptionsRef,
+        AAPipeline: *const ::libc::c_char,
     );
     pub fn LLVMPassBuilderOptionsSetLoopInterleaving(
         Options: LLVMPassBuilderOptionsRef,

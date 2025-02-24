@@ -216,7 +216,7 @@ pub enum LLVMTypeKind {
     LLVMPointerTypeKind = 12,
     LLVMVectorTypeKind = 13,
     LLVMMetadataTypeKind = 14,
-    LLVMX86_MMXTypeKind = 15,
+    // 15 previously used by LLVMX86_MMXTypeKind
     LLVMTokenTypeKind = 16,
     LLVMScalableVectorTypeKind = 17,
     LLVMBFloatTypeKind = 18,
@@ -440,6 +440,10 @@ pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpFMin = 14,
     LLVMAtomicRMWBinOpUIncWrap = 15,
     LLVMAtomicRMWBinOpUDecWrap = 16,
+    /// Subtracts the value only if no unsigned overflow.
+    LLVMAtomicRMWBinOpUSubCond,
+    /// Subtracts the value, clamping to zero.
+    LLVMAtomicRMWBinOpUSubSat,
 }
 
 #[repr(C)]
