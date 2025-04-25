@@ -346,14 +346,32 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
                         .file_name()
                         .unwrap()
                         .to_str()
-                        .expect("Shared library path must be a valid string");
-                    let (stem, _rest) = soname
-                        .rsplit_once(target_dylib_extension())
-                        .expect("Shared library should be a .so file");
+                        .expect("Library filename must be a valid string");
 
-                    stem.strip_prefix("lib").unwrap_or_else(|| {
-                        panic!("system library '{}' does not have a 'lib' prefix", soname)
-                    })
+                    // Check for any valid library filename, even if it's a different kind from the
+                    // one we asked for. Some configurations give us a path to a static archive,
+                    // even when we're asking for shared libraries.
+                    [LibraryKind::Dynamic, LibraryKind::Static]
+                        .iter()
+                        .filter_map(|&kind| {
+                            if let Some((stem, _rest)) = soname.rsplit_once(kind.file_extension()) {
+                                Some(stem.strip_prefix("lib").unwrap_or_else(|| {
+                                    panic!(
+                                        "system library '{}' does not have a 'lib' prefix",
+                                        soname
+                                    )
+                                }))
+                            } else {
+                                None
+                            }
+                        })
+                        .next()
+                        .unwrap_or_else(|| {
+                            panic!(
+                                "Filename '{}' does not appear to refer to a library file",
+                                soname
+                            )
+                        })
                 } else {
                     panic!(
                         "Unable to parse result of llvm-config --system-libs: {}",
@@ -424,14 +442,6 @@ fn homebrew_prefix(name: Option<&str>) -> Option<String> {
         .map(|val| val.trim().to_string())
 }
 
-fn target_dylib_extension() -> &'static str {
-    if target_os_is("macos") {
-        ".dylib"
-    } else {
-        ".so"
-    }
-}
-
 /// Get the library that must be linked for C++, if any.
 fn get_system_libcpp() -> Option<&'static str> {
     if let Some(libcpp) = option_env!("LLVM_SYS_LIBCPP") {
@@ -469,6 +479,22 @@ impl LibraryKind {
         match self {
             LibraryKind::Static => "static",
             LibraryKind::Dynamic => "dylib",
+        }
+    }
+
+    /// Return the file extension associated with a library kind for the target platform.
+    ///
+    /// The returned extension includes a leading '.', like ".so".
+    pub fn file_extension(&self) -> &'static str {
+        match self {
+            LibraryKind::Dynamic => {
+                if target_os_is("macos") {
+                    ".dylib"
+                } else {
+                    ".so"
+                }
+            }
+            LibraryKind::Static => ".a",
         }
     }
 }
