@@ -512,10 +512,9 @@ fn get_link_libraries(
         llvm_config_path: &Path,
         kind: LibraryKind,
     ) -> anyhow::Result<String> {
-        // Windows targets don't get dynamic support.
-        // See: https://gitlab.com/taricorp/llvm-sys.rs/-/merge_requests/31#note_1306397918
         if target_env_is("msvc") && kind == LibraryKind::Dynamic {
-            anyhow::bail!("Dynamic linking to LLVM is not supported on Windows");
+            // Upstream work on support: https://github.com/llvm/llvm-project/issues/109483
+            anyhow::bail!("Dynamic linking to LLVM is not currently supported on Windows");
         }
 
         let link_arg = match kind {
