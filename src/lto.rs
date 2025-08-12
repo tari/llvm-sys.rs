@@ -159,6 +159,17 @@ extern "C" {
         _mod: lto_module_t,
         index: ::libc::c_uint,
     ) -> lto_symbol_attributes;
+    /// Returns the number of asm undefined symbols in the object module.
+    ///
+    /// Available since before LTO API version 30.
+    pub fn lto_module_get_num_asm_undef_symbols(mod_: lto_module_t) -> ::libc::c_uint;
+    /// Returns the name of the ith asm undefined symbol in the object module.
+    ///
+    /// Available since before LTO API version 30.
+    pub fn lto_module_get_asm_undef_symbol_name(
+        mod_: lto_module_t,
+        index: ::libc::c_uint,
+    ) -> *const ::libc::c_char;
     /// Returns the module's linker options.
     ///
     /// The linker options may consist of multiple flags. It is the linker's

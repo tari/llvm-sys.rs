@@ -161,6 +161,8 @@ pub enum LLVMMetadataKind {
     LLVMDIGenericSubrangeMetadataKind,
     LLVMDIArgListMetadataKind,
     LLVMDIAssignIDMetadataKind,
+    LLVMDISubrangeTypeMetadataKind,
+    LLVMDIFixedPointTypeMetadataKind,
 }
 
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;
@@ -414,6 +416,16 @@ extern "C" {
         IsUnsigned: LLVMBool,
     ) -> LLVMMetadataRef;
 
+    /// Create debugging information entry for an enumerator of arbitrary precision.
+    pub fn LLVMDIBuilderCreateEnumeratorOfArbitraryPrecision(
+        Builder: LLVMDIBuilderRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        SizeInBits: u64,
+        Words: *const u64,
+        IsUnsigned: LLVMBool,
+    ) -> LLVMMetadataRef;
+
     /// Create debugging information entry for an enumeration.
     pub fn LLVMDIBuilderCreateEnumerationType(
         Builder: LLVMDIBuilderRef,
@@ -456,6 +468,65 @@ extern "C" {
         Subscripts: *mut LLVMMetadataRef,
         NumSubscripts: ::libc::c_uint,
     ) -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a set.
+    pub fn LLVMDIBuilderCreateSetType(
+        Builder: LLVMDIBuilderRef,
+        Scope: LLVMMetadataRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        File: LLVMMetadataRef,
+        LineNumber: ::libc::c_uint,
+        SizeInBits: u64,
+        AlignInBits: u32,
+        BaseTy: LLVMMetadataRef,
+    ) -> LLVMMetadataRef;
+
+    /// Create a descriptor for a subrange with dynamic bounds.
+    pub fn LLVMDIBuilderCreateSubrangeType(
+        Builder: LLVMDIBuilderRef,
+        Scope: LLVMMetadataRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        LineNo: ::libc::c_uint,
+        File: LLVMMetadataRef,
+        SizeInBits: u64,
+        AlignInBits: u32,
+        Flags: LLVMDIFlags,
+        BaseTy: LLVMMetadataRef,
+        LowerBound: LLVMMetadataRef,
+        UpperBound: LLVMMetadataRef,
+        Stride: LLVMMetadataRef,
+        Bias: LLVMMetadataRef,
+    ) -> LLVMMetadataRef;
+
+    /// Create debugging information entry for a dynamic array.
+    pub fn LLVMDIBuilderCreateDynamicArrayType(
+        Builder: LLVMDIBuilderRef,
+        Scope: LLVMMetadataRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        LineNo: ::libc::c_uint,
+        File: LLVMMetadataRef,
+        Size: u64,
+        AlignInBits: u32,
+        Ty: LLVMMetadataRef,
+        Subscripts: LLVMMetadataRef,
+        NumSubscripts: ::libc::c_uint,
+        DataLocation: LLVMMetadataRef,
+        Associated: LLVMMetadataRef,
+        Allocated: LLVMMetadataRef,
+        Rank: LLVMMetadataRef,
+        BitStride: LLVMMetadataRef,
+    ) -> LLVMMetadataRef;
+
+    /// Replace arrays.
+    pub fn LLVMReplaceArrays(
+        Builder: LLVMDIBuilderRef,
+        T: *mut LLVMMetadataRef,
+        Elements: *mut LLVMMetadataRef,
+        NumElements: ::libc::c_uint,
+    );
 
     /// Create debugging information entry for a vector type.
     pub fn LLVMDIBuilderCreateVectorType(

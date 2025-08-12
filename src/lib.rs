@@ -393,13 +393,6 @@ pub enum LLVMRealPredicate {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum LLVMLandingPadClauseTy {
-    LLVMLandingPadCatch = 0,
-    LLVMLandingPadFilter = 1,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMThreadLocalMode {
     LLVMNotThreadLocal = 0,
     LLVMGeneralDynamicTLSModel = 1,
@@ -444,6 +437,12 @@ pub enum LLVMAtomicRMWBinOp {
     LLVMAtomicRMWBinOpUSubCond,
     /// Subtracts the value, clamping to zero.
     LLVMAtomicRMWBinOpUSubSat,
+    /// Sets the value if it's greater than the original using an floating
+    /// point comparison and return the old one.
+    LLVMAtomicRMWBinOpFMaximum,
+    /// Sets the value if it's smaller than the original using an floating
+    /// point comparison and return the old one.
+    LLVMAtomicRMWBinOpFMinimum,
 }
 
 #[repr(C)]
