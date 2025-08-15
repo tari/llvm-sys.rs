@@ -656,6 +656,11 @@ extern "C" {
     ) -> LLVMValueRef;
     pub fn LLVMIsConstantString(c: LLVMValueRef) -> LLVMBool;
     pub fn LLVMGetAsString(C: LLVMValueRef, Length: *mut ::libc::size_t) -> *const ::libc::c_char;
+    /// Get the raw, underlying bytes of the given constant data sequential.
+    ///
+    /// This is the same as LLVMGetAsString except it works for all constant data
+    /// sequentials, not just i8 arrays.
+    pub fn LLVMGetRawDataValues(c: LLVMValueRef, SizeInBytes: usize) -> *const ::libc::c_char;
     pub fn LLVMConstStructInContext(
         C: LLVMContextRef,
         ConstantVals: *mut LLVMValueRef,
@@ -681,6 +686,16 @@ extern "C" {
         ElementTy: LLVMTypeRef,
         ConstantVals: *mut LLVMValueRef,
         Length: u64,
+    ) -> LLVMValueRef;
+    /// Create a ConstantDataArray from raw values.
+    ///
+    /// ElementTy must be one of i8, i16, i32, i64, half, bfloat, float, or double.
+    /// Data points to a contiguous buffer of raw values in the host endianness. The
+    /// element count is inferred from the element type and the data size in bytes.
+    pub fn LLVMConstDataArray(
+        ElementTy: LLVMTypeRef,
+        Data: *const ::libc::c_char,
+        SizeInBytes: usize,
     ) -> LLVMValueRef;
     pub fn LLVMConstNamedStruct(
         StructTy: LLVMTypeRef,
@@ -1215,6 +1230,14 @@ extern "C" {
     pub fn LLVMDeleteInstruction(Inst: LLVMValueRef);
     pub fn LLVMGetInstructionOpcode(Inst: LLVMValueRef) -> LLVMOpcode;
     pub fn LLVMGetICmpPredicate(Inst: LLVMValueRef) -> LLVMIntPredicate;
+    /// Get whether or not an icmp instruction has the samesign flag.
+    ///
+    /// This is only valid for instructions that correspond to `llvm::ICmpInst`.
+    pub fn LLVMGetICmpSameSign(Inst: LLVMValueRef) -> LLVMBool;
+    /// Set the samesign flag on an icmp instruction.
+    ///
+    /// This is only valid for instructions that correspond to `llvm::ICmpInst`.
+    pub fn LLVMSetICmpSameSign(Inst: LLVMValueRef, SameSign: LLVMBool);
     pub fn LLVMGetFCmpPredicate(Inst: LLVMValueRef) -> LLVMRealPredicate;
     pub fn LLVMInstructionClone(Inst: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsATerminatorInst(Inst: LLVMValueRef) -> LLVMValueRef;

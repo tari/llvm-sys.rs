@@ -4,7 +4,7 @@ Rust bindings to LLVM's C API.
 
 ```toml
 [dependencies]
-llvm-sys = "201.0.0-rc1"
+llvm-sys = "211.0.0-rc1"
 ```
 
 There must be a compatible version of LLVM available. By default `llvm-sys`
@@ -118,7 +118,7 @@ compile it yourself.
 
 `LLVM_SYS_<version>_PREFIX` specifies the install prefix for a compiled and
 installed copy of the libraries, where `<version>` is the major version of
-`llvm-sys` (for example, `LLVM_SYS_201_PREFIX`). The llvm-sys build scripts
+`llvm-sys` (for example, `LLVM_SYS_211_PREFIX`). The llvm-sys build scripts
 will look for a `llvm-config` binary in the directory `<PREFIX>/bin/` in
 addition to searching for a copy on `$PATH`, and verify that the LLVM version
 reported by `llvm-config` is compatible with the current crate version.
