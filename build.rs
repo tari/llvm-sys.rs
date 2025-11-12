@@ -102,6 +102,44 @@ fn locate_llvm_config() -> Option<PathBuf> {
         }
     }
 
+    // On FreeBSD, LLVM binary packages install to /usr/local/llvm{version} (where version is "21",
+    // "20" and so forth down to 11 as the earliest available as of 2025-11-13) and aren't on PATH.
+    // Search for one of those if nothing else worked, newest first.
+    if target_os_is("freebsd") {
+        fn is_llvm_dir(entry: io::Result<std::fs::DirEntry>) -> Option<(std::ffi::OsString, u32)> {
+            let entry = entry.ok()?;
+            let name = entry.file_name();
+
+            let name_str = name.as_os_str().to_str()?;
+            let version = name_str.get(4..)?.parse::<u32>().ok()?;
+            if name_str.starts_with("llvm") && entry.file_type().ok()?.is_dir() {
+                Some((name, version))
+            } else {
+                None
+            }
+        }
+
+        // Any LLVM version at least as new as the crate version is okay, so we need to search for
+        // directories with the right name rather than looking for any of a set of versions.
+        let mut roots = std::collections::BTreeMap::new();
+        for dir in std::fs::read_dir("/usr/local").expect("unable to open /usr/local") {
+            if let Some((name, version)) = is_llvm_dir(dir) {
+                roots.insert(version, name);
+            }
+        }
+
+        let mut path = PathBuf::from("/usr/local");
+        for (_version, name) in roots.iter().rev() {
+            path.push(name);
+            path.push("bin");
+            if let Some(x) = llvm_compatible_binary_name(&path) {
+                return Some(x);
+            }
+            path.pop();
+            path.pop();
+        }
+    }
+
     None
 }
 
