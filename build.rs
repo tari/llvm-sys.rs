@@ -444,10 +444,9 @@ fn homebrew_prefix(name: Option<&str>) -> Option<String> {
 
 /// Get the library that must be linked for C++, if any.
 fn get_system_libcpp() -> Option<&'static str> {
-    if let Some(libcpp) = option_env!("CXXSTDLIB") {
+    if let Some(libcpp) = option_env!("CXXSTDLIB").or(option_env!("LLVM_SYS_LIBCPP")) {
         // Use the library defined by the caller, if provided.
-        Some(libcpp)
-    } else if let Some(libcpp) = option_env!("LLVM_SYS_LIBCPP") {
+        // CXXSTDLIB is a de-facto standard used by cc-rs.
         Some(libcpp)
     } else if target_env_is("msvc") {
         // MSVC doesn't need an explicit one.
