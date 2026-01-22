@@ -165,6 +165,14 @@ pub enum LLVMMetadataKind {
     LLVMDIFixedPointTypeMetadataKind,
 }
 
+#[repr(C)]
+#[derive(Debug)]
+pub enum LLVMChecksumKind {
+    CSK_MD5,
+    CSK_SHA1,
+    CSK_SHA256,
+}
+
 pub type LLVMDWARFTypeEncoding = ::libc::c_uint;
 
 #[repr(C)]
@@ -225,6 +233,19 @@ extern "C" {
         FilenameLen: ::libc::size_t,
         Directory: *const ::libc::c_char,
         DirectoryLen: ::libc::size_t,
+    ) -> LLVMMetadataRef;
+    /// Create a file descriptor to hold debugging information for a file.
+    pub fn LLVMDIBuilderCreateFileWithChecksum(
+        Builder: LLVMDIBuilderRef,
+        Filename: *const ::libc::c_char,
+        FilenameLen: ::libc::size_t,
+        Directory: *const ::libc::c_char,
+        DirectoryLen: ::libc::size_t,
+        ChecksumKind: LLVMChecksumKind,
+        Checksum: *const ::libc::c_char,
+        ChecksumLen: ::libc::size_t,
+        Source: *const ::libc::c_char,
+        SourceLen: ::libc::size_t,
     ) -> LLVMMetadataRef;
 
     /// Creates a new descriptor for a module with the specified parent scope.

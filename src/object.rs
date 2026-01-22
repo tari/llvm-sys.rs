@@ -57,6 +57,8 @@ pub enum LLVMBinaryType {
     LLVMBinaryTypeWasm,
     /// Offloading fatbinary
     LLVMBinaryTypeOffload,
+    /// DirectX Binary Container
+    LLVMBinaryTypeDXcontainer,
 }
 
 #[deprecated(since = "90.0.0")]

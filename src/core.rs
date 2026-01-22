@@ -17,6 +17,10 @@ extern "C" {
 // Core->Contexts
 extern "C" {
     pub fn LLVMContextCreate() -> LLVMContextRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, create one using LLVMContextCreate instead"
+    )]
     pub fn LLVMGetGlobalContext() -> LLVMContextRef;
     pub fn LLVMContextSetDiagnosticHandler(
         C: LLVMContextRef,
@@ -42,6 +46,10 @@ extern "C" {
         Name: *const ::libc::c_char,
         SLen: ::libc::c_uint,
     ) -> ::libc::c_uint;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMGetMDKindIDInContext instead"
+    )]
     pub fn LLVMGetMDKindID(Name: *const ::libc::c_char, SLen: ::libc::c_uint) -> ::libc::c_uint;
 
     /// Maps a synchronization scope name to a ID unique within this context.
@@ -124,6 +132,10 @@ extern "C" {
 
 // Core->Modules
 extern "C" {
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMModuleCreateWithNameInContext instead."
+    )]
     pub fn LLVMModuleCreateWithName(ModuleID: *const ::libc::c_char) -> LLVMModuleRef;
     pub fn LLVMModuleCreateWithNameInContext(
         ModuleID: *const ::libc::c_char,
@@ -338,6 +350,21 @@ extern "C" {
         Name: *const ::libc::c_char,
         FunctionTy: LLVMTypeRef,
     ) -> LLVMValueRef;
+    /// Obtain or insert a function into a module.
+    ///
+    /// If a function with the specified name already exists in the module, it
+    /// is returned. Otherwise, a new function is created in the module with the
+    /// specified name and type and is returned.
+    ///
+    /// The returned value corresponds to a llvm::Function instance.
+    ///
+    /// See `llvm::Module::getOrInsertFunction()`.
+    pub fn LLVMGetOrInsertFunction(
+        M: LLVMModuleRef,
+        Name: *const ::libc::c_char,
+        NameLen: ::libc::size_t,
+        FunctionTy: LLVMTypeRef,
+    ) -> LLVMValueRef;
     pub fn LLVMGetNamedFunction(M: LLVMModuleRef, Name: *const ::libc::c_char) -> LLVMValueRef;
     /// Obtain a Function value from a Module by its name.
     ///
@@ -369,12 +396,40 @@ extern "C" {
     pub fn LLVMInt64TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMInt128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMIntTypeInContext(C: LLVMContextRef, NumBits: ::libc::c_uint) -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMInt1TypeInContext instead"
+    )]
     pub fn LLVMInt1Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMInt8TypeInContext instead"
+    )]
     pub fn LLVMInt8Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMInt16TypeInContext instead"
+    )]
     pub fn LLVMInt16Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMInt32TypeInContext instead"
+    )]
     pub fn LLVMInt32Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMInt64TypeInContext instead"
+    )]
     pub fn LLVMInt64Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMInt128TypeInContext instead"
+    )]
     pub fn LLVMInt128Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMIntTypeInContext instead"
+    )]
     pub fn LLVMIntType(NumBits: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMGetIntTypeWidth(IntegerTy: LLVMTypeRef) -> ::libc::c_uint;
 
@@ -386,12 +441,40 @@ extern "C" {
     pub fn LLVMX86FP80TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMFP128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMPPCFP128TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMHalfTypeInContext instead"
+    )]
     pub fn LLVMHalfType() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMBFloatTypeInContext instead"
+    )]
     pub fn LLVMBFloatType() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMFloatTypeInContext instead"
+    )]
     pub fn LLVMFloatType() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMDoubleTypeInContext instead"
+    )]
     pub fn LLVMDoubleType() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMX86FP80TypeInContext instead"
+    )]
     pub fn LLVMX86FP80Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMFP128TypeInContext instead"
+    )]
     pub fn LLVMFP128Type() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMPPCFP128TypeInContext instead"
+    )]
     pub fn LLVMPPCFP128Type() -> LLVMTypeRef;
 
     // Core->Types->Function
@@ -413,6 +496,10 @@ extern "C" {
         ElementCount: ::libc::c_uint,
         Packed: LLVMBool,
     ) -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMStructTypeInContext instead"
+    )]
     pub fn LLVMStructType(
         ElementTypes: *mut LLVMTypeRef,
         ElementCount: ::libc::c_uint,
@@ -503,8 +590,20 @@ extern "C" {
     pub fn LLVMX86AMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMTokenTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMMetadataTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMVoidTypeInContext instead"
+    )]
     pub fn LLVMVoidType() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMLabelTypeInContext instead"
+    )]
     pub fn LLVMLabelType() -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMX86AMXTypeInContext instead"
+    )]
     pub fn LLVMX86AMXType() -> LLVMTypeRef;
     pub fn LLVMTargetExtTypeInContext(
         C: LLVMContextRef,
@@ -628,6 +727,10 @@ extern "C" {
         Text: *const ::libc::c_char,
         SLen: ::libc::c_uint,
     ) -> LLVMValueRef;
+    /// Obtain a constant for a floating point value from array of 64 bit values.
+    /// The length of the array N must be ceildiv(bits, 64), where bits is the
+    /// scalar size in bits of the floating-point type.
+    pub fn LLVMConstFPFromBits(Ty: LLVMTypeRef, N: *const u64) -> LLVMValueRef;
     pub fn LLVMConstIntGetZExtValue(ConstantVal: LLVMValueRef) -> ::libc::c_ulonglong;
     pub fn LLVMConstIntGetSExtValue(ConstantVal: LLVMValueRef) -> ::libc::c_longlong;
     pub fn LLVMConstRealGetDouble(
@@ -649,6 +752,10 @@ extern "C" {
         Length: usize,
         DontNullTerminate: LLVMBool,
     ) -> LLVMValueRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMConstStructInContext instead"
+    )]
     pub fn LLVMConstString(
         Str: *const ::libc::c_char,
         Length: ::libc::c_uint,
@@ -817,8 +924,16 @@ extern "C" {
     pub fn LLVMSetAlignment(V: LLVMValueRef, Bytes: ::libc::c_uint);
 
     pub fn LLVMGlobalSetMetadata(Global: LLVMValueRef, Kind: ::libc::c_uint, MD: LLVMMetadataRef);
+    /// Adds a metadata attachment.
+    ///
+    /// See `llvm::GlobalObject::addMetadata()`.
+    pub fn LLVMGlobalAddMetadata(Global: LLVMValueRef, Kind: ::libc::c_uint, MD: LLVMMetadataRef);
     pub fn LLVMGlobalEraseMetadata(Global: LLVMValueRef, Kind: ::libc::c_uint);
     pub fn LLVMGlobalClearMetadata(Global: LLVMValueRef);
+    /// Add debuginfo metadata to this global.
+    ///
+    /// See `llvm::GlobalVariable::addDebugInfo()`.
+    pub fn LLVMGlobalAddDebugInfo(Global: LLVMValueRef, GVE: LLVMMetadataRef);
     pub fn LLVMGlobalCopyAllMetadata(
         Value: LLVMValueRef,
         NumEntries: *mut ::libc::size_t,
@@ -1034,7 +1149,10 @@ extern "C" {
         Str: *const ::libc::c_char,
         SLen: ::libc::c_uint,
     ) -> LLVMValueRef;
-    #[deprecated(since = "90.0.0", note = "Use LLVMMDStringInContext2 instead.")]
+    #[deprecated(
+        since = "90.0.0",
+        note = "Use of the global context is deprecated, use LLVMMDStringInContext2 instead."
+    )]
     pub fn LLVMMDString(Str: *const ::libc::c_char, SLen: ::libc::c_uint) -> LLVMValueRef;
     #[deprecated(since = "90.0.0", note = "Use LLVMMDNodeInContext2 instead.")]
     pub fn LLVMMDNodeInContext(
@@ -1042,7 +1160,10 @@ extern "C" {
         Vals: *mut LLVMValueRef,
         Count: ::libc::c_uint,
     ) -> LLVMValueRef;
-    #[deprecated(since = "90.0.0", note = "Use LLVMMDNodeInContext2 instead.")]
+    #[deprecated(
+        since = "90.0.0",
+        note = "Use of the global context is deprecated, use LLVMMDNodeInContext2 instead."
+    )]
     pub fn LLVMMDNode(Vals: *mut LLVMValueRef, Count: ::libc::c_uint) -> LLVMValueRef;
 
     /// Create a new operand bundle.
@@ -1188,6 +1309,10 @@ extern "C" {
         Fn: LLVMValueRef,
         Name: *const ::libc::c_char,
     ) -> LLVMBasicBlockRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMAppendBasicBlockInContext instead."
+    )]
     pub fn LLVMAppendBasicBlock(Fn: LLVMValueRef, Name: *const ::libc::c_char)
         -> LLVMBasicBlockRef;
     pub fn LLVMInsertBasicBlockInContext(
@@ -1195,6 +1320,10 @@ extern "C" {
         BB: LLVMBasicBlockRef,
         Name: *const ::libc::c_char,
     ) -> LLVMBasicBlockRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMInsertBasicBlockInContext instead."
+    )]
     pub fn LLVMInsertBasicBlock(
         InsertBeforeBB: LLVMBasicBlockRef,
         Name: *const ::libc::c_char,
@@ -1257,6 +1386,27 @@ extern "C" {
     pub fn LLVMGetNextDbgRecord(DbgRecord: LLVMDbgRecordRef) -> LLVMDbgRecordRef;
     /// Obtain the previous DbgRecord in the sequence or NULL if there are no more.
     pub fn LLVMGetPreviousDbgRecord(DbgRecord: LLVMDbgRecordRef) -> LLVMDbgRecordRef;
+
+    // Get the debug location attached to the debug record.
+    //
+    // See `llvm::DbgRecord::getDebugLoc()`.
+    pub fn LLVMDbgRecordGetDebugLoc(Rec: LLVMDbgRecordRef) -> LLVMMetadataRef;
+    pub fn LLVMDbgRecordGetKind(Rec: LLVMDbgRecordRef) -> LLVMDbgRecordKind;
+    /// Get the value of the DbgVariableRecord.
+    ///
+    /// See `llvm::DbgVariableRecord::getValue()`.
+    pub fn LLVMDbgVariableRecordGetValue(
+        Rec: LLVMDbgRecordRef,
+        OpIdx: ::libc::c_uint,
+    ) -> LLVMValueRef;
+    /// Get the debug info variable of the DbgVariableRecord.
+    ///
+    /// See `llvm::DbgVariableRecord::getVariable()`.
+    pub fn LLVMDbgVariableRecordGetVariable(Rec: LLVMDbgRecordRef) -> LLVMMetadataRef;
+    /// Get the debug info expression of the DbgVariableRecord.
+    ///
+    /// See `llvm::DbgVariableRecord::getExpression()`.
+    pub fn LVMDbgVariableRecordGetExpression(Rec: LLVMDbgRecordRef) -> LLVMMetadataRef;
 
     // Instructions->Call Sites and Invocations
     // Obtain the argument count for a call instruction.
@@ -1351,6 +1501,26 @@ extern "C" {
     pub fn LLVMGetCondition(Branch: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMSetCondition(Branch: LLVMValueRef, Cond: LLVMValueRef);
     pub fn LLVMGetSwitchDefaultDest(SwitchInstr: LLVMValueRef) -> LLVMBasicBlockRef;
+    /// Obtain the case value for a successor of a switch instruction. i corresponds
+    /// to the successor index. The first successor is the default destination, so i
+    /// must be greater than zero.
+    ///
+    /// This only works on llvm::SwitchInst instructions.
+    ///
+    /// See `llvm::SwitchInst::CaseHandle::getCaseValue()`.
+    pub fn LLVMGetSwitchCaseValue(SwitchInstr: LLVMValueRef, i: ::libc::c_uint) -> LLVMValueRef;
+    /// Set the case value for a successor of a switch instruction. i corresponds to
+    /// the successor index. The first successor is the default destination, so i
+    /// must be greater than zero.
+    ///
+    /// This only works on llvm::SwitchInst instructions.
+    ///
+    /// See `llvm::SwitchInst::CaseHandle::setValue()`.
+    pub fn LLVMSetSwitchCaseValue(
+        SwitchInstr: LLVMValueRef,
+        i: ::libc::c_uint,
+        CaseValue: LLVMValueRef,
+    );
 
     // Instructions->Allocas
     // Obtain the type being allocated by an alloca instruction.
@@ -1484,6 +1654,10 @@ extern "C" {
 // Core->Instruction Builders
 extern "C" {
     pub fn LLVMCreateBuilderInContext(C: LLVMContextRef) -> LLVMBuilderRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMCreateBuilderInContext instead."
+    )]
     pub fn LLVMCreateBuilder() -> LLVMBuilderRef;
     /// Set the builder position before Instr but after any attached debug records,
     /// or if Instr is null set the position to the end of Block.
@@ -2037,7 +2211,7 @@ extern "C" {
         Str: *const ::libc::c_char,
         Name: *const ::libc::c_char,
     ) -> LLVMValueRef;
-    pub fn LLVMGetVolatile(MemoryAccessInst: LLVMValueRef) -> LLVMBool;
+    pub fn LLVMGetVolatile(Inst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetVolatile(MemoryAccessInst: LLVMValueRef, IsVolatile: LLVMBool);
     pub fn LLVMGetWeak(CmpXchgInst: LLVMValueRef) -> LLVMBool;
     pub fn LLVMSetWeak(CmpXchgInst: LLVMValueRef, IsWeak: LLVMBool);

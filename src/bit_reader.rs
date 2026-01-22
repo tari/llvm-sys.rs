@@ -7,7 +7,10 @@ extern "C" {
     ///
     /// Returns 0 on success and the generated module in `OutModule`.
     /// Optionally returns a human-readable error message in `OutMessage`.
-    #[deprecated(since = "38.0.0", note = "Use LLVMParseBitcode2")]
+    #[deprecated(
+        since = "38.0.0",
+        note = "Use of the global context is deprecated, use LLVMParseBitcodeInContext2 instead"
+    )]
     pub fn LLVMParseBitcode(
         MemBuf: LLVMMemoryBufferRef,
         OutModule: *mut LLVMModuleRef,
@@ -16,6 +19,10 @@ extern "C" {
     /// Build a module from the bitcode in the specified memory buffer.
     ///
     /// Returns the created module in OutModule, returns 0 on success.
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMParseBitcodeInContext2 instead"
+    )]
     pub fn LLVMParseBitcode2(
         MemBuf: LLVMMemoryBufferRef,
         OutModule: *mut LLVMModuleRef,
@@ -55,7 +62,10 @@ extern "C" {
         OutM: *mut LLVMModuleRef,
     ) -> LLVMBool;
 
-    #[deprecated(since = "38.0.0", note = "Use LLVMGetBitcodeModule2")]
+    #[deprecated(
+        since = "38.0.0",
+        note = "Use of the global context is deprecated, use LLVMParseBitcodeInContext2 instead"
+    )]
     pub fn LLVMGetBitcodeModule(
         MemBuf: LLVMMemoryBufferRef,
         OutM: *mut LLVMModuleRef,
@@ -65,6 +75,10 @@ extern "C" {
     ///
     /// Outputs a module provider which performs lazy deserialization.
     /// Returns 0 on success.
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMParseBitcodeInContext2 instead"
+    )]
     pub fn LLVMGetBitcodeModule2(MemBuf: LLVMMemoryBufferRef, OutM: *mut LLVMModuleRef)
         -> LLVMBool;
 }
