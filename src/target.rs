@@ -150,7 +150,15 @@ extern "C" {
     pub fn LLVMByteOrder(TD: LLVMTargetDataRef) -> LLVMByteOrdering;
     pub fn LLVMPointerSize(TD: LLVMTargetDataRef) -> ::libc::c_uint;
     pub fn LLVMPointerSizeForAS(TD: LLVMTargetDataRef, AS: ::libc::c_uint) -> ::libc::c_uint;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMIntPtrTypeInContext instead."
+    )]
     pub fn LLVMIntPtrType(TD: LLVMTargetDataRef) -> LLVMTypeRef;
+    #[deprecated(
+        since = "221.0.0",
+        note = "Use of the global context is deprecated, use LLVMIntPtrTypeForASInContext instead."
+    )]
     pub fn LLVMIntPtrTypeForAS(TD: LLVMTargetDataRef, AS: ::libc::c_uint) -> LLVMTypeRef;
     pub fn LLVMIntPtrTypeInContext(C: LLVMContextRef, TD: LLVMTargetDataRef) -> LLVMTypeRef;
     pub fn LLVMIntPtrTypeForASInContext(

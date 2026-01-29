@@ -74,6 +74,6 @@ extern "C" {
 
     /// Install the plugin that submits debug objects to the executor.
     ///
-    /// Executors must expose the llvm_orc_registerJITLoaderGDBWrapper symbol.
+    /// Executors must expose the llvm_orc_registerJITLoaderGDBAllocAction symbol.
     pub fn LLVMOrcLLJITEnableDebugSupport(J: LLVMOrcLLJITRef) -> LLVMErrorRef;
 }

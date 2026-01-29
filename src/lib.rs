@@ -169,6 +169,7 @@ pub enum LLVMOpcode {
     LLVMFPTrunc = 37,
     LLVMFPExt = 38,
     LLVMPtrToInt = 39,
+    LLVMPtrToAddr = 69,
     LLVMIntToPtr = 40,
     LLVMBitCast = 41,
     LLVMAddrSpaceCast = 60,
@@ -519,6 +520,15 @@ pub type LLVMFastMathFlags = ::libc::c_uint;
 
 /// Flags that constrain the allowed wrap semantics of a gelementptr instruction.
 pub type LLVMGEPNoWrapFlags = ::libc::c_uint;
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LLVMDbgRecordKind {
+    LLVMDbgRecordLabel,
+    LLVMDbgRecordDeclare,
+    LLVMDbgRecordValue,
+    LLVMDbgRecordAssign,
+}
 
 pub const LLVMGEPFlagInBounds: LLVMGEPNoWrapFlags = 1;
 pub const LLVMGEPFlagNUSW: LLVMGEPNoWrapFlags = 1 << 1;
