@@ -189,8 +189,8 @@ to the official documentation.
 Download and unpack a copy of the source for the required version.
 
 ```sh
-wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-20.1.0-rc1.tar.gz
-tar xJf llvmorg-20.1.0-rc1.tar.xz
+wget https://github.com/llvm/llvm-project/archive/refs/tags/llvmorg-22.1.0.tar.gz
+tar xJf llvmorg-22.1.0.tar.xz
 ```
 
 Note that you do not need to compile Clang or the test suite.
