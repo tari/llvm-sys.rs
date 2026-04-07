@@ -1,5 +1,8 @@
 Rust bindings to LLVM's C API.
 
+[![Crates.io Version](https://img.shields.io/crates/v/llvm-sys)](https://crates.io/crates/llvm-sys)
+[![documentation on docs.rs](https://img.shields.io/docsrs/llvm-sys)](https://docs.rs/llvm-sys/)
+
 # Usage
 
 ```toml
@@ -14,8 +17,6 @@ on your system can be specified via environment variables. See
 [LLVM compatibility](#llvm-compatibility) for more information.
 
 ## Documentation
-
-[![documentation on docs.rs](https://img.shields.io/docsrs/llvm-sys)](https://docs.rs/llvm-sys/)
 
 See the `examples` directory in this repository for API examples. There also
 exist some other projects using these bindings which may be
