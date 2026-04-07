@@ -454,8 +454,9 @@ extern "C" {
         TargetTriple: *const ::libc::c_char,
     ) -> LLVMErrorRef;
     pub fn LLVMOrcCreateNewThreadSafeContext() -> LLVMOrcThreadSafeContextRef;
-    pub fn LLVMOrcThreadSafeContextGetContext(TSCtx: LLVMOrcThreadSafeContextRef)
-        -> LLVMContextRef;
+    pub fn LLVMOrcCreateNewThreadSafeContextFromLLVMContext(
+        Ctx: LLVMContextRef,
+    ) -> LLVMOrcThreadSafeContextRef;
     pub fn LLVMOrcDisposeThreadSafeContext(TSCtx: LLVMOrcThreadSafeContextRef);
     pub fn LLVMOrcCreateNewThreadSafeModule(
         M: LLVMModuleRef,
