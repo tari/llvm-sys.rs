@@ -130,7 +130,9 @@ pub mod transforms {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum LLVMOpcode {
     LLVMRet = 1,
-    LLVMBr = 2,
+    // LLVMBr = 2 was removed in LLVM 23
+    LLVMUncondBr = 70,
+    LLVMCondBr = 71,
     LLVMSwitch = 3,
     LLVMIndirectBr = 4,
     LLVMInvoke = 5,
@@ -223,6 +225,8 @@ pub enum LLVMTypeKind {
     LLVMBFloatTypeKind = 18,
     LLVMX86_AMXTypeKind = 19,
     LLVMTargetExtTypeKind = 20,
+    /// Arbitrary bit width bytes
+    LLVMByteTypeKind = 21,
 }
 
 #[repr(C)]
@@ -343,6 +347,7 @@ pub enum LLVMValueKind {
     LLVMConstantDataArrayValueKind,
     LLVMConstantDataVectorValueKind,
     LLVMConstantIntValueKind,
+    LLVMConstantByteValueKind,
     LLVMConstantFPValueKind,
     LLVMConstantPointerNullValueKind,
     LLVMConstantTokenNoneValueKind,
@@ -444,6 +449,12 @@ pub enum LLVMAtomicRMWBinOp {
     /// Sets the value if it's smaller than the original using an floating
     /// point comparison and return the old one.
     LLVMAtomicRMWBinOpFMinimum,
+    /// Sets the value if it's greater than the original using a floating
+    /// point comparison and return the old one.
+    LLVMAtomicRMWBinOpFMaximumNum,
+    /// Sets the value if it's smaller than the original using a floating
+    /// point comparison and return the old one.
+    LLVMAtomicRMWBinOpFMinimumNum,
 }
 
 #[repr(C)]
@@ -528,6 +539,15 @@ pub enum LLVMDbgRecordKind {
     LLVMDbgRecordDeclare,
     LLVMDbgRecordValue,
     LLVMDbgRecordAssign,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum LLVMDenormalModeKind {
+    LLVMDenormalModeKindIEEE = 0,
+    LLVMDenormalModeKindPreserveSign = 1,
+    LLVMDenormalModeKindPositiveZero = 2,
+    LLVMDenormalModeKindDynamic = 3,
 }
 
 pub const LLVMGEPFlagInBounds: LLVMGEPNoWrapFlags = 1;
