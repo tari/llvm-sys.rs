@@ -36,9 +36,9 @@ test:alpine-rustc-llvm-tarball:
     - .build_definition
 
 test:debian:
-  image: rust:bookworm
+  image: rust:trixie
   before_script:
-    - apt-get update -qq && apt-get install -qq -y lsb-release software-properties-common
+    - apt-get update -qq && apt-get install -qq -y lsb-release
     - wget https://apt.llvm.org/llvm.sh
     - chmod +x llvm.sh
     # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
