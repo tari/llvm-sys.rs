@@ -104,6 +104,28 @@ extern "C" {
         UpperWords: *const u64,
     ) -> LLVMAttributeRef;
 
+    /// Create a DenormalFPEnv attribute.
+    ///
+    /// # Arguments
+    ///
+    /// - `DefaultModeOutput`: The assumed denormal handling for the outputs of most
+    ///   floating-point types.
+    /// - `DefaultModeInput`: The assumed denormal handling for the inputs of most
+    ///   floating-point types.
+    /// - `FloatModeOutput`: The assumed denormal handling for the outputs of
+    ///   float. This should always be the same as DefaultModeOutput for most
+    ///   targets.
+    /// - `FloatModeInput`: The assumed denormal handling for the inputs of
+    ///   float. This should always be the same as DefaultModeInput for most
+    ///   targets.
+    pub fn LLVMCreateDenormalFPEnvAttribute(
+        C: LLVMContextRef,
+        DefaultModeOutput: LLVMDenormalModeKind,
+        DefaultModeInput: LLVMDenormalModeKind,
+        FloatModeOutput: LLVMDenormalModeKind,
+        FloatModeInput: LLVMDenormalModeKind,
+    ) -> LLVMAttributeRef;
+
     /// Create a string attribute.
     pub fn LLVMCreateStringAttribute(
         C: LLVMContextRef,
@@ -112,6 +134,7 @@ extern "C" {
         V: *const ::libc::c_char,
         VLength: ::libc::c_uint,
     ) -> LLVMAttributeRef;
+
     /// Get a string attribute's kind.
     pub fn LLVMGetStringAttributeKind(
         A: LLVMAttributeRef,
@@ -388,6 +411,10 @@ extern "C" {
     pub fn LLVMDumpType(Val: LLVMTypeRef);
     pub fn LLVMPrintTypeToString(Val: LLVMTypeRef) -> *mut ::libc::c_char;
 
+    // Core->Types->Byte
+    pub fn LLVMByteTypeInContext(C: LLVMContextRef, NumBits: ::libc::c_uint) -> LLVMTypeRef;
+    pub fn LLVMGetByteTypeWidth(ByteTy: LLVMTypeRef) -> ::libc::c_uint;
+
     // Core->Types->Integer
     pub fn LLVMInt1TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMInt8TypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
@@ -590,6 +617,7 @@ extern "C" {
     pub fn LLVMX86AMXTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMTokenTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
     pub fn LLVMMetadataTypeInContext(C: LLVMContextRef) -> LLVMTypeRef;
+
     #[deprecated(
         since = "221.0.0",
         note = "Use of the global context is deprecated, use LLVMVoidTypeInContext instead"
@@ -720,6 +748,30 @@ extern "C" {
         SLen: ::libc::c_uint,
         Radix: u8,
     ) -> LLVMValueRef;
+
+    // Core->Values->Constants->Byte
+    /// Obtain a constant value for a byte type.
+    pub fn LLVMConstByte(ByteTy: LLVMTypeRef, N: ::libc::c_ulonglong) -> LLVMValueRef;
+    /// Obtain a constant value for a byte of arbitrary precision.
+    pub fn LLVMConstByteOfArbitraryPrecision(
+        ByteTy: LLVMTypeRef,
+        NumWords: ::libc::c_uint,
+        Words: *const u64,
+    ) -> LLVMValueRef;
+    /// Obtain a constant value for a byte parsed from a string.
+    pub fn LLVMConstByteOfString(
+        ByteTy: LLVMTypeRef,
+        Text: *const ::libc::c_char,
+        Radix: u8,
+    ) -> LLVMValueRef;
+    /// Obtain a constant value for a byte parsed from a string with specified length.
+    pub fn LLVMConstByteOfStringAndSize(
+        ByteTy: LLVMTypeRef,
+        Text: *const ::libc::c_char,
+        SLen: ::libc::c_uint,
+        Radix: u8,
+    ) -> LLVMValueRef;
+
     pub fn LLVMConstReal(RealTy: LLVMTypeRef, N: ::libc::c_double) -> LLVMValueRef;
     pub fn LLVMConstRealOfString(RealTy: LLVMTypeRef, Text: *const ::libc::c_char) -> LLVMValueRef;
     pub fn LLVMConstRealOfStringAndSize(
@@ -731,12 +783,18 @@ extern "C" {
     /// The length of the array N must be ceildiv(bits, 64), where bits is the
     /// scalar size in bits of the floating-point type.
     pub fn LLVMConstFPFromBits(Ty: LLVMTypeRef, N: *const u64) -> LLVMValueRef;
+
     pub fn LLVMConstIntGetZExtValue(ConstantVal: LLVMValueRef) -> ::libc::c_ulonglong;
     pub fn LLVMConstIntGetSExtValue(ConstantVal: LLVMValueRef) -> ::libc::c_longlong;
     pub fn LLVMConstRealGetDouble(
         ConstantVal: LLVMValueRef,
         losesInfo: *mut LLVMBool,
     ) -> ::libc::c_double;
+
+    /// Obtain the zero extended value for a byte constant value.
+    pub fn LLVMConstByteGetZExtValue(ConstantVal: LLVMValueRef) -> ::libc::c_ulonglong;
+    /// Obtain the sign extended value for a byte constant value.
+    pub fn LLVMConstByteGetSExtValue(ConstantVal: LLVMValueRef) -> ::libc::c_longlong;
 
     // Core->Values->Constants->Composite
     #[deprecated(since = "191.0.0", note = "Use LLVMConstStringInContext2 instead.")]
@@ -1038,14 +1096,14 @@ extern "C" {
     pub fn LLVMGetIntrinsicDeclaration(
         Mod: LLVMModuleRef,
         ID: ::libc::c_uint,
-        ParamTypes: *mut LLVMTypeRef,
-        ParamCount: ::libc::size_t,
+        OverloadTypes: *mut LLVMTypeRef,
+        OverloadCount: ::libc::size_t,
     ) -> LLVMValueRef;
     pub fn LLVMIntrinsicGetType(
         Ctx: LLVMContextRef,
         ID: ::libc::c_uint,
-        ParamTypes: *mut LLVMTypeRef,
-        ParamCount: ::libc::size_t,
+        OverloadTypes: *mut LLVMTypeRef,
+        OverloadCount: ::libc::size_t,
     ) -> LLVMTypeRef;
     pub fn LLVMIntrinsicGetName(
         ID: ::libc::c_uint,
@@ -1054,15 +1112,15 @@ extern "C" {
     #[deprecated = "Use LLVMIntrinsicCopyOverloadedName2 instead."]
     pub fn LLVMIntrinsicCopyOverloadedName(
         ID: ::libc::c_uint,
-        ParamTypes: *mut LLVMTypeRef,
-        ParamCount: ::libc::size_t,
+        OverloadTypes: *mut LLVMTypeRef,
+        OverloadCount: ::libc::size_t,
         NameLength: *mut ::libc::size_t,
     ) -> *const ::libc::c_char;
     pub fn LLVMIntrinsicCopyOverloadedName2(
         Mod: LLVMModuleRef,
         ID: ::libc::c_uint,
-        ParamTypes: *mut LLVMTypeRef,
-        ParamCount: ::libc::size_t,
+        OverloadTypes: *mut LLVMTypeRef,
+        OverloadCount: ::libc::size_t,
         NameLength: *mut ::libc::size_t,
     ) -> *mut ::libc::c_char;
     pub fn LLVMIntrinsicIsOverloaded(ID: ::libc::c_uint) -> LLVMBool;
@@ -1497,8 +1555,12 @@ extern "C" {
     pub fn LLVMGetNumSuccessors(Term: LLVMValueRef) -> ::libc::c_uint;
     pub fn LLVMGetSuccessor(Term: LLVMValueRef, i: ::libc::c_uint) -> LLVMBasicBlockRef;
     pub fn LLVMSetSuccessor(Term: LLVMValueRef, i: ::libc::c_uint, block: LLVMBasicBlockRef);
+
+    #[deprecated(since = "231.0.0", note = "Use LLVMIsACondBrInst instead.")]
     pub fn LLVMIsConditional(Branch: LLVMValueRef) -> LLVMBool;
+    /// This only works on llvm::CondBrInst instructions.
     pub fn LLVMGetCondition(Branch: LLVMValueRef) -> LLVMValueRef;
+    /// This only works on llvm::CondBrInst instructions.
     pub fn LLVMSetCondition(Branch: LLVMValueRef, Cond: LLVMValueRef);
     pub fn LLVMGetSwitchDefaultDest(SwitchInstr: LLVMValueRef) -> LLVMBasicBlockRef;
     /// Obtain the case value for a successor of a switch instruction. i corresponds
@@ -1605,7 +1667,13 @@ extern "C" {
     pub fn LLVMIsASelectInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAShuffleVectorInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAStoreInst(Val: LLVMValueRef) -> LLVMValueRef;
+    #[deprecated(
+        since = "231.0.0",
+        note = "Use LLVMIsAUncondBrInst/LLVMIsACondBrInst instead"
+    )]
     pub fn LLVMIsABranchInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsAUncondBrInst(Val: LLVMValueRef) -> LLVMValueRef;
+    pub fn LLVMIsACondBrInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAIndirectBrInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAInvokeInst(Val: LLVMValueRef) -> LLVMValueRef;
     pub fn LLVMIsAReturnInst(Val: LLVMValueRef) -> LLVMValueRef;
@@ -1699,12 +1767,12 @@ extern "C" {
     /// Attempts to set the debug location for the given instruction using the
     /// current debug location for the given builder.  If the builder has no current
     /// debug location, this function is a no-op.
-    #[deprecated(
-        since = "140.0.0",
-        note = "Deprecated in favor of the more general LLVMAddMetadataToInst."
-    )]
     pub fn LLVMSetInstDebugLocation(Builder: LLVMBuilderRef, Inst: LLVMValueRef);
-    /// Adds the metadata registered with the given builder to the given instruction.
+    /// Same as LLVMSetInstDebugLocation.
+    #[deprecated(
+        since = "231.0.0",
+        note = "Use the identical LLVMSetInstDebugLocation."
+    )]
     pub fn LLVMAddMetadataToInst(Builder: LLVMBuilderRef, Inst: LLVMValueRef);
     /// Get the dafult floating-point math metadata for a given builder.
     pub fn LLVMBuilderGetDefaultFPMathTag(Builder: LLVMBuilderRef) -> LLVMMetadataRef;
