@@ -38,12 +38,12 @@ test:alpine-rustc-llvm-tarball:
 test:debian:
   image: rust:trixie
   before_script:
-    # Add LLVM APT repository and its signing key.
-    - echo "deb https://apt.llvm.org/trixie/ llvm-toolchain-trixie-23 main" > /etc/apt/sources.list.d/llvm.list
-    - wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /etc/apt/trusted.gpg.d/llvm-snapshot.gpg
+    - apt-get update -qq && apt-get install -qq -y lsb-release
+    - wget https://apt.llvm.org/llvm.sh
+    - chmod +x llvm.sh
     # Workaround for https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1043101
     - echo >> /etc/apt/sources.list
-    - apt-get update -qq && apt-get install -qq -y llvm-23-dev libpolly-23-dev
+    - ./llvm.sh 23 all
   script:
     - *default_build_script
     # LLJIT uses `dlopen()` to open the shared libLLVM library. Therefore, we
