@@ -141,7 +141,6 @@ fn llvm_compatible_binary_name(prefix: &Path) -> Option<PathBuf> {
 /// Return an iterator over possible names for the llvm-config binary.
 fn llvm_config_binary_names() -> impl Iterator<Item = String> {
     let base_names = [
-        "llvm-config".into(),
         format!("llvm-config-{}", CRATE_VERSION.major),
         format!("llvm-config{}", CRATE_VERSION.major),
         format!("llvm{}-config", CRATE_VERSION.major),
@@ -150,6 +149,7 @@ fn llvm_config_binary_names() -> impl Iterator<Item = String> {
             CRATE_VERSION.major, CRATE_VERSION.minor
         ),
         format!("llvm-config{}{}", CRATE_VERSION.major, CRATE_VERSION.minor),
+        "llvm-config".into(),
     ];
 
     // On Windows, also search for llvm-config.exe
