@@ -45,7 +45,7 @@ extern "C" {
     pub fn LLVMGetMDKindID(Name: *const ::libc::c_char, SLen: ::libc::c_uint) -> ::libc::c_uint;
 
     /// Maps a synchronization scope name to a ID unique within this context.
-    pub fn LLVMGetSyncScopeID(C: LLVMContextRef, Name: *const ::libc::c_char, SLen: ::libc::size_t);
+    pub fn LLVMGetSyncScopeID(C: LLVMContextRef, Name: *const ::libc::c_char, SLen: ::libc::size_t) -> ::libc::c_uint;
 
     /// Return a unique id given the name of an enum attribute, or 0 if no attribute
     /// by that name exists.
@@ -469,7 +469,7 @@ extern "C" {
     pub fn LLVMPointerTypeIsOpaque(Ty: LLVMTypeRef) -> LLVMBool;
     /// Create an opaque pointer type in a context.
     pub fn LLVMPointerTypeInContext(C: LLVMContextRef, AddressSpace: ::libc::c_uint)
-        -> LLVMTypeRef;
+                                    -> LLVMTypeRef;
     pub fn LLVMGetPointerAddressSpace(PointerTy: LLVMTypeRef) -> ::libc::c_uint;
     pub fn LLVMVectorType(ElementType: LLVMTypeRef, ElementCount: ::libc::c_uint) -> LLVMTypeRef;
     /// Create a vector type that contains a defined type and has a scalable
@@ -965,7 +965,7 @@ extern "C" {
 
     pub fn LLVMAddAttributeAtIndex(F: LLVMValueRef, Idx: LLVMAttributeIndex, A: LLVMAttributeRef);
     pub fn LLVMGetAttributeCountAtIndex(F: LLVMValueRef, Idx: LLVMAttributeIndex)
-        -> ::libc::c_uint;
+                                        -> ::libc::c_uint;
     pub fn LLVMGetAttributesAtIndex(
         F: LLVMValueRef,
         Idx: LLVMAttributeIndex,
@@ -1174,7 +1174,7 @@ extern "C" {
         Name: *const ::libc::c_char,
     ) -> LLVMBasicBlockRef;
     pub fn LLVMAppendBasicBlock(Fn: LLVMValueRef, Name: *const ::libc::c_char)
-        -> LLVMBasicBlockRef;
+                                -> LLVMBasicBlockRef;
     pub fn LLVMInsertBasicBlockInContext(
         C: LLVMContextRef,
         BB: LLVMBasicBlockRef,
