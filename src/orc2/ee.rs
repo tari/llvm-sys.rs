@@ -1,7 +1,8 @@
 use super::*;
 use crate::execution_engine::*;
 
-pub type LLVMMemoryManagerCreateContextCallback = extern "C" fn(CtxCtx: *mut ::libc::c_void);
+pub type LLVMMemoryManagerCreateContextCallback =
+    extern "C" fn(CtxCtx: *mut ::libc::c_void) -> *mut ::libc::c_void;
 pub type LLVMMemoryManagerNotifyTerminatingCallback = extern "C" fn(CtxCtx: *mut ::libc::c_void);
 
 extern "C" {
@@ -10,6 +11,7 @@ extern "C" {
     ) -> LLVMOrcObjectLayerRef;
     pub fn LLVMOrcCreateRTDyldObjectLinkingLayerWithMCJITMemoryManagerLikeCallbacks(
         ES: LLVMOrcExecutionSessionRef,
+        CreateContextCtx: *mut ::libc::c_void,
         CreateContext: LLVMMemoryManagerCreateContextCallback,
         NotifyTerminating: LLVMMemoryManagerNotifyTerminatingCallback,
         AllocateCodeSection: LLVMMemoryManagerAllocateCodeSectionCallback,
