@@ -304,92 +304,96 @@ fn get_system_libraries(llvm_config_path: &Path, kind: LibraryKind) -> Vec<Strin
     llvm_config(llvm_config_path, ["--system-libs", link_arg])
         .split(&[' ', '\n'] as &[char])
         .filter(|s| !s.is_empty())
-        .map(|flag| {
-            if target_env_is("msvc") {
-                // Same as --libnames, foo.lib
-                flag.strip_suffix(".lib").unwrap_or_else(|| {
-                    panic!(
-                        "system library '{}' does not appear to be a MSVC library file",
-                        flag
-                    )
-                })
-            } else {
-                if let Some(flag) = flag.strip_prefix("-l") {
-                    // Linker flags style, -lfoo
-                    if target_os_is("macos") {
-                        // .tdb libraries are "text-based stub" files that provide lists of symbols,
-                        // which refer to libraries shipped with a given system and aren't shipped
-                        // as part of the corresponding SDK. They're named like the underlying
-                        // library object, including the 'lib' prefix that we need to strip.
-                        if let Some(flag) = flag
-                            .strip_prefix("lib")
-                            .and_then(|flag| flag.strip_suffix(".tbd"))
-                        {
-                            return flag;
-                        }
-                    }
-
-                    if let Some(i) = flag.find(".so.") {
-                        // On some distributions (OpenBSD, perhaps others), we get sonames
-                        // like "-lz.so.7.0". Correct those by pruning the file extension
-                        // and library version.
-                        return &flag[..i];
-                    }
-                    return flag;
-                }
-
-                let maybe_lib = Path::new(flag);
-                if maybe_lib.is_file() {
-                    // Library on disk, likely an absolute path to a .so. We'll add its location to
-                    // the library search path and specify the file as a link target.
-                    println!(
-                        "cargo:rustc-link-search={}",
-                        maybe_lib.parent().unwrap().display()
-                    );
-
-                    // Expect a file named something like libfoo.so, or with a version libfoo.so.1.
-                    // Trim everything after and including the last .so and remove the leading 'lib'
-                    let soname = maybe_lib
-                        .file_name()
-                        .unwrap()
-                        .to_str()
-                        .expect("Library filename must be a valid string");
-
-                    // Check for any valid library filename, even if it's a different kind from the
-                    // one we asked for. Some configurations give us a path to a static archive,
-                    // even when we're asking for shared libraries.
-                    [LibraryKind::Dynamic, LibraryKind::Static]
-                        .iter()
-                        .filter_map(|&kind| {
-                            if let Some((stem, _rest)) = soname.rsplit_once(kind.file_extension()) {
-                                Some(stem.strip_prefix("lib").unwrap_or_else(|| {
-                                    panic!(
-                                        "system library '{}' does not have a 'lib' prefix",
-                                        soname
-                                    )
-                                }))
-                            } else {
-                                None
-                            }
-                        })
-                        .next()
-                        .unwrap_or_else(|| {
-                            panic!(
-                                "Filename '{}' does not appear to refer to a library file",
-                                soname
-                            )
-                        })
-                } else {
-                    panic!(
-                        "Unable to parse result of llvm-config --system-libs: {}",
-                        flag
-                    )
-                }
-            }
-        })
+        .map(lib_flag_to_link_option)
         .chain(get_system_libcpp())
         .map(str::to_owned)
         .collect()
+}
+
+/// Given a linker flag like what gets emitted by `llvm-config --system-libs`, return the string
+/// that should be emitted in a `cargo:rustc-link-lib` option to link that library.
+fn lib_flag_to_link_option(flag: &str) -> &str {
+    let maybe_lib_path = Path::new(flag);
+    if maybe_lib_path.is_absolute() && maybe_lib_path.exists() {
+        // Absolute path to a library file. Add its directory to the linker search path.
+        println!(
+            "cargo:rustc-link-search={}",
+            maybe_lib_path.parent().unwrap().display()
+        );
+
+        // Then say we want to link against it.
+        let soname = maybe_lib_path
+            .file_name()
+            .unwrap()
+            .to_str()
+            .expect("Library filename must be a valid string");
+
+        if target_env_is("msvc") {
+            // For MSVC this will be something like foo.lib (no lib prefix, .lib extension)
+            return soname.strip_suffix(".lib").unwrap_or_else(|| {
+                panic!(
+                    "Expected absolute path to lib to end in \".lib\": {}",
+                    maybe_lib_path.display()
+                );
+            });
+        } else {
+            // Expect a file named something like libfoo.so, or with a version libfoo.so.1 Trim
+            // everything after and including the last .so and remove the leading 'lib'. Also try
+            // static libraries, since some configurations give us a path to a static archive,
+            // even when we're asking for shared libraries.
+            return [LibraryKind::Dynamic, LibraryKind::Static]
+                .iter()
+                .filter_map(|&kind| {
+                    if let Some((stem, _rest)) = soname.rsplit_once(kind.file_extension()) {
+                        Some(stem.strip_prefix("lib").unwrap_or_else(|| {
+                            panic!("system library '{}' does not have a 'lib' prefix", soname)
+                        }))
+                    } else {
+                        None
+                    }
+                })
+                .next()
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Filename '{}' does not appear to refer to a library file",
+                        soname
+                    )
+                });
+        };
+    }
+
+    let lib_name = if target_env_is("msvc") {
+        flag.strip_suffix(".lib").unwrap_or_else(|| {
+            panic!(
+                "system library '{}' does not appear to be a MSVC library file",
+                flag
+            )
+        })
+    } else {
+        flag.strip_prefix("-l").unwrap_or_else(|| {
+            panic!(
+                "system library '{}' expected to be a library name prefixed with '-l' but was not",
+                flag
+            );
+        })
+    };
+
+    if let Some(i) = lib_name.find(".so.") {
+        // On some distributions (OpenBSD, perhaps others), we get sonames
+        // like "-lz.so.7.0". Correct those by pruning the file extension
+        // and library version.
+        return &lib_name[..i];
+    }
+
+    if let Some(name) = lib_name.strip_suffix(".tbd") {
+        // -llibfoo.tdb: .tdb libraries are "text-based stub" files that provide lists of symbols,
+        // which refer to libraries shipped with a given system and aren't shipped as part of the
+        // corresponding SDK. They're named like the underlying library object, including the 'lib'
+        // prefix that we need to strip.
+        return name;
+    }
+
+    lib_name
 }
 
 /// Return additional linker search paths that should be used but that are not discovered
