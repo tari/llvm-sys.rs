@@ -101,6 +101,7 @@ fn locate_llvm_config() -> Option<PathBuf> {
     // here, but only if we didn't already find a working llvm-config in PATH.
     // This removes the need for fiddling around with LIBRARY_PATH or `brew
     // link`.
+    // TODO: homebrew works on Linux too, maybe not useful to have a macos check here
     if target_os_is("macos") {
         if let Some(p) = homebrew_prefix(Some(&format!("llvm@{}", CRATE_VERSION.major)))
             .or_else(|| homebrew_prefix(Some("llvm")))
@@ -504,12 +505,14 @@ impl LibraryKind {
     pub fn file_extension(&self) -> &'static str {
         match self {
             LibraryKind::Dynamic => {
+                // .dll for mingw, .lib for msvc
                 if target_os_is("macos") {
                     ".dylib"
                 } else {
                     ".so"
                 }
             }
+            // .a for mingw, .lib for msvc
             LibraryKind::Static => ".a",
         }
     }
