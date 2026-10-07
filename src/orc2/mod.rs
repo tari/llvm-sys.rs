@@ -451,7 +451,6 @@ extern "C" {
         Result: *mut LLVMOrcDefinitionGeneratorRef,
         ObjLayer: LLVMOrcObjectLayerRef,
         FileName: *const ::libc::c_char,
-        TargetTriple: *const ::libc::c_char,
     ) -> LLVMErrorRef;
     pub fn LLVMOrcCreateNewThreadSafeContext() -> LLVMOrcThreadSafeContextRef;
     pub fn LLVMOrcCreateNewThreadSafeContextFromLLVMContext(
