@@ -121,9 +121,9 @@ pub type LLVMOrcCDependenceMapPairs = *mut LLVMOrcCDependenceMapPair;
 /// A set of symbols that share dependencies.
 #[repr(C)]
 pub struct LLVMOrcCSymbolDependenceGroup {
-    Symbols: LLVMOrcCSymbolsList,
-    Dependencies: LLVMOrcCDependenceMapPairs,
-    NumDependencies: usize,
+    pub Symbols: LLVMOrcCSymbolsList,
+    pub Dependencies: LLVMOrcCDependenceMapPairs,
+    pub NumDependencies: usize,
 }
 
 /// Lookup kind. This can be used by definition generators when deciding whether
