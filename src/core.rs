@@ -1464,7 +1464,7 @@ extern "C" {
     /// Get the debug info expression of the DbgVariableRecord.
     ///
     /// See `llvm::DbgVariableRecord::getExpression()`.
-    pub fn LVMDbgVariableRecordGetExpression(Rec: LLVMDbgRecordRef) -> LLVMMetadataRef;
+    pub fn LLVMDbgVariableRecordGetExpression(Rec: LLVMDbgRecordRef) -> LLVMMetadataRef;
 
     // Instructions->Call Sites and Invocations
     // Obtain the argument count for a call instruction.
